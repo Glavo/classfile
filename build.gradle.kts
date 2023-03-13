@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "org.glavo"
-version = "0.1.0" + "-SNAPSHOT"
+version = "0.1.0"// + "-SNAPSHOT"
 description = "Java 21 Classfile API"
 
 tasks.compileJava {
@@ -115,5 +115,16 @@ if (rootProject.ext.has("signing.key")) {
             rootProject.ext["signing.password"].toString(),
         )
         sign(publishing.publications["maven"])
+    }
+}
+
+// ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
+nexusPublishing {
+    repositories {
+        sonatype {
+            stagingProfileId.set(rootProject.ext["sonatypeStagingProfileId"].toString())
+            username.set(rootProject.ext["sonatypeUsername"].toString())
+            password.set(rootProject.ext["sonatypePassword"].toString())
+        }
     }
 }
