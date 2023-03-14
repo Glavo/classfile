@@ -14,19 +14,17 @@ plugins {
 }
 
 group = "org.glavo"
-version = "0.1.0"// + "-SNAPSHOT"
+version = "0.2.0" + "-SNAPSHOT"
 description = "Java 21 Classfile API"
 
-tasks.compileJava {
+tasks.withType<JavaCompile> {
     exclude("**/snippet-files/*")
 
     options.release.set(17)
     options.compilerArgs.add("--enable-preview")
 
+    val root = destinationDirectory.asFile.get()
     doLast {
-        val root = destinationDirectory.asFile.get()
-        // skip for test sources
-        if (root.endsWith("test")) return@doLast
         val tree = fileTree(root)
         tree.include("**/*.class")
         tree.include("module-info.class")
@@ -34,7 +32,7 @@ tasks.compileJava {
             BuildUtil.stripPreview(
                 root.toPath(), it.toPath(),
                 true, false,
-                "java/lang/RuntimeException",
+                "java/lang/AssertionError",
             )
         }
     }
@@ -52,7 +50,7 @@ val javadocJar = tasks.create<Jar>("javadocJar") {
     archiveClassifier.set("javadoc")
 }
 
-tasks.withType<GenerateModuleMetadata>().configureEach {
+tasks.withType<GenerateModuleMetadata> {
     enabled = false
 }
 
@@ -65,7 +63,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
 }
 
-tasks.getByName<Test>("test") {
+tasks.test {
     useJUnitPlatform()
 }
 
