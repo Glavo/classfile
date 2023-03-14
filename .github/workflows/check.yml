@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**/*.md'
   pull_request:
     branches:
       - main
@@ -16,4 +18,5 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - uses: gradle/gradle-build-action@v2
-      - run: gradle check --info --no-daemon --stacktrace
+      - name: Run tests
+        run: gradle check --info --no-daemon --stacktrace
