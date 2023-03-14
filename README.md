@@ -1,5 +1,8 @@
 # Java Classfile API
 
+[![Gradle Check](https://github.com/Glavo/classfile/actions/workflows/check.yml/badge.svg)](https://github.com/Glavo/classfile/actions/workflows/check.yml)
+[![Latest release](https://img.shields.io/maven-central/v/org.glavo/classfile)](https://github.com/Glavo/classfile/releases/latest)
+
 This is a modern Java classfile manipulation and analysis library.
 This library is a modern replacement for [ASM](https://asm.ow2.io/), extracted from the latest internal implementation of JDK,
 requires Java 17 as a minimum version.
@@ -35,6 +38,8 @@ In order to be compatible with Java 17, this library also copies some new APIs i
 
 * `java.lang.reflect.AccessFlag` -> `org.glavo.classfile.AccessFlag`
 * `java.lang.reflect.ClassFileFormatVersion` -> `org.glavo.classfile.ClassFileFormatVersion`
+
+
 
 Because the implementation in JDK is still in the `jdk.internal.classfile`
 package and does not belong to the public API, the API of this library is still unstable
