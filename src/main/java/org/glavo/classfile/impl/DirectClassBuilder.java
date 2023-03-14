@@ -68,14 +68,8 @@ public final class DirectClassBuilder
         this.superclassEntry = null;
         this.interfaceEntries = Collections.emptyList();
 
-        int currentMajorVersion = Runtime.version().feature() + 44;
-        if (currentMajorVersion >= Classfile.LATEST_MAJOR_VERSION) {
-            this.majorVersion = Classfile.LATEST_MAJOR_VERSION;
-            this.minorVersion = Classfile.LATEST_MINOR_VERSION;
-        } else {
-            this.majorVersion = currentMajorVersion;
-            this.minorVersion = 0;
-        }
+        this.majorVersion = Classfile.JAVA_17_VERSION;
+        this.minorVersion = 0;
     }
 
     @Override
