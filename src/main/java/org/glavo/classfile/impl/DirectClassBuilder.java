@@ -67,8 +67,15 @@ public final class DirectClassBuilder
         this.flags = Classfile.DEFAULT_CLASS_FLAGS;
         this.superclassEntry = null;
         this.interfaceEntries = Collections.emptyList();
-        this.majorVersion = Classfile.LATEST_MAJOR_VERSION;
-        this.minorVersion = Classfile.LATEST_MINOR_VERSION;
+
+        int currentMajorVersion = Runtime.version().feature() + 44;
+        if (currentMajorVersion >= Classfile.LATEST_MAJOR_VERSION) {
+            this.majorVersion = Classfile.LATEST_MAJOR_VERSION;
+            this.minorVersion = Classfile.LATEST_MINOR_VERSION;
+        } else {
+            this.majorVersion = currentMajorVersion;
+            this.minorVersion = 0;
+        }
     }
 
     @Override
