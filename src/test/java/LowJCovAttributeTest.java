@@ -50,7 +50,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * LowJCovAttributeTest
  */
-@Disabled("TODO")
+@Disabled("Not compiled with -Xjcov")
 class LowJCovAttributeTest {
 
     private static final boolean VERBOSE = false;
