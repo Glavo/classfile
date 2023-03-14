@@ -250,7 +250,7 @@ public enum AccessFlag {
      * <code>{@value "0x%04x" Modifier#BRIDGE}</code>
      * @see Method#isBridge()
      */
-    BRIDGE(/*Modifier.BRIDGE*/ 0x00000040, false, Location.SET_METHOD,
+    BRIDGE(/*Modifier.BRIDGE*/ 0x0000_0040, false, Location.SET_METHOD,
             new Function<ClassFileFormatVersion, Set<Location>>() {
                 @Override
                 public Set<Location> apply(ClassFileFormatVersion cffv) {
@@ -271,7 +271,7 @@ public enum AccessFlag {
      <code>{@value "0x%04x" Modifier#VARARGS}</code>.
      * @see Executable#isVarArgs()
      */
-    VARARGS(/*Modifier.VARARGS*/ 0x00000080, false, Location.SET_METHOD,
+    VARARGS(/*Modifier.VARARGS*/ 0x0000_0080, false, Location.SET_METHOD,
             new Function<ClassFileFormatVersion, Set<Location>>() {
                 @Override
                 public Set<Location> apply(ClassFileFormatVersion cffv) {
@@ -343,7 +343,7 @@ public enum AccessFlag {
      * @see Executable#isSynthetic()
      * @see java.lang.module.ModuleDescriptor.Modifier#SYNTHETIC
      */
-    SYNTHETIC(/*Modifier.SYNTHETIC*/ 0x00001000, false, Location.SET_SYNTHETIC_9,
+    SYNTHETIC(/*Modifier.SYNTHETIC*/ 0x0000_1000, false, Location.SET_SYNTHETIC_9,
             new Function<ClassFileFormatVersion, Set<Location>>() {
                 @Override
                 public Set<Location> apply(ClassFileFormatVersion cffv) {
@@ -365,7 +365,7 @@ public enum AccessFlag {
      * <code>{@value "0x%04x" Modifier#ANNOTATION}</code>.
      * @see Class#isAnnotation()
      */
-    ANNOTATION(/*Modifier.ANNOTATION*/ 0x00002000, false, Location.SET_CLASS_INNER_CLASS,
+    ANNOTATION(/*Modifier.ANNOTATION*/ 0x0000_2000, false, Location.SET_CLASS_INNER_CLASS,
             new Function<ClassFileFormatVersion, Set<Location>>() {
                 @Override
                 public Set<Location> apply(ClassFileFormatVersion cffv) {
@@ -379,7 +379,7 @@ public enum AccessFlag {
      * <code>{@value "0x%04x" Modifier#ENUM}</code>.
      * @see Class#isEnum()
      */
-    ENUM(/*Modifier.ENUM*/ 0x00004000, false, Location.SET_CLASS_FIELD_INNER_CLASS,
+    ENUM(/*Modifier.ENUM*/ 0x0000_4000, false, Location.SET_CLASS_FIELD_INNER_CLASS,
             new Function<ClassFileFormatVersion, Set<Location>>() {
                 @Override
                 public Set<Location> apply(ClassFileFormatVersion cffv) {
@@ -392,7 +392,7 @@ public enum AccessFlag {
      * The access flag {@code ACC_MANDATED} with a mask value of
      * <code>{@value "0x%04x" Modifier#MANDATED}</code>.
      */
-    MANDATED(/*Modifier.MANDATED*/ 0x00008000, false, Location.SET_MANDATED_9,
+    MANDATED(/*Modifier.MANDATED*/ 0x0000_8000, false, Location.SET_MANDATED_9,
             new Function<ClassFileFormatVersion, Set<Location>>() {
                 @Override
                 public Set<Location> apply(ClassFileFormatVersion cffv) {
