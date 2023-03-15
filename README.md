@@ -39,10 +39,10 @@ In order to be compatible with Java 17, this library also copies some new APIs i
 * `java.lang.reflect.AccessFlag` -> `org.glavo.classfile.AccessFlag`
 * `java.lang.reflect.ClassFileFormatVersion` -> `org.glavo.classfile.ClassFileFormatVersion`
 
-
-
 Because the implementation in JDK is still in the `jdk.internal.classfile`
 package and does not belong to the public API, the API of this library is still unstable
 until the stable version of [JEP Draft 8280389](https://openjdk.org/jeps/8280389) is released.
 
-Welcome to feedback. We will feed back to the upstream to improve the Classfile API before it officially enters the Java standard library.
+If you encounter problems when using this library, please feed back through [issue](https://github.com/Glavo/classfile/issues).
+
+If you want to discuss the design of the Classfile API, please go to the [Classfile API mailing list](https://mail.openjdk.org/mailman/listinfo/classfile-api-dev) (classfile-api-dev@openjdk.org) for discussion.
