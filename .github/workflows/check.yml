@@ -17,6 +17,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-      - uses: gradle/gradle-build-action@v2
       - name: Run tests
-        run: gradle check --info --no-daemon --stacktrace
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: check --info --no-daemon --stacktrace
