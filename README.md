@@ -1,6 +1,7 @@
 # Java Classfile API
 
 [![Gradle Check](https://github.com/Glavo/classfile/actions/workflows/check.yml/badge.svg)](https://github.com/Glavo/classfile/actions/workflows/check.yml)
+[![codecov](https://codecov.io/gh/Glavo/classfile/branch/main/graph/badge.svg?token=O9EUO58YKZ)](https://codecov.io/gh/Glavo/classfile)
 [![Latest release](https://img.shields.io/maven-central/v/org.glavo/classfile)](https://github.com/Glavo/classfile/releases/latest)
 
 This is a modern Java classfile manipulation and analysis library.
