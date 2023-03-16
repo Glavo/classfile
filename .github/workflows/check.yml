@@ -20,4 +20,6 @@ jobs:
       - name: Run tests
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: check --info --no-daemon --stacktrace
+          arguments: check jacocoTestReport --info --no-daemon --stacktrace
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3

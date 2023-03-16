@@ -7,6 +7,7 @@ buildscript {
 
 plugins {
     id("java-library")
+    id("jacoco")
     id("maven-publish")
     id("signing")
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
@@ -74,6 +75,15 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(false)
+    }
 }
 
 configure<PublishingExtension> {
