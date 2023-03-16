@@ -1,6 +1,10 @@
 # Change Log
 
-## Version 0.3.0 (In development)
+## Version 0.3.0 (2023-03-17)
+
+Sync upstream changes.
+
+Based on [openjdk/jdk@7dbab81](https://github.com/openjdk/jdk/commit/7dbab81d3c06efb1225c4d57ad3eb4960fcf5cc6).
 
 ## Version 0.2.0 (2023-03-14)
 
