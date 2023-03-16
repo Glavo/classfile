@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "org.glavo"
-version = "0.3.0" + "-SNAPSHOT"
+version = "0.3.0"// + "-SNAPSHOT"
 description = "Java 21 Classfile API"
 
 tasks.withType<JavaCompile> {
