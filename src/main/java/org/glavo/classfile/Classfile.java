@@ -159,8 +159,8 @@ public class Classfile {
      */
     public static ClassModel parse(byte[] bytes, Option... options) {
         Collection<Option> os = (options == null || options.length == 0)
-                                   ? Collections.emptyList()
-                                   : List.of(options);
+                ? Collections.emptyList()
+                : List.of(options);
         return new ClassImpl(bytes, os);
     }
 
@@ -249,44 +249,20 @@ public class Classfile {
      * @return the classfile bytes
      */
     public static byte[] buildModule(ModuleAttribute moduleAttribute) {
-        return buildModule(moduleAttribute, List.of(), clb -> {});
+        return buildModule(moduleAttribute, clb -> {});
     }
 
     /**
      * Build a module descriptor into a byte array.
      * @param moduleAttribute the {@code Module} attribute
-     * @param packages additional module packages
-     * @return the classfile bytes
-     */
-    public static byte[] buildModule(ModuleAttribute moduleAttribute,
-                                     List<PackageDesc> packages) {
-        return buildModule(moduleAttribute, packages, clb -> {});
-    }
-
-    /**
-     * Build a module descriptor into a byte array.
-     * @param moduleAttribute the {@code Module} attribute
-     * @param packages additional module packages
      * @param handler a handler that receives a {@link ClassBuilder}
      * @return the classfile bytes
      */
     public static byte[] buildModule(ModuleAttribute moduleAttribute,
-                                     List<PackageDesc> packages,
                                      Consumer<? super ClassBuilder> handler) {
         return build(ClassDesc.of("module-info"), clb -> {
             clb.withFlags(AccessFlag.MODULE);
             clb.with(moduleAttribute);
-            if (!packages.isEmpty()) {
-                var cp = clb.constantPool();
-                var allPackages = new LinkedHashSet<PackageEntry>();
-                for (var exp : moduleAttribute.exports()) allPackages.add(AbstractPoolEntry.maybeClone(cp, exp.exportedPackage()));
-                for (var opn : moduleAttribute.opens()) allPackages.add(AbstractPoolEntry.maybeClone(cp, opn.openedPackage()));
-                boolean emitMPA = false;
-                for (var p : packages)
-                    emitMPA |= allPackages.add(cp.packageEntry(p));
-                if(emitMPA)
-                    clb.with(new UnboundAttribute.UnboundModulePackagesAttribute(allPackages));
-            }
             handler.accept(clb);
         });
     }
@@ -298,33 +274,19 @@ public class Classfile {
      */
     public static void buildModuleTo(Path path,
                                      ModuleAttribute moduleAttribute) throws IOException {
-        buildModuleTo(path, moduleAttribute, List.of(), clb -> {});
+        buildModuleTo(path, moduleAttribute, clb -> {});
     }
 
     /**
      * Build a module descriptor into a file.
      * @param path the file to write
      * @param moduleAttribute the {@code Module} attribute
-     * @param packages additional module packages
-     */
-    public static void buildModuleTo(Path path,
-                                     ModuleAttribute moduleAttribute,
-                                     List<PackageDesc> packages) throws IOException {
-        buildModuleTo(path, moduleAttribute, packages, clb -> {});
-    }
-
-    /**
-     * Build a module descriptor into a file.
-     * @param path the file to write
-     * @param moduleAttribute the {@code Module} attribute
-     * @param packages additional module packages
      * @param handler a handler that receives a {@link ClassBuilder}
      */
     public static void buildModuleTo(Path path,
                                      ModuleAttribute moduleAttribute,
-                                     List<PackageDesc> packages,
                                      Consumer<? super ClassBuilder> handler) throws IOException {
-        Files.write(path, buildModule(moduleAttribute, packages, handler));
+        Files.write(path, buildModule(moduleAttribute, handler));
     }
 
     public static final int MAGIC_NUMBER = 0xCAFEBABE;
