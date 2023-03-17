@@ -6,6 +6,11 @@ Sync upstream changes.
 
 Based on [openjdk/jdk@7dbab81](https://github.com/openjdk/jdk/commit/7dbab81d3c06efb1225c4d57ad3eb4960fcf5cc6).
 
+API changes:
+
+* Dropping the packages parameter from `Classfile.buildModule` and `Classfile.buildModuleTo`
+* New API: `TypeKind.from(TypeDescriptor.OfField<?>)`
+
 ## Version 0.2.0 (2023-03-14)
 
 * Make `Classfile.build` generate Java 17 bytecode instead of Java 21 by default
