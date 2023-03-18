@@ -12,9 +12,7 @@ See [JEP Draft 8280389](https://openjdk.org/jeps/8280389) for the usage of this 
 
 ## Adding to your build
 
-[![Latest release](https://img.shields.io/maven-central/v/org.glavo/classfile)](https://github.com/Glavo/classfile/releases/latest)
-
-Please replace `${version}` with the current version of this library.
+Please replace `${version}` with the [current version](https://github.com/Glavo/classfile/releases) of this library.
 
 Maven:
 ```xml
@@ -43,6 +41,7 @@ In order to be compatible with Java 17, this library also copies some new APIs i
 Because the implementation in JDK is still in the `jdk.internal.classfile`
 package and does not belong to the public API, the API of this library is still unstable
 until the stable version of [JEP Draft 8280389](https://openjdk.org/jeps/8280389) is released.
+[Here](CHANGELOG.md) is the change log.  
 
 If you encounter problems when using this library, please feed back through [issue](https://github.com/Glavo/classfile/issues).
 
