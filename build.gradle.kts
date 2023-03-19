@@ -18,6 +18,14 @@ group = "org.glavo"
 version = "0.4.0" + "-SNAPSHOT"
 description = "Java 21 Classfile API"
 
+sourceSets {
+    test {
+        java {
+            srcDir("src/examples/java")
+        }
+    }
+}
+
 tasks.withType<JavaCompile> {
     exclude("**/snippet-files/*")
 

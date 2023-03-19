@@ -8,8 +8,6 @@ This is a modern Java classfile manipulation and analysis library.
 This library is a modern replacement for [ASM](https://asm.ow2.io/), extracted from the latest internal implementation of JDK,
 requires Java 17 as a minimum version.
 
-See [JEP Draft 8280389](https://openjdk.org/jeps/8280389) for the usage of this API.
-
 ## Adding to your build
 
 Please replace `${version}` with the [current version](https://github.com/Glavo/classfile/releases) of this library.
@@ -27,6 +25,12 @@ Gradle:
 ```kotlin
 implementation("org.glavo:classfile:${version}")
 ```
+
+## Get started
+
+The core class of the Classfile API is [`Classfile`](src/main/java/org/glavo/classfile/Classfile.java).
+
+A tutorial is in the works, now you can look at the [examples](src/examples/java), or check out the [JEP draft](https://openjdk.org/jeps/8280389) for help.
 
 ## Note
 
