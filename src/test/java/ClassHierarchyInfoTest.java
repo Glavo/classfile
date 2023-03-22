@@ -50,7 +50,7 @@ class ClassHierarchyInfoTest {
 
     @Test
     public void testProduceInvalidStackMaps() throws Exception {
-        assertThrows(VerifyError.class, () -> transformAndVerify(className -> null));
+        assertThrows(IllegalArgumentException.class, () -> transformAndVerify(className -> null));
     }
 
     @Test
