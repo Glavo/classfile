@@ -15,7 +15,7 @@ plugins {
 }
 
 group = "org.glavo"
-version = "0.4.0" + "-SNAPSHOT"
+version = "0.4.0"// + "-SNAPSHOT"
 description = "Java 21 Classfile API"
 
 sourceSets {
@@ -68,7 +68,7 @@ tasks.javadoc {
     options.addStringOption("-source", "20")
     options.addStringOption("link", "https://docs.oracle.com/en/java/javase/17/docs/api/")
 
-    options.addStringOption("-snippet-path", file("src/main/snippet").absolutePath)
+    options.addStringOption("-snippet-path", file("src/main/snippet-files").absolutePath)
 }
 
 java {
