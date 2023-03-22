@@ -5,8 +5,13 @@
 Sync upstream changes:
 
 * [JDK-8304164](https://github.com/openjdk/jdk/commit/b2639e1d6246a7e1aab1d9d15add7979adf40766)
+* [JDK-8304502](https://github.com/openjdk/jdk/commit/0156909ab38072869e2eb9f5049042b9199d14a0)
 
-Now the Classfile API is based on openjdk/jdk@b2639e1.
+Now the Classfile API is based on [openjdk/jdk@0156909](https://github.com/openjdk/jdk/commit/0156909ab38072869e2eb9f5049042b9199d14a0).
+
+Important changes:
+
+* Throws `IllegalArgumentException` when the class is not resolved
 
 ## Version 0.3.0 (2023-03-17)
 
