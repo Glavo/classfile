@@ -55,7 +55,7 @@ import org.glavo.classfile.components.CodeRelabeler;
 import org.glavo.classfile.instruction.ReturnInstruction;
 import org.glavo.classfile.instruction.StoreInstruction;
 
-class PackageSnippets {
+class RootPackageSnippets {
     void enumerateFieldsMethods1(byte[] bytes) {
         // @start region="enumerateFieldsMethods1"
         ClassModel cm = Classfile.parse(bytes);

@@ -25,6 +25,8 @@
 
 package org.glavo.classfile;
 
+import java.lang.reflect.Executable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.Objects;
@@ -89,7 +91,7 @@ import static java.util.Map.entry;
  * @see java.lang.module.ModuleDescriptor.Requires.Modifier
  * @see java.lang.module.ModuleDescriptor.Exports.Modifier
  * @see java.lang.module.ModuleDescriptor.Opens.Modifier
- * @see java.compiler/javax.lang.model.element.Modifier
+ * @see javax.lang.model.element.Modifier
  * @since 20
  */
 @SuppressWarnings("doclint:reference") // cross-module link
@@ -248,7 +250,6 @@ public enum AccessFlag {
     /**
      * The access flag {@code ACC_BRIDGE} with a mask value of
      * <code>{@value "0x%04x" Modifier#BRIDGE}</code>
-     * @see Method#isBridge()
      */
     BRIDGE(/*Modifier.BRIDGE*/ 0x0000_0040, false, Location.SET_METHOD,
             new Function<ClassFileFormatVersion, Set<Location>>() {

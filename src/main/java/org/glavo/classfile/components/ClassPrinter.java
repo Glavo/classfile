@@ -48,13 +48,13 @@ import org.glavo.classfile.impl.ClassPrinterImpl;
  * Level of details to print or to export is driven by {@link Verbosity} option.
  * <p>
  * The most frequent use case is to simply print a class:
- * {@snippet lang="java" class="PackageSnippets" region="printClass"}
+ * {@snippet lang="java" class="ComponentsPackageSnippets" region="printClass"}
  * <p>
  * {@link ClassPrinter} allows to traverse tree of simple printable nodes to hook custom printer:
- * {@snippet lang="java" class="PackageSnippets" region="customPrint"}
+ * {@snippet lang="java" class="ComponentsPackageSnippets" region="customPrint"}
  * <p>
  * Another use case for {@link ClassPrinter} is to simplify writing of automated tests:
- * {@snippet lang="java" class="PackageSnippets" region="printNodesInTest"}
+ * {@snippet lang="java" class="ComponentsPackageSnippets" region="printNodesInTest"}
  */
 public final class ClassPrinter {
 

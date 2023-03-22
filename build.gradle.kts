@@ -27,7 +27,11 @@ sourceSets {
 }
 
 tasks.withType<JavaCompile> {
-    exclude("**/snippet-files/*")
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    })
+
+    options.forkOptions.jvmArgs = listOf("-Duser.language=en")
 
     options.release.set(17)
     options.compilerArgs.add("--enable-preview")
@@ -47,16 +51,29 @@ tasks.withType<JavaCompile> {
     }
 }
 
-val sourcesJar = tasks.create<Jar>("sourcesJar") {
-    group = "build"
-    archiveClassifier.set("sources")
+tasks.javadoc {
+    javadocTool.set(javaToolchains.javadocToolFor {
+        languageVersion.set(JavaLanguageVersion.of(20))
+    })
 
-    from(sourceSets.main.get().allSource)
+    val options = this.options as StandardJavadocDocletOptions
+
+    options.jFlags("-Duser.language=en")
+    options.encoding = "UTF-8"
+
+    options.tags("apiNote", "implNote", "implSpec", "jvms", "jls", "snippet-files")
+
+    options.addStringOption("Xdoclint:none", "-quiet")
+    options.addBooleanOption("-enable-preview", true)
+    options.addStringOption("-source", "20")
+    options.addStringOption("link", "https://docs.oracle.com/en/java/javase/17/docs/api/")
+
+    options.addStringOption("-snippet-path", file("src/main/snippet").absolutePath)
 }
 
-val javadocJar = tasks.create<Jar>("javadocJar") {
-    group = "build"
-    archiveClassifier.set("javadoc")
+java {
+    withJavadocJar()
+    withSourcesJar()
 }
 
 tasks.withType<GenerateModuleMetadata> {
@@ -101,8 +118,6 @@ configure<PublishingExtension> {
             version = project.version.toString()
             artifactId = project.name
             from(components["java"])
-            artifact(javadocJar)
-            artifact(sourcesJar)
 
             pom {
                 name.set(project.name)

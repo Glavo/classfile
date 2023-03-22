@@ -64,10 +64,10 @@ import org.glavo.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
  * corresponding methods for other classfile locations.)
  * <p>
  * Class transformation sample where code transformation is stateful:
- * {@snippet lang="java" class="PackageSnippets" region="codeRelabeling"}
+ * {@snippet lang="java" class="RootPackageSnippets" region="codeRelabeling"}
  * <p>
  * Complex class instrumentation sample chaining multiple transformations:
- * {@snippet lang="java" class="PackageSnippets" region="classInstrumentation"}
+ * {@snippet lang="java" class="RootPackageSnippets" region="classInstrumentation"}
  */
 public sealed interface ClassfileTransform<
         C extends ClassfileTransform<C, E, B>,

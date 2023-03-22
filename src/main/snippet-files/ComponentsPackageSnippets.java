@@ -47,7 +47,7 @@ import org.glavo.classfile.components.CodeRelabeler;
 import org.glavo.classfile.instruction.ReturnInstruction;
 import org.glavo.classfile.instruction.StoreInstruction;
 
-class PackageSnippets {
+class ComponentsPackageSnippets {
 
     void printClass(ClassModel classModel) {
         // @start region="printClass"
