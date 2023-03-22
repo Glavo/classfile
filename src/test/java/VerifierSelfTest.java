@@ -35,6 +35,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
+
+import org.glavo.classfile.ClassHierarchyResolver;
 import org.glavo.classfile.Classfile;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.MethodModel;
@@ -62,7 +64,8 @@ class VerifierSelfTest {
     @Test
     void testFailedDump() throws IOException {
         Path path = FileSystems.getFileSystem(URI.create("jrt:/")).getPath("modules/java.base/java/util/HashMap.class");
-        var classModel = Classfile.parse(path, Classfile.Option.classHierarchyResolver(className -> null));
+        var classModel = Classfile.parse(path, Classfile.Option.classHierarchyResolver(
+                className -> new ClassHierarchyResolver.ClassHierarchyInfo(className, false, null)));
         byte[] brokenClassBytes = classModel.transform(
                 (clb, cle) -> {
                     if (cle instanceof MethodModel mm) {
