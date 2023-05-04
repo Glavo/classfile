@@ -31,6 +31,7 @@
  * @run junit ClassBuildingTest
  */
 
+import helpers.ByteArrayClassLoader;
 import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.ClassTransform;
 import org.glavo.classfile.Classfile;
@@ -41,7 +42,6 @@ import org.glavo.classfile.components.ClassRemapper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ClassDesc;
-import java.lang.invoke.MethodHandles;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
@@ -60,7 +60,11 @@ public class ClassBuildingTest {
         transform = transform.andThen(ClassTransform.transformingMethods(MethodTransform.dropping(me
                 -> me instanceof SignatureAttribute)));
 
-        MethodHandles.lookup().defineClass(cm.transform(transform));
+        // java.lang.LinkageError: loader 'app' attempted duplicate class definition for Outer$1Local. (Outer$1Local is in unnamed module of loader 'app')
+        // MethodHandles.lookup().defineClass(cm.transform(transform));
+
+        var loader = new ByteArrayClassLoader(ClassBuildingTest.class.getClassLoader(), "Outer$1Local", cm.transform(transform));
+        loader.findClass("Outer$1Local");
     }
 }
 
