@@ -2,6 +2,12 @@
 
 ## Version 0.5.0 (In development)
 
+Sync upstream changes:
+
+* [JDK-8304837](https://github.com/openjdk/jdk/commit/a2d3fc83b0dd7eea38e1dd5898a97d6d7ff60194)
+* [JDK-8304937](https://github.com/openjdk/jdk/commit/dc4096ce136c867e0806070a2d7c8b4efef5294c)
+* [JDK-8304031](https://github.com/openjdk/jdk/commit/cd5d0ff5b29065222ffafbc4fb04b90f6f8909e2)
+
 ## Version 0.4.0 (2023-03-23)
 
 Sync upstream changes:
