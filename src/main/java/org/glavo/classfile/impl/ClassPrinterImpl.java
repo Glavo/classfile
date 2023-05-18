@@ -501,6 +501,7 @@ public final class ClassPrinterImpl {
             case OfAnnotation av -> leafs("annotation class", av.annotation().className().stringValue());
             case OfArray av -> new Node[]{new ListNodeImpl(FLOW, "array", av.values().stream().map(
                     ev -> new MapNodeImpl(FLOW, "value").with(elementValueToTree(ev))))};
+            default -> throw new AssertionError();
         };
     }
 
@@ -548,6 +549,7 @@ public final class ClassPrinterImpl {
             case FieldModel fm -> fieldToTree(fm, verbosity);
             case MethodModel mm -> methodToTree(mm, verbosity);
             case CodeModel com -> codeToTree((CodeAttribute)com, verbosity);
+            default -> throw new AssertionError();
         };
     }
 
@@ -636,6 +638,7 @@ public final class ClassPrinterImpl {
                             case AnnotationConstantValueEntry ve -> leafs(
                                     "value", String.valueOf(ve.constantValue())
                             );
+                            default -> throw new AssertionError();
                         }));
                 i += e.width();
             }
