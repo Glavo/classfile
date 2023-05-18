@@ -26,8 +26,6 @@ package org.glavo.classfile.impl;
 
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.DirectMethodHandleDesc;
-
-import org.glavo.classfile.constantpool.*;
 import org.glavo.classfile.AccessFlag;
 import java.util.AbstractList;
 import java.util.Arrays;
@@ -50,42 +48,43 @@ import org.glavo.classfile.AnnotationValue;
 import org.glavo.classfile.AnnotationValue.*;
 import org.glavo.classfile.Attribute;
 import org.glavo.classfile.ClassModel;
+import org.glavo.classfile.components.ClassPrinter.*;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.Instruction;
 import org.glavo.classfile.MethodModel;
 import org.glavo.classfile.TypeAnnotation;
+import org.glavo.classfile.attribute.*;
+import org.glavo.classfile.attribute.StackMapFrameInfo.*;
+import org.glavo.classfile.constantpool.*;
+import org.glavo.classfile.instruction.*;
 
 import static org.glavo.classfile.Classfile.*;
 import org.glavo.classfile.CompoundElement;
 import org.glavo.classfile.FieldModel;
-import org.glavo.classfile.attribute.*;
-import org.glavo.classfile.components.ClassPrinter;
-import org.glavo.classfile.instruction.*;
-
 import static org.glavo.classfile.impl.ClassPrinterImpl.Style.*;
 
 public final class ClassPrinterImpl {
 
     public enum Style { BLOCK, FLOW }
 
-    public record LeafNodeImpl(ConstantDesc name, ConstantDesc value) implements ClassPrinter.LeafNode {
+    public record LeafNodeImpl(ConstantDesc name, ConstantDesc value) implements LeafNode {
 
         @Override
-        public Stream<ClassPrinter.Node> walk() {
+        public Stream<Node> walk() {
             return Stream.of(this);
         }
     }
 
-    public static final class ListNodeImpl extends AbstractList<ClassPrinter.Node> implements ClassPrinter.ListNode {
+    public static final class ListNodeImpl extends AbstractList<Node> implements ListNode {
 
         private final Style style;
         private final ConstantDesc name;
-        private final ClassPrinter.Node[] nodes;
+        private final Node[] nodes;
 
-        public ListNodeImpl(Style style, ConstantDesc name, Stream<ClassPrinter.Node> nodes) {
+        public ListNodeImpl(Style style, ConstantDesc name, Stream<Node> nodes) {
             this.style = style;
             this.name = name;
-            this.nodes = nodes.toArray(ClassPrinter.Node[]::new);
+            this.nodes = nodes.toArray(Node[]::new);
         }
 
         @Override
@@ -94,8 +93,8 @@ public final class ClassPrinterImpl {
         }
 
         @Override
-        public Stream<ClassPrinter.Node> walk() {
-            return Stream.concat(Stream.of(this), stream().flatMap(ClassPrinter.Node::walk));
+        public Stream<Node> walk() {
+            return Stream.concat(Stream.of(this), stream().flatMap(Node::walk));
         }
 
         public Style style() {
@@ -103,7 +102,7 @@ public final class ClassPrinterImpl {
         }
 
         @Override
-        public ClassPrinter.Node get(int index) {
+        public Node get(int index) {
             Objects.checkIndex(index, nodes.length);
             return nodes[index];
         }
@@ -114,11 +113,11 @@ public final class ClassPrinterImpl {
         }
     }
 
-    public static final class MapNodeImpl implements ClassPrinter.MapNode {
+    public static final class MapNodeImpl implements MapNode {
 
         private final Style style;
         private final ConstantDesc name;
-        private final Map<ConstantDesc, ClassPrinter.Node> map;
+        private final Map<ConstantDesc, Node> map;
 
         public MapNodeImpl(Style style, ConstantDesc name) {
             this.style = style;
@@ -132,8 +131,8 @@ public final class ClassPrinterImpl {
         }
 
         @Override
-        public Stream<ClassPrinter.Node> walk() {
-            return Stream.concat(Stream.of(this), values().stream().flatMap(ClassPrinter.Node::walk));
+        public Stream<Node> walk() {
+            return Stream.concat(Stream.of(this), values().stream().flatMap(Node::walk));
         }
 
         public Style style() {
@@ -158,22 +157,22 @@ public final class ClassPrinterImpl {
         }
 
         @Override
-        public ClassPrinter.Node get(Object key) {
+        public Node get(Object key) {
             return map.get(key);
         }
 
         @Override
-        public ClassPrinter.Node put(ConstantDesc key, ClassPrinter.Node value) {
+        public Node put(ConstantDesc key, Node value) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public ClassPrinter.Node remove(Object key) {
+        public Node remove(Object key) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public void putAll(Map<? extends ConstantDesc, ? extends ClassPrinter.Node> m) {
+        public void putAll(Map<? extends ConstantDesc, ? extends Node> m) {
             throw new UnsupportedOperationException();
         }
 
@@ -188,17 +187,17 @@ public final class ClassPrinterImpl {
         }
 
         @Override
-        public Collection<ClassPrinter.Node> values() {
+        public Collection<Node> values() {
             return Collections.unmodifiableCollection(map.values());
         }
 
         @Override
-        public Set<Entry<ConstantDesc, ClassPrinter.Node>> entrySet() {
+        public Set<Entry<ConstantDesc, Node>> entrySet() {
             return Collections.unmodifiableSet(map.entrySet());
         }
 
 
-        MapNodeImpl with(ClassPrinter.Node... nodes) {
+        MapNodeImpl with(Node... nodes) {
             for (var n : nodes)
                 if (n != null && map.put(n.name(), n) != null)
                     throw new AssertionError("Double entry of " + n.name() + " into " + name);
@@ -206,25 +205,25 @@ public final class ClassPrinterImpl {
         }
     }
 
-    private static ClassPrinter.Node leaf(ConstantDesc name, ConstantDesc value) {
+    private static Node leaf(ConstantDesc name, ConstantDesc value) {
         return new LeafNodeImpl(name, value);
     }
 
-    private static ClassPrinter.Node[] leafs(ConstantDesc... namesAndValues) {
+    private static Node[] leafs(ConstantDesc... namesAndValues) {
         if ((namesAndValues.length & 1) > 0)
             throw new AssertionError("Odd number of arguments: " + Arrays.toString(namesAndValues));
-        var nodes = new ClassPrinter.Node[namesAndValues.length >> 1];
+        var nodes = new Node[namesAndValues.length >> 1];
         for (int i = 0, j = 0; i < nodes.length; i ++) {
             nodes[i] = leaf(namesAndValues[j++], namesAndValues[j++]);
         }
         return nodes;
     }
 
-    private static ClassPrinter.Node list(ConstantDesc listName, ConstantDesc itemsName, Stream<ConstantDesc> values) {
+    private static Node list(ConstantDesc listName, ConstantDesc itemsName, Stream<ConstantDesc> values) {
         return new ListNodeImpl(FLOW, listName, values.map(v -> leaf(itemsName, v)));
     }
 
-    private static ClassPrinter.Node map(ConstantDesc mapName, ConstantDesc... keysAndValues) {
+    private static Node map(ConstantDesc mapName, ConstantDesc... keysAndValues) {
         return new MapNodeImpl(FLOW, mapName).with(leafs(keysAndValues));
     }
 
@@ -252,14 +251,14 @@ public final class ClassPrinterImpl {
         }
     }
 
-    public static void toYaml(ClassPrinter.Node node, Consumer<String> out) {
+    public static void toYaml(Node node, Consumer<String> out) {
         toYaml(0, false, new ListNodeImpl(BLOCK, null, Stream.of(node)), out);
         out.accept(NL);
     }
 
-    private static void toYaml(int indent, boolean skipFirstIndent, ClassPrinter.Node node, Consumer<String> out) {
+    private static void toYaml(int indent, boolean skipFirstIndent, Node node, Consumer<String> out) {
         switch (node) {
-            case ClassPrinter.LeafNode leaf -> {
+            case LeafNode leaf -> {
                 out.accept(quoteAndEscapeYaml(leaf.value()));
             }
             case ListNodeImpl list -> {
@@ -336,14 +335,14 @@ public final class ClassPrinterImpl {
         return esc;
     }
 
-    public static void toJson(ClassPrinter.Node node, Consumer<String> out) {
+    public static void toJson(Node node, Consumer<String> out) {
         toJson(1, true, node, out);
         out.accept(NL);
     }
 
-    private static void toJson(int indent, boolean skipFirstIndent, ClassPrinter.Node node, Consumer<String> out) {
+    private static void toJson(int indent, boolean skipFirstIndent, Node node, Consumer<String> out) {
         switch (node) {
-            case ClassPrinter.LeafNode leaf -> {
+            case LeafNode leaf -> {
                 out.accept(quoteAndEscapeJson(leaf.value()));
             }
             case ListNodeImpl list -> {
@@ -409,16 +408,16 @@ public final class ClassPrinterImpl {
         return sb.toString();
     }
 
-    public static void toXml(ClassPrinter.Node node, Consumer<String> out) {
+    public static void toXml(Node node, Consumer<String> out) {
         out.accept("<?xml version = '1.0'?>");
         toXml(0, false, node, out);
         out.accept(NL);
     }
 
-    private static void toXml(int indent, boolean skipFirstIndent, ClassPrinter.Node node, Consumer<String> out) {
+    private static void toXml(int indent, boolean skipFirstIndent, Node node, Consumer<String> out) {
         var name = toXmlName(node.name().toString());
         switch (node) {
-            case ClassPrinter.LeafNode leaf -> {
+            case LeafNode leaf -> {
                 out.accept("<" + name + ">");
                 out.accept(xmlEscape(leaf.value()));
             }
@@ -468,14 +467,14 @@ public final class ClassPrinterImpl {
         var s = String.valueOf(value);
         var sb = new StringBuilder(s.length() << 1);
         s.chars().forEach(c -> {
-        switch (c) {
-            case '<'  -> sb.append("&lt;");
-            case '>'  -> sb.append("&gt;");
-            case '"'  -> sb.append("&quot;");
-            case '&'  -> sb.append("&amp;");
-            case '\''  -> sb.append("&apos;");
-            default -> escape(c, sb);
-        }});
+            switch (c) {
+                case '<'  -> sb.append("&lt;");
+                case '>'  -> sb.append("&gt;");
+                case '"'  -> sb.append("&quot;");
+                case '&'  -> sb.append("&amp;");
+                case '\''  -> sb.append("&apos;");
+                default -> escape(c, sb);
+            }});
         return sb.toString();
     }
 
@@ -485,7 +484,7 @@ public final class ClassPrinterImpl {
         return name.replaceAll("[^A-Za-z_0-9]", "_");
     }
 
-    private static ClassPrinter.Node[] elementValueToTree(AnnotationValue v) {
+    private static Node[] elementValueToTree(AnnotationValue v) {
         return switch (v) {
             case OfString cv -> leafs("string", String.valueOf(cv.constantValue()));
             case OfDouble cv -> leafs("double", String.valueOf(cv.constantValue()));
@@ -498,33 +497,32 @@ public final class ClassPrinterImpl {
             case OfBoolean cv -> leafs("boolean", String.valueOf((int)cv.constantValue() != 0));
             case OfClass clv -> leafs("class", clv.className().stringValue());
             case OfEnum ev -> leafs("enum class", ev.className().stringValue(),
-                                    "contant name", ev.constantName().stringValue());
+                    "contant name", ev.constantName().stringValue());
             case OfAnnotation av -> leafs("annotation class", av.annotation().className().stringValue());
-            case OfArray av -> new ClassPrinter.Node[]{new ListNodeImpl(FLOW, "array", av.values().stream().map(
+            case OfArray av -> new Node[]{new ListNodeImpl(FLOW, "array", av.values().stream().map(
                     ev -> new MapNodeImpl(FLOW, "value").with(elementValueToTree(ev))))};
-            default -> throw new AssertionError();
         };
     }
 
-    private static ClassPrinter.Node elementValuePairsToTree(List<AnnotationElement> evps) {
+    private static Node elementValuePairsToTree(List<AnnotationElement> evps) {
         return new ListNodeImpl(FLOW, "values", evps.stream().map(evp -> new MapNodeImpl(FLOW, "pair").with(
                 leaf("name", evp.name().stringValue()),
                 new MapNodeImpl(FLOW, "value").with(elementValueToTree(evp.value())))));
     }
 
-    private static Stream<ConstantDesc> convertVTIs(CodeAttribute lr, List<StackMapFrameInfo.VerificationTypeInfo> vtis) {
+    private static Stream<ConstantDesc> convertVTIs(CodeAttribute lr, List<VerificationTypeInfo> vtis) {
         return vtis.stream().mapMulti((vti, ret) -> {
             switch (vti) {
-                case StackMapFrameInfo.SimpleVerificationTypeInfo s -> {
+                case SimpleVerificationTypeInfo s -> {
                     switch (s) {
                         case ITEM_DOUBLE -> {
                             ret.accept("double");
                             ret.accept("double2");
                         }
                         case ITEM_FLOAT ->
-                            ret.accept("float");
+                                ret.accept("float");
                         case ITEM_INTEGER ->
-                            ret.accept("int");
+                                ret.accept("int");
                         case ITEM_LONG ->  {
                             ret.accept("long");
                             ret.accept("long2");
@@ -534,44 +532,43 @@ public final class ClassPrinterImpl {
                         case ITEM_UNINITIALIZED_THIS -> ret.accept("THIS");
                     }
                 }
-                case StackMapFrameInfo.ObjectVerificationTypeInfo o ->
-                    ret.accept(o.className().name().stringValue());
-                case StackMapFrameInfo.UninitializedVerificationTypeInfo u ->
-                    ret.accept("UNITIALIZED @" + lr.labelToBci(u.newTarget()));
+                case ObjectVerificationTypeInfo o ->
+                        ret.accept(o.className().name().stringValue());
+                case UninitializedVerificationTypeInfo u ->
+                        ret.accept("UNITIALIZED @" + lr.labelToBci(u.newTarget()));
             }
         });
     }
 
     private record ExceptionHandler(int start, int end, int handler, String catchType) {}
 
-    public static ClassPrinter.MapNode modelToTree(CompoundElement<?> model, ClassPrinter.Verbosity verbosity) {
+    public static MapNode modelToTree(CompoundElement<?> model, Verbosity verbosity) {
         return switch(model) {
             case ClassModel cm -> classToTree(cm, verbosity);
             case FieldModel fm -> fieldToTree(fm, verbosity);
             case MethodModel mm -> methodToTree(mm, verbosity);
             case CodeModel com -> codeToTree((CodeAttribute)com, verbosity);
-            default -> throw new AssertionError();
         };
     }
 
-    private static ClassPrinter.MapNode classToTree(ClassModel clm, ClassPrinter.Verbosity verbosity) {
+    private static MapNode classToTree(ClassModel clm, Verbosity verbosity) {
         return new MapNodeImpl(BLOCK, "class")
                 .with(leaf("class name", clm.thisClass().asInternalName()),
-                      leaf("version", clm.majorVersion() + "." + clm.minorVersion()),
-                      list("flags", "flag", clm.flags().flags().stream().map(AccessFlag::name)),
-                      leaf("superclass", clm.superclass().map(ClassEntry::asInternalName).orElse("")),
-                      list("interfaces", "interface", clm.interfaces().stream().map(ClassEntry::asInternalName)),
-                      list("attributes", "attribute", clm.attributes().stream().map(Attribute::attributeName)))
+                        leaf("version", clm.majorVersion() + "." + clm.minorVersion()),
+                        list("flags", "flag", clm.flags().flags().stream().map(AccessFlag::name)),
+                        leaf("superclass", clm.superclass().map(ClassEntry::asInternalName).orElse("")),
+                        list("interfaces", "interface", clm.interfaces().stream().map(ClassEntry::asInternalName)),
+                        list("attributes", "attribute", clm.attributes().stream().map(Attribute::attributeName)))
                 .with(constantPoolToTree(clm.constantPool(), verbosity))
                 .with(attributesToTree(clm.attributes(), verbosity))
                 .with(new ListNodeImpl(BLOCK, "fields", clm.fields().stream().map(f ->
-                    fieldToTree(f, verbosity))))
+                        fieldToTree(f, verbosity))))
                 .with(new ListNodeImpl(BLOCK, "methods", clm.methods().stream().map(mm ->
-                    methodToTree(mm, verbosity))));
+                        methodToTree(mm, verbosity))));
     }
 
-    private static ClassPrinter.Node[] constantPoolToTree(ConstantPool cp, ClassPrinter.Verbosity verbosity) {
-        if (verbosity == ClassPrinter.Verbosity.TRACE_ALL) {
+    private static Node[] constantPoolToTree(ConstantPool cp, Verbosity verbosity) {
+        if (verbosity == Verbosity.TRACE_ALL) {
             var cpNode = new MapNodeImpl(BLOCK, "constant pool");
             for (int i = 1; i < cp.entryCount();) {
                 var e = cp.entryByIndex(i);
@@ -598,14 +595,14 @@ public final class ClassPrinterImpl {
                         }))
                         .with(switch (e) {
                             case ClassEntry ce -> leafs(
-                                "class name index", ce.name().index(),
-                                "class internal name", ce.asInternalName());
+                                    "class name index", ce.name().index(),
+                                    "class internal name", ce.asInternalName());
                             case ModuleEntry me -> leafs(
-                                "module name index", me.name().index(),
-                                "module name", me.name().stringValue());
+                                    "module name index", me.name().index(),
+                                    "module name", me.name().stringValue());
                             case PackageEntry pe -> leafs(
-                                "package name index", pe.name().index(),
-                                "package name", pe.name().stringValue());
+                                    "package name index", pe.name().index(),
+                                    "package name", pe.name().stringValue());
                             case StringEntry se -> leafs(
                                     "value index", se.utf8().index(),
                                     "value", se.stringValue());
@@ -629,57 +626,56 @@ public final class ClassPrinterImpl {
                             case MethodTypeEntry mte -> leafs(
                                     "descriptor index", mte.descriptor().index(),
                                     "descriptor", mte.descriptor().stringValue());
-                            case DynamicConstantPoolEntry dcpe -> new ClassPrinter.Node[] {
-                                leaf("bootstrap method handle index", dcpe.bootstrap().bootstrapMethod().index()),
-                                list("bootstrap method arguments indexes",
-                                        "index", dcpe.bootstrap().arguments().stream().map(en -> en.index())),
-                                leaf("name and type index", dcpe.nameAndType().index()),
-                                leaf("name", dcpe.name().stringValue()),
-                                leaf("type", dcpe.type().stringValue())};
+                            case DynamicConstantPoolEntry dcpe -> new Node[] {
+                                    leaf("bootstrap method handle index", dcpe.bootstrap().bootstrapMethod().index()),
+                                    list("bootstrap method arguments indexes",
+                                            "index", dcpe.bootstrap().arguments().stream().map(en -> en.index())),
+                                    leaf("name and type index", dcpe.nameAndType().index()),
+                                    leaf("name", dcpe.name().stringValue()),
+                                    leaf("type", dcpe.type().stringValue())};
                             case AnnotationConstantValueEntry ve -> leafs(
-                                "value", String.valueOf(ve.constantValue())
+                                    "value", String.valueOf(ve.constantValue())
                             );
-                            default -> throw new AssertionError();
                         }));
                 i += e.width();
             }
-            return new ClassPrinter.Node[]{cpNode};
+            return new Node[]{cpNode};
         } else {
-            return new ClassPrinter.Node[0];
+            return new Node[0];
         }
     }
 
-    private static ClassPrinter.Node frameToTree(ConstantDesc name, CodeAttribute lr, StackMapFrameInfo f) {
+    private static Node frameToTree(ConstantDesc name, CodeAttribute lr, StackMapFrameInfo f) {
         return new MapNodeImpl(FLOW, name).with(
                 list("locals", "item", convertVTIs(lr, f.locals())),
                 list("stack", "item", convertVTIs(lr, f.stack())));
     }
 
-    private static ClassPrinter.MapNode fieldToTree(FieldModel f, ClassPrinter.Verbosity verbosity) {
+    private static MapNode fieldToTree(FieldModel f, Verbosity verbosity) {
         return new MapNodeImpl(BLOCK, "field")
-                            .with(leaf("field name", f.fieldName().stringValue()),
-                                  list("flags",
-                                          "flag", f.flags().flags().stream().map(AccessFlag::name)),
-                                  leaf("field type", f.fieldType().stringValue()),
-                                  list("attributes",
-                                          "attribute", f.attributes().stream().map(Attribute::attributeName)))
-                            .with(attributesToTree(f.attributes(), verbosity));
+                .with(leaf("field name", f.fieldName().stringValue()),
+                        list("flags",
+                                "flag", f.flags().flags().stream().map(AccessFlag::name)),
+                        leaf("field type", f.fieldType().stringValue()),
+                        list("attributes",
+                                "attribute", f.attributes().stream().map(Attribute::attributeName)))
+                .with(attributesToTree(f.attributes(), verbosity));
     }
 
-    public static ClassPrinter.MapNode methodToTree(MethodModel m, ClassPrinter.Verbosity verbosity) {
+    public static MapNode methodToTree(MethodModel m, Verbosity verbosity) {
         return new MapNodeImpl(BLOCK, "method")
                 .with(leaf("method name", m.methodName().stringValue()),
-                      list("flags",
-                              "flag", m.flags().flags().stream().map(AccessFlag::name)),
-                      leaf("method type", m.methodType().stringValue()),
-                      list("attributes",
-                              "attribute", m.attributes().stream().map(Attribute::attributeName)))
+                        list("flags",
+                                "flag", m.flags().flags().stream().map(AccessFlag::name)),
+                        leaf("method type", m.methodType().stringValue()),
+                        list("attributes",
+                                "attribute", m.attributes().stream().map(Attribute::attributeName)))
                 .with(attributesToTree(m.attributes(), verbosity))
                 .with(codeToTree((CodeAttribute)m.code().orElse(null), verbosity));
     }
 
-    private static ClassPrinter.MapNode codeToTree(CodeAttribute com, ClassPrinter.Verbosity verbosity) {
-        if (verbosity != ClassPrinter.Verbosity.MEMBERS_ONLY && com != null) {
+    private static MapNode codeToTree(CodeAttribute com, Verbosity verbosity) {
+        if (verbosity != Verbosity.MEMBERS_ONLY && com != null) {
             var codeNode = new MapNodeImpl(BLOCK, "code");
             codeNode.with(leaf("max stack", com.maxStack()));
             codeNode.with(leaf("max locals", com.maxLocals()));
@@ -695,18 +691,18 @@ public final class ClassPrinterImpl {
                     for (var smf : smta.entries()) {
                         stackMap.with(frameToTree(com.labelToBci(smf.target()), com, smf));
                     }
-                } else if (verbosity == ClassPrinter.Verbosity.TRACE_ALL && attr != null) switch (attr) {
+                } else if (verbosity == Verbosity.TRACE_ALL && attr != null) switch (attr) {
                     case LocalVariableTableAttribute lvta -> {
                         locals = lvta.localVariables();
                         codeNode.with(new ListNodeImpl(BLOCK, "local variables",
                                 IntStream.range(0, locals.size()).mapToObj(i -> {
                                     var lv = lvta.localVariables().get(i);
                                     return map(i + 1,
-                                        "start", lv.startPc(),
-                                        "end", lv.startPc() + lv.length(),
-                                        "slot", lv.slot(),
-                                        "name", lv.name().stringValue(),
-                                        "type", lv.type().stringValue());
+                                            "start", lv.startPc(),
+                                            "end", lv.startPc() + lv.length(),
+                                            "slot", lv.slot(),
+                                            "name", lv.name().stringValue(),
+                                            "type", lv.type().stringValue());
                                 })));
                     }
                     case LocalVariableTypeTableAttribute lvtta -> {
@@ -714,11 +710,11 @@ public final class ClassPrinterImpl {
                                 IntStream.range(0, lvtta.localVariableTypes().size()).mapToObj(i -> {
                                     var lvt = lvtta.localVariableTypes().get(i);
                                     return map(i + 1,
-                                        "start", lvt.startPc(),
-                                        "end", lvt.startPc() + lvt.length(),
-                                        "slot", lvt.slot(),
-                                        "name", lvt.name().stringValue(),
-                                        "signature", lvt.signature().stringValue());
+                                            "start", lvt.startPc(),
+                                            "end", lvt.startPc() + lvt.length(),
+                                            "slot", lvt.slot(),
+                                            "name", lvt.name().stringValue(),
+                                            "signature", lvt.signature().stringValue());
                                 })));
                     }
                     case LineNumberTableAttribute lnta -> {
@@ -726,8 +722,8 @@ public final class ClassPrinterImpl {
                                 IntStream.range(0, lnta.lineNumbers().size()).mapToObj(i -> {
                                     var ln = lnta.lineNumbers().get(i);
                                     return map(i + 1,
-                                        "start", ln.startPc(),
-                                        "line number", ln.lineNumber());
+                                            "start", ln.startPc(),
+                                            "line number", ln.lineNumber());
                                 })));
                     }
                     case CharacterRangeTableAttribute crta -> {
@@ -735,27 +731,27 @@ public final class ClassPrinterImpl {
                                 IntStream.range(0, crta.characterRangeTable().size()).mapToObj(i -> {
                                     var cr = crta.characterRangeTable().get(i);
                                     return map(i + 1,
-                                        "start", cr.startPc(),
-                                        "end", cr.endPc(),
-                                        "range start", cr.characterRangeStart(),
-                                        "range end", cr.characterRangeEnd(),
-                                        "flags", cr.flags());
+                                            "start", cr.startPc(),
+                                            "end", cr.endPc(),
+                                            "range start", cr.characterRangeStart(),
+                                            "range end", cr.characterRangeEnd(),
+                                            "flags", cr.flags());
                                 })));
                     }
                     case RuntimeVisibleTypeAnnotationsAttribute rvtaa ->
-                        rvtaa.annotations().forEach(a -> forEachOffset(a, com, (off, an) ->
-                                visibleTypeAnnos.computeIfAbsent(off, o -> new LinkedList<>()).add(an)));
+                            rvtaa.annotations().forEach(a -> forEachOffset(a, com, (off, an) ->
+                                    visibleTypeAnnos.computeIfAbsent(off, o -> new LinkedList<>()).add(an)));
                     case RuntimeInvisibleTypeAnnotationsAttribute ritaa ->
-                        ritaa.annotations().forEach(a -> forEachOffset(a, com, (off, an) ->
-                                invisibleTypeAnnos.computeIfAbsent(off, o -> new LinkedList<>()).add(an)));
+                            ritaa.annotations().forEach(a -> forEachOffset(a, com, (off, an) ->
+                                    invisibleTypeAnnos.computeIfAbsent(off, o -> new LinkedList<>()).add(an)));
                     case Object o -> {}
                 }
             }
             codeNode.with(attributesToTree(com.attributes(), verbosity));
             if (!stackMap.containsKey(0)) {
                 codeNode.with(new MapNodeImpl(FLOW, "//stack map frame @0").with(
-                    list("locals", "item", convertVTIs(com, StackMapDecoder.initFrameLocals(com.parent().get()))),
-                    list("stack", "item", Stream.of())));
+                        list("locals", "item", convertVTIs(com, StackMapDecoder.initFrameLocals(com.parent().get()))),
+                        list("stack", "item", Stream.of())));
             }
             var excHandlers = com.exceptionHandlers().stream().map(exc -> new ExceptionHandler(
                     com.labelToBci(exc.tryStart()),
@@ -768,7 +764,7 @@ public final class ClassPrinterImpl {
                     var frame = stackMap.get(bci);
                     if (frame != null) {
                         codeNode.with(new MapNodeImpl(FLOW, "//stack map frame @" + bci)
-                                .with(((MapNodeImpl)frame).values().toArray(new ClassPrinter.Node[2])));
+                                .with(((MapNodeImpl)frame).values().toArray(new Node[2])));
                     }
                     var annos = invisibleTypeAnnos.get(bci);
                     if (annos != null) {
@@ -806,14 +802,14 @@ public final class ClassPrinterImpl {
                     codeNode.with(in);
                     switch (coe) {
                         case IncrementInstruction inc ->  in.with(leafs(
-                                "slot", inc.slot(),
-                                "const", inc.constant()))
+                                        "slot", inc.slot(),
+                                        "const", inc.constant()))
                                 .with(localInfoToTree(locals, inc.slot(), bci));
                         case LoadInstruction lv ->  in.with(leaf(
-                                "slot", lv.slot()))
+                                        "slot", lv.slot()))
                                 .with(localInfoToTree(locals, lv.slot(), bci));
                         case StoreInstruction lv ->  in.with(leaf(
-                                "slot", lv.slot()))
+                                        "slot", lv.slot()))
                                 .with(localInfoToTree(locals, lv.slot(), bci));
                         case FieldInstruction fa -> in.with(leafs(
                                 "owner", fa.owner().name().stringValue(),
@@ -850,11 +846,11 @@ public final class ClassPrinterImpl {
                         case LookupSwitchInstruction si -> in.with(list(
                                 "targets", "target", Stream.concat(Stream.of(si.defaultTarget())
                                         .map(com::labelToBci), si.cases().stream()
-                                                .map(sc -> com.labelToBci(sc.target())))));
+                                        .map(sc -> com.labelToBci(sc.target())))));
                         case TableSwitchInstruction si -> in.with(list(
                                 "targets", "target", Stream.concat(Stream.of(si.defaultTarget())
                                         .map(com::labelToBci), si.cases().stream()
-                                                .map(sc -> com.labelToBci(sc.target())))));
+                                        .map(sc -> com.labelToBci(sc.target())))));
                         case DiscontinuedInstruction.JsrInstruction jsr -> in.with(leaf(
                                 "target", com.labelToBci(jsr.target())));
                         case DiscontinuedInstruction.RetInstruction ret ->  in.with(leaf(
@@ -881,53 +877,53 @@ public final class ClassPrinterImpl {
         return null;
     }
 
-    private static ClassPrinter.Node[] attributesToTree(List<Attribute<?>> attributes, ClassPrinter.Verbosity verbosity) {
-        var nodes = new LinkedList<ClassPrinter.Node>();
-        if (verbosity != ClassPrinter.Verbosity.MEMBERS_ONLY) for (var attr : attributes) {
+    private static Node[] attributesToTree(List<Attribute<?>> attributes, Verbosity verbosity) {
+        var nodes = new LinkedList<Node>();
+        if (verbosity != Verbosity.MEMBERS_ONLY) for (var attr : attributes) {
             switch (attr) {
                 case BootstrapMethodsAttribute bma ->
-                    nodes.add(new ListNodeImpl(BLOCK, "bootstrap methods", bma.bootstrapMethods().stream().map(
-                    bm -> {
-                        var mh = bm.bootstrapMethod();
-                        var mref = mh.reference();
-                        return map("bm",
-                                "kind", DirectMethodHandleDesc.Kind.valueOf(mh.kind(),
-                                        mref instanceof InterfaceMethodRefEntry).name(),
-                                "owner", mref.owner().name().stringValue(),
-                                "name", mref.nameAndType().name().stringValue(),
-                                "type", mref.nameAndType().type().stringValue());
-                    })));
+                        nodes.add(new ListNodeImpl(BLOCK, "bootstrap methods", bma.bootstrapMethods().stream().map(
+                                bm -> {
+                                    var mh = bm.bootstrapMethod();
+                                    var mref = mh.reference();
+                                    return map("bm",
+                                            "kind", DirectMethodHandleDesc.Kind.valueOf(mh.kind(),
+                                                    mref instanceof InterfaceMethodRefEntry).name(),
+                                            "owner", mref.owner().name().stringValue(),
+                                            "name", mref.nameAndType().name().stringValue(),
+                                            "type", mref.nameAndType().type().stringValue());
+                                })));
                 case ConstantValueAttribute cva ->
-                    nodes.add(leaf("constant value", cva.constant().constantValue()));
+                        nodes.add(leaf("constant value", cva.constant().constantValue()));
                 case NestHostAttribute nha ->
-                    nodes.add(leaf("nest host", nha.nestHost().name().stringValue()));
+                        nodes.add(leaf("nest host", nha.nestHost().name().stringValue()));
                 case NestMembersAttribute nma ->
-                    nodes.add(list("nest members", "member", nma.nestMembers().stream()
-                            .map(mp -> mp.name().stringValue())));
+                        nodes.add(list("nest members", "member", nma.nestMembers().stream()
+                                .map(mp -> mp.name().stringValue())));
                 case PermittedSubclassesAttribute psa ->
-                    nodes.add(list("permitted subclasses", "subclass", psa.permittedSubclasses().stream()
-                            .map(e -> e.name().stringValue())));
+                        nodes.add(list("permitted subclasses", "subclass", psa.permittedSubclasses().stream()
+                                .map(e -> e.name().stringValue())));
                 default -> {}
             }
-            if (verbosity == ClassPrinter.Verbosity.TRACE_ALL) switch (attr) {
+            if (verbosity == Verbosity.TRACE_ALL) switch (attr) {
                 case EnclosingMethodAttribute ema ->
-                    nodes.add(map("enclosing method",
-                            "class", ema.enclosingClass().name().stringValue(),
-                            "method name", ema.enclosingMethodName()
-                                    .map(Utf8Entry::stringValue).orElse("null"),
-                            "method type", ema.enclosingMethodType()
-                                    .map(Utf8Entry::stringValue).orElse("null")));
+                        nodes.add(map("enclosing method",
+                                "class", ema.enclosingClass().name().stringValue(),
+                                "method name", ema.enclosingMethodName()
+                                        .map(Utf8Entry::stringValue).orElse("null"),
+                                "method type", ema.enclosingMethodType()
+                                        .map(Utf8Entry::stringValue).orElse("null")));
                 case ExceptionsAttribute exa ->
-                    nodes.add(list("excceptions", "exc", exa.exceptions().stream()
-                            .map(e -> e.name().stringValue())));
+                        nodes.add(list("excceptions", "exc", exa.exceptions().stream()
+                                .map(e -> e.name().stringValue())));
                 case InnerClassesAttribute ica ->
-                    nodes.add(new ListNodeImpl(BLOCK, "inner classes", ica.classes().stream()
-                            .map(ic -> new MapNodeImpl(FLOW, "cls").with(
-                                leaf("inner class", ic.innerClass().name().stringValue()),
-                                leaf("outer class", ic.outerClass()
-                                        .map(cle -> cle.name().stringValue()).orElse("null")),
-                                leaf("inner name", ic.innerName().map(Utf8Entry::stringValue).orElse("null")),
-                                list("flags", "flag", ic.flags().stream().map(AccessFlag::name))))));
+                        nodes.add(new ListNodeImpl(BLOCK, "inner classes", ica.classes().stream()
+                                .map(ic -> new MapNodeImpl(FLOW, "cls").with(
+                                        leaf("inner class", ic.innerClass().name().stringValue()),
+                                        leaf("outer class", ic.outerClass()
+                                                .map(cle -> cle.name().stringValue()).orElse("null")),
+                                        leaf("inner name", ic.innerName().map(Utf8Entry::stringValue).orElse("null")),
+                                        list("flags", "flag", ic.flags().stream().map(AccessFlag::name))))));
                 case MethodParametersAttribute mpa -> {
                     var n = new MapNodeImpl(BLOCK, "method parameters");
                     for (int i = 0; i < mpa.parameters().size(); i++) {
@@ -938,76 +934,76 @@ public final class ClassPrinterImpl {
                     }
                 }
                 case ModuleAttribute ma ->
-                    nodes.add(new MapNodeImpl(BLOCK, "module")
-                            .with(leaf("name", ma.moduleName().name().stringValue()),
-                                  list("flags","flag", ma.moduleFlags().stream().map(AccessFlag::name)),
-                                  leaf("version", ma.moduleVersion().map(Utf8Entry::stringValue).orElse("null")),
-                                  list("uses", "class", ma.uses().stream().map(ce -> ce.name().stringValue())),
-                                  new ListNodeImpl(BLOCK, "requires", ma.requires().stream().map(req ->
-                                    new MapNodeImpl(FLOW, "req").with(
-                                            leaf("name", req.requires().name().stringValue()),
-                                            list("flags", "flag", req.requiresFlags().stream()
-                                                    .map(AccessFlag::name)),
-                                            leaf("version", req.requiresVersion()
-                                                    .map(Utf8Entry::stringValue).orElse(null))))),
-                                  new ListNodeImpl(BLOCK, "exports", ma.exports().stream().map(exp ->
-                                    new MapNodeImpl(FLOW, "exp").with(
-                                            leaf("package", exp.exportedPackage().asSymbol().packageName()),
-                                            list("flags", "flag", exp.exportsFlags().stream()
-                                                    .map(AccessFlag::name)),
-                                            list("to", "module", exp.exportsTo().stream()
-                                                    .map(me -> me.name().stringValue()))))),
-                                  new ListNodeImpl(BLOCK, "opens", ma.opens().stream().map(opn ->
-                                    new MapNodeImpl(FLOW, "opn").with(
-                                            leaf("package", opn.openedPackage().asSymbol().packageName()),
-                                            list("flags", "flag", opn.opensFlags().stream()
-                                                    .map(AccessFlag::name)),
-                                            list("to", "module", opn.opensTo().stream()
-                                                    .map(me -> me.name().stringValue()))))),
-                                  new ListNodeImpl(BLOCK, "provides", ma.provides().stream()
-                                          .map(prov -> new MapNodeImpl(FLOW, "prov").with(
-                                                  leaf("class", prov.provides().name().stringValue()),
-                                                  list("with", "cls", prov.providesWith().stream()
-                                                          .map(ce -> ce.name().stringValue())))))));
+                        nodes.add(new MapNodeImpl(BLOCK, "module")
+                                .with(leaf("name", ma.moduleName().name().stringValue()),
+                                        list("flags","flag", ma.moduleFlags().stream().map(AccessFlag::name)),
+                                        leaf("version", ma.moduleVersion().map(Utf8Entry::stringValue).orElse("null")),
+                                        list("uses", "class", ma.uses().stream().map(ce -> ce.name().stringValue())),
+                                        new ListNodeImpl(BLOCK, "requires", ma.requires().stream().map(req ->
+                                                new MapNodeImpl(FLOW, "req").with(
+                                                        leaf("name", req.requires().name().stringValue()),
+                                                        list("flags", "flag", req.requiresFlags().stream()
+                                                                .map(AccessFlag::name)),
+                                                        leaf("version", req.requiresVersion()
+                                                                .map(Utf8Entry::stringValue).orElse(null))))),
+                                        new ListNodeImpl(BLOCK, "exports", ma.exports().stream().map(exp ->
+                                                new MapNodeImpl(FLOW, "exp").with(
+                                                        leaf("package", exp.exportedPackage().asSymbol().packageName()),
+                                                        list("flags", "flag", exp.exportsFlags().stream()
+                                                                .map(AccessFlag::name)),
+                                                        list("to", "module", exp.exportsTo().stream()
+                                                                .map(me -> me.name().stringValue()))))),
+                                        new ListNodeImpl(BLOCK, "opens", ma.opens().stream().map(opn ->
+                                                new MapNodeImpl(FLOW, "opn").with(
+                                                        leaf("package", opn.openedPackage().asSymbol().packageName()),
+                                                        list("flags", "flag", opn.opensFlags().stream()
+                                                                .map(AccessFlag::name)),
+                                                        list("to", "module", opn.opensTo().stream()
+                                                                .map(me -> me.name().stringValue()))))),
+                                        new ListNodeImpl(BLOCK, "provides", ma.provides().stream()
+                                                .map(prov -> new MapNodeImpl(FLOW, "prov").with(
+                                                        leaf("class", prov.provides().name().stringValue()),
+                                                        list("with", "cls", prov.providesWith().stream()
+                                                                .map(ce -> ce.name().stringValue())))))));
                 case ModulePackagesAttribute mopa ->
-                    nodes.add(list("module packages", "subclass", mopa.packages().stream()
-                            .map(mp -> mp.asSymbol().packageName())));
+                        nodes.add(list("module packages", "subclass", mopa.packages().stream()
+                                .map(mp -> mp.asSymbol().packageName())));
                 case ModuleMainClassAttribute mmca ->
-                    nodes.add(leaf("module main class", mmca.mainClass().name().stringValue()));
+                        nodes.add(leaf("module main class", mmca.mainClass().name().stringValue()));
                 case RecordAttribute ra ->
-                    nodes.add(new ListNodeImpl(BLOCK, "record components", ra.components().stream()
-                            .map(rc -> new MapNodeImpl(BLOCK, "record")
-                                    .with(leafs(
-                                        "name", rc.name().stringValue(),
-                                        "type", rc.descriptor().stringValue()))
-                                    .with(list("attributes", "attribute", rc.attributes().stream()
-                                            .map(Attribute::attributeName)))
-                                    .with(attributesToTree(rc.attributes(), verbosity)))));
+                        nodes.add(new ListNodeImpl(BLOCK, "record components", ra.components().stream()
+                                .map(rc -> new MapNodeImpl(BLOCK, "record")
+                                        .with(leafs(
+                                                "name", rc.name().stringValue(),
+                                                "type", rc.descriptor().stringValue()))
+                                        .with(list("attributes", "attribute", rc.attributes().stream()
+                                                .map(Attribute::attributeName)))
+                                        .with(attributesToTree(rc.attributes(), verbosity)))));
                 case AnnotationDefaultAttribute ada ->
-                    nodes.add(new MapNodeImpl(FLOW, "annotation default").with(elementValueToTree(ada.defaultValue())));
+                        nodes.add(new MapNodeImpl(FLOW, "annotation default").with(elementValueToTree(ada.defaultValue())));
                 case RuntimeInvisibleAnnotationsAttribute aa ->
-                    nodes.add(annotationsToTree("invisible annotations", aa.annotations()));
+                        nodes.add(annotationsToTree("invisible annotations", aa.annotations()));
                 case RuntimeVisibleAnnotationsAttribute aa ->
-                    nodes.add(annotationsToTree("visible annotations", aa.annotations()));
+                        nodes.add(annotationsToTree("visible annotations", aa.annotations()));
                 case RuntimeInvisibleParameterAnnotationsAttribute aa ->
-                    nodes.add(parameterAnnotationsToTree("invisible parameter annotations", aa.parameterAnnotations()));
+                        nodes.add(parameterAnnotationsToTree("invisible parameter annotations", aa.parameterAnnotations()));
                 case RuntimeVisibleParameterAnnotationsAttribute aa ->
-                    nodes.add(parameterAnnotationsToTree("visible parameter annotations", aa.parameterAnnotations()));
+                        nodes.add(parameterAnnotationsToTree("visible parameter annotations", aa.parameterAnnotations()));
                 case RuntimeInvisibleTypeAnnotationsAttribute aa ->
-                    nodes.add(typeAnnotationsToTree(BLOCK, "invisible type annotations", aa.annotations()));
+                        nodes.add(typeAnnotationsToTree(BLOCK, "invisible type annotations", aa.annotations()));
                 case RuntimeVisibleTypeAnnotationsAttribute aa ->
-                    nodes.add(typeAnnotationsToTree(BLOCK, "visible type annotations", aa.annotations()));
+                        nodes.add(typeAnnotationsToTree(BLOCK, "visible type annotations", aa.annotations()));
                 case SignatureAttribute sa ->
-                    nodes.add(leaf("signature", sa.signature().stringValue()));
+                        nodes.add(leaf("signature", sa.signature().stringValue()));
                 case SourceFileAttribute sfa ->
-                    nodes.add(leaf("source file", sfa.sourceFile().stringValue()));
+                        nodes.add(leaf("source file", sfa.sourceFile().stringValue()));
                 default -> {}
             }
         }
-        return nodes.toArray(ClassPrinter.Node[]::new);
+        return nodes.toArray(Node[]::new);
     }
 
-    private static ClassPrinter.Node annotationsToTree(String name, List<Annotation> annos) {
+    private static Node annotationsToTree(String name, List<Annotation> annos) {
         return new ListNodeImpl(BLOCK, name, annos.stream().map(a ->
                 new MapNodeImpl(FLOW, "anno")
                         .with(leaf("annotation class", a.className().stringValue()))
@@ -1015,11 +1011,11 @@ public final class ClassPrinterImpl {
 
     }
 
-    private static ClassPrinter.Node typeAnnotationsToTree(Style style, String name, List<TypeAnnotation> annos) {
+    private static Node typeAnnotationsToTree(Style style, String name, List<TypeAnnotation> annos) {
         return new ListNodeImpl(style, name, annos.stream().map(a ->
                 new MapNodeImpl(FLOW, "anno")
                         .with(leaf("annotation class", a.className().stringValue()),
-                              leaf("target info", a.targetInfo().targetType().name()))
+                                leaf("target info", a.targetInfo().targetType().name()))
                         .with(elementValuePairsToTree(a.elements()))));
 
     }
@@ -1030,34 +1026,34 @@ public final class ClassPrinterImpl {
             var annos = paramAnnotations.get(i);
             if (!annos.isEmpty()) {
                 node.with(new ListNodeImpl(FLOW, "parameter " + (i + 1), annos.stream().map(a ->
-                                new MapNodeImpl(FLOW, "anno")
-                                        .with(leaf("annotation class", a.className().stringValue()))
-                                        .with(elementValuePairsToTree(a.elements())))));
+                        new MapNodeImpl(FLOW, "anno")
+                                .with(leaf("annotation class", a.className().stringValue()))
+                                .with(elementValuePairsToTree(a.elements())))));
             }
         }
         return node;
     }
 
-    private static ClassPrinter.Node[] localInfoToTree(List<LocalVariableInfo> locals, int slot, int bci) {
+    private static Node[] localInfoToTree(List<LocalVariableInfo> locals, int slot, int bci) {
         if (locals != null) {
             for (var l : locals) {
                 if (l.slot() == slot && l.startPc() <= bci && l.length() + l.startPc() >= bci) {
                     return leafs("type", l.type().stringValue(),
-                                 "variable name", l.name().stringValue());
+                            "variable name", l.name().stringValue());
                 }
             }
         }
-        return new ClassPrinter.Node[0];
+        return new Node[0];
     }
 
     private static void forEachOffset(TypeAnnotation ta, CodeAttribute lr, BiConsumer<Integer, TypeAnnotation> consumer) {
         switch (ta.targetInfo()) {
             case TypeAnnotation.OffsetTarget ot ->
-                consumer.accept(lr.labelToBci(ot.target()), ta);
+                    consumer.accept(lr.labelToBci(ot.target()), ta);
             case TypeAnnotation.TypeArgumentTarget tat ->
-                consumer.accept(lr.labelToBci(tat.target()), ta);
+                    consumer.accept(lr.labelToBci(tat.target()), ta);
             case TypeAnnotation.LocalVarTarget lvt ->
-                lvt.table().forEach(lvti -> consumer.accept(lr.labelToBci(lvti.startLabel()), ta));
+                    lvt.table().forEach(lvti -> consumer.accept(lr.labelToBci(lvti.startLabel()), ta));
             default -> {}
         }
     }
