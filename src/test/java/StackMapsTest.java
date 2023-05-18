@@ -26,11 +26,13 @@
 /*
  * @test
  * @summary Testing Classfile stack maps generator.
+ * @bug 8305990
  * @build testdata.*
  * @run junit StackMapsTest
  */
 
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.*;
+import org.glavo.classfile.components.ClassPrinter;
 import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -77,7 +79,7 @@ class StackMapsTest {
                                     cob.exceptionCatch(cob.startLabel(), deadStart, handler, ConstantDescs.CD_Throwable);
                                     //exception block after dead code to stay untouched
                                     cob.exceptionCatch(deadEnd, handler, handler, ConstantDescs.CD_Throwable);
-                                     //exception block overlapping dead code to cut from right
+                                    //exception block overlapping dead code to cut from right
                                     cob.exceptionCatch(cob.startLabel(), deadEnd, handler, ConstantDescs.CD_Throwable);
                                     //exception block overlapping dead code to from left
                                     cob.exceptionCatch(deadStart, handler, handler, ConstantDescs.CD_Throwable);
@@ -97,14 +99,14 @@ class StackMapsTest {
     void testDeadCodePatternFail() throws Exception {
         var error = assertThrows(IllegalStateException.class, () -> testTransformedStackMaps(buildDeadCode(), Classfile.Option.patchDeadCode(false)));
         assertLinesMatch(
-            """
-            Unable to generate stack map frame for dead code at bytecode offset 1 of method twoReturns()
-            >> more lines >>
-                0: {opcode: RETURN}
-                1: {opcode: RETURN}
-            """.lines(),
-            error.getMessage().lines(),
-            error.getMessage()
+                """
+                Unable to generate stack map frame for dead code at bytecode offset 1 of method twoReturns()
+                >> more lines >>
+                    0: {opcode: RETURN}
+                    1: {opcode: RETURN}
+                """.lines(),
+                error.getMessage().lines(),
+                error.getMessage()
         );
     }
 
@@ -171,48 +173,62 @@ class StackMapsTest {
     @Test
     void testFrameOutOfBytecodeRange() {
         var error = assertThrows(IllegalStateException.class, () ->
-        Classfile.parse(
-                Classfile.build(ClassDesc.of("TestClass"), clb ->
-                        clb.withMethodBody("frameOutOfRangeMethod", MethodTypeDesc.of(ConstantDescs.CD_void), 0, cob -> {
-                            var l = cob.newLabel();
-                            cob.goto_(l);//jump to the end of method body triggers invalid frame creation
-                            cob.labelBinding(l);
-                        }))));
+                Classfile.parse(
+                        Classfile.build(ClassDesc.of("TestClass"), clb ->
+                                clb.withMethodBody("frameOutOfRangeMethod", MethodTypeDesc.of(ConstantDescs.CD_void), 0, cob -> {
+                                    var l = cob.newLabel();
+                                    cob.goto_(l);//jump to the end of method body triggers invalid frame creation
+                                    cob.labelBinding(l);
+                                }))));
         assertLinesMatch(
-            """
-            Detected branch target out of bytecode range at bytecode offset 0 of method frameOutOfRangeMethod()
-            >> more lines >>
-                0: {opcode: GOTO, target: 3}
-            """.lines(),
-            error.getMessage().lines(),
-            error.getMessage()
+                """
+                Detected branch target out of bytecode range at bytecode offset 0 of method frameOutOfRangeMethod()
+                >> more lines >>
+                    0: {opcode: GOTO, target: 3}
+                """.lines(),
+                error.getMessage().lines(),
+                error.getMessage()
         );
     }
 
     @Test
     void testMethodSwitchFromStatic() {
         assertThrows(IllegalArgumentException.class, () ->
-        Classfile.build(ClassDesc.of("TestClass"), clb ->
-                clb.withMethod("testMethod", MethodTypeDesc.of(ConstantDescs.CD_Object, ConstantDescs.CD_int),
-                               ACC_STATIC,
-                               mb -> mb.withCode(cob -> {
-                                           var t = cob.newLabel();
-                                           cob.aload(0).goto_(t).labelBinding(t).areturn();
-                                       })
-                                       .withFlags())));
+                Classfile.build(ClassDesc.of("TestClass"), clb ->
+                        clb.withMethod("testMethod", MethodTypeDesc.of(ConstantDescs.CD_Object, ConstantDescs.CD_int),
+                                ACC_STATIC,
+                                mb -> mb.withCode(cob -> {
+                                            var t = cob.newLabel();
+                                            cob.aload(0).goto_(t).labelBinding(t).areturn();
+                                        })
+                                        .withFlags())));
     }
 
     @Test
     void testMethodSwitchToStatic() {
         assertThrows(IllegalArgumentException.class, () ->
-        Classfile.build(ClassDesc.of("TestClass"), clb ->
-                clb.withMethod("testMethod", MethodTypeDesc.of(ConstantDescs.CD_int, ConstantDescs.CD_int),
-                               0, mb ->
-                                       mb.withCode(cob -> {
-                                             var t = cob.newLabel();
-                                             cob.iload(0).goto_(t).labelBinding(t).ireturn();
-                                         })
-                                         .withFlags(AccessFlag.STATIC))));
+                Classfile.build(ClassDesc.of("TestClass"), clb ->
+                        clb.withMethod("testMethod", MethodTypeDesc.of(ConstantDescs.CD_int, ConstantDescs.CD_int),
+                                0, mb ->
+                                        mb.withCode(cob -> {
+                                                    var t = cob.newLabel();
+                                                    cob.iload(0).goto_(t).labelBinding(t).ireturn();
+                                                })
+                                                .withFlags(AccessFlag.STATIC))));
+    }
+
+    @Test
+    void testClassVersions() throws Exception {
+        var actualVersion = Classfile.parse(StackMapsTest.class.getResourceAsStream("/testdata/Pattern1.class").readAllBytes());
+
+        //test transformation to class version 49 with removal of StackMapTable attributes
+        var version49 = Classfile.parse(actualVersion.transform(ClassTransform.transformingMethodBodies(CodeTransform.ACCEPT_ALL)
+                .andThen(ClassTransform.endHandler(clb -> clb.withVersion(49, 0)))));
+        assertFalse(ClassPrinter.toTree(version49, ClassPrinter.Verbosity.CRITICAL_ATTRIBUTES).walk().anyMatch(n -> n.name().equals("stack map frames")));
+
+        //test transformation to class version 50 with re-generation of StackMapTable attributes
+        assertEmpty(Classfile.parse(version49.transform(ClassTransform.transformingMethodBodies(CodeTransform.ACCEPT_ALL)
+                .andThen(ClassTransform.endHandler(clb -> clb.withVersion(50, 0))))).verify(null));
     }
 
     private static final FileSystem JRT = FileSystems.getFileSystem(URI.create("jrt:/"));
@@ -220,8 +236,8 @@ class StackMapsTest {
     private static void testTransformedStackMaps(String classPath, Classfile.Option... options) throws Exception {
         testTransformedStackMaps(
                 classPath.startsWith("/")
-                            ? StackMapsTest.class.getResourceAsStream(classPath).readAllBytes()
-                            : Files.readAllBytes(JRT.getPath(classPath)),
+                        ? StackMapsTest.class.getResourceAsStream(classPath).readAllBytes()
+                        : Files.readAllBytes(JRT.getPath(classPath)),
                 options);
     }
 
@@ -229,12 +245,12 @@ class StackMapsTest {
         //transform the class model
         var classModel = Classfile.parse(originalBytes, options);
         var transformedBytes = Classfile.build(classModel.thisClass().asSymbol(), List.of(options),
-                                               cb -> {
+                cb -> {
 //                                                   classModel.superclass().ifPresent(cb::withSuperclass);
 //                                                   cb.withInterfaces(classModel.interfaces());
 //                                                   cb.withVersion(classModel.majorVersion(), classModel.minorVersion());
-                                                   classModel.forEachElement(cb);
-                                               });
+                    classModel.forEachElement(cb);
+                });
 
         //then verify transformed bytecode
         assertEmpty(Classfile.parse(transformedBytes).verify(null));

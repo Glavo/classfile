@@ -66,6 +66,8 @@ import static org.glavo.classfile.Opcode.GOTO;
 import static org.glavo.classfile.Opcode.GOTO_W;
 import static org.glavo.classfile.Opcode.IINC;
 import static org.glavo.classfile.Opcode.IINC_W;
+import static org.glavo.classfile.Opcode.JSR;
+import static org.glavo.classfile.Opcode.JSR_W;
 import static org.glavo.classfile.Opcode.LDC2_W;
 import static org.glavo.classfile.Opcode.LDC_W;
 
@@ -73,12 +75,12 @@ public final class DirectCodeBuilder
         extends AbstractDirectBuilder<CodeModel>
         implements TerminalCodeBuilder, LabelContext {
     private final List<CharacterRange> characterRanges = new ArrayList<>();
-    private final List<AbstractPseudoInstruction.ExceptionCatchImpl> handlers = new ArrayList<>();
+    final List<AbstractPseudoInstruction.ExceptionCatchImpl> handlers = new ArrayList<>();
     private final List<LocalVariable> localVariables = new ArrayList<>();
     private final List<LocalVariableType> localVariableTypes = new ArrayList<>();
     private final boolean transformFwdJumps, transformBackJumps;
     private final Label startLabel, endLabel;
-    private final MethodInfo methodInfo;
+    final MethodInfo methodInfo;
     final BufWriter bytecodesBufWriter;
     private CodeAttribute mruParent;
     private int[] mruParentTable;
@@ -125,7 +127,7 @@ public final class DirectCodeBuilder
         this.transformFwdJumps = transformFwdJumps;
         this.transformBackJumps = constantPool.options().fixJumps;
         bytecodesBufWriter = (original instanceof CodeImpl cai) ? new BufWriterImpl(constantPool, cai.codeLength())
-                                                               : new BufWriterImpl(constantPool);
+                : new BufWriterImpl(constantPool);
         this.startLabel = new LabelImpl(this, 0);
         this.endLabel = new LabelImpl(this, -1);
         this.topLocal = Util.maxLocals(methodInfo.methodFlags(), methodInfo.methodType().stringValue());
@@ -314,7 +316,9 @@ public final class DirectCodeBuilder
                 boolean canReuseStackmaps = codeAndExceptionsMatch(codeLength);
 
                 if (!constantPool.options().generateStackmaps) {
-                    maxStack = maxLocals = 255;
+                    StackCounter cntr = StackCounter.of(DirectCodeBuilder.this, buf);
+                    maxStack = cntr.maxStack();
+                    maxLocals = cntr.maxLocals();
                     stackMapAttr = null;
                 }
                 else if (canReuseStackmaps) {
@@ -322,21 +326,33 @@ public final class DirectCodeBuilder
                     maxStack = original.maxStack();
                     stackMapAttr = original.findAttribute(Attributes.STACK_MAP_TABLE).orElse(null);
                 }
-                else {
-                    //new instance of generator immediately calculates maxStack, maxLocals, all frames,
-                    // patches dead bytecode blocks and removes them from exception table
-                    StackMapGenerator gen = new StackMapGenerator(DirectCodeBuilder.this,
-                                                  buf.thisClass().asSymbol(),
-                                                  methodInfo.methodName().stringValue(),
-                                                  MethodTypeDesc.ofDescriptor(methodInfo.methodType().stringValue()),
-                                                  (methodInfo.methodFlags() & Classfile.ACC_STATIC) != 0,
-                                                  bytecodesBufWriter.asByteBuffer().slice(0, codeLength),
-                                                  constantPool,
-                                                  handlers);
-                    maxStack = gen.maxStack();
-                    maxLocals = gen.maxLocals();
-                    stackMapAttr = gen.stackMapTableAttribute();
+                else if (buf.getMajorVersion() >= Classfile.JAVA_6_VERSION) {
+                    try {
+                        //new instance of generator immediately calculates maxStack, maxLocals, all frames,
+                        // patches dead bytecode blocks and removes them from exception table
+                        StackMapGenerator gen = StackMapGenerator.of(DirectCodeBuilder.this, buf);
+                        maxStack = gen.maxStack();
+                        maxLocals = gen.maxLocals();
+                        stackMapAttr = gen.stackMapTableAttribute();
+                    } catch (Exception e) {
+                        if (buf.getMajorVersion() == Classfile.JAVA_6_VERSION) {
+                            //failover following JVMS-4.10
+                            StackCounter cntr = StackCounter.of(DirectCodeBuilder.this, buf);
+                            maxStack = cntr.maxStack();
+                            maxLocals = cntr.maxLocals();
+                            stackMapAttr = null;
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
+                else {
+                    StackCounter cntr = StackCounter.of(DirectCodeBuilder.this, buf);
+                    maxStack = cntr.maxStack();
+                    maxLocals = cntr.maxLocals();
+                    stackMapAttr = null;
+                }
+
                 attributes.withAttribute(stackMapAttr);
 
                 buf.writeU2(maxStack);
@@ -399,7 +415,7 @@ public final class DirectCodeBuilder
         boolean codeAttributesMatch;
         if (original instanceof CodeImpl cai && canWriteDirect(cai.constantPool())) {
             codeAttributesMatch = cai.codeLength == curPc()
-                                  && cai.compareCodeBytes(bytecodesBufWriter, 0, codeLength);
+                    && cai.compareCodeBytes(bytecodesBufWriter, 0, codeLength);
             if (codeAttributesMatch) {
                 BufWriter bw = new BufWriterImpl(constantPool);
                 writeExceptionHandlers(bw);
@@ -449,17 +465,7 @@ public final class DirectCodeBuilder
         bytecodesBufWriter.writeU1(opcode.bytecode() & 0xFF);
     }
 
-    public void writeLoad(Opcode opcode, int localVar) {
-        writeBytecode(opcode);
-        switch (opcode.sizeIfFixed()) {
-            case 1 -> { }
-            case 2 -> bytecodesBufWriter.writeU1(localVar);
-            case 4 -> bytecodesBufWriter.writeU2(localVar);
-            default -> throw new IllegalArgumentException("Unexpected instruction size: " + opcode);
-        }
-    }
-
-    public void writeStore(Opcode opcode, int localVar) {
+    public void writeLocalVar(Opcode opcode, int localVar) {
         writeBytecode(opcode);
         switch (opcode.sizeIfFixed()) {
             case 1 -> { }
@@ -471,8 +477,8 @@ public final class DirectCodeBuilder
 
     public void writeIncrement(int slot, int val) {
         Opcode opcode = (slot < 256 && val < 128 && val > -127)
-                        ? IINC
-                        : IINC_W;
+                ? IINC
+                : IINC_W;
         writeBytecode(opcode);
         if (opcode.isWide()) {
             bytecodesBufWriter.writeU2(slot);
@@ -488,11 +494,14 @@ public final class DirectCodeBuilder
         int targetBci = labelToBci(target);
         //transform short-opcode forward jumps if enforced, and backward jumps if enabled and overflowing
         if (op.sizeIfFixed() == 3 && (targetBci == -1
-                                      ? transformFwdJumps
-                                      : (transformBackJumps
-                                         && targetBci - instructionPc < Short.MIN_VALUE))) {
+                ? transformFwdJumps
+                : (transformBackJumps
+                && targetBci - instructionPc < Short.MIN_VALUE))) {
             if (op == GOTO) {
                 writeBytecode(GOTO_W);
+                writeLabelOffset(4, instructionPc, target);
+            } else if (op == JSR) {
+                writeBytecode(JSR_W);
                 writeLabelOffset(4, instructionPc, target);
             } else {
                 writeBytecode(BytecodeHelpers.reverseBranchOpcode(op));
