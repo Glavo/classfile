@@ -42,6 +42,7 @@ import org.glavo.classfile.instruction.ArrayStoreInstruction;
 import org.glavo.classfile.instruction.BranchInstruction;
 import org.glavo.classfile.instruction.ConstantInstruction;
 import org.glavo.classfile.instruction.ConvertInstruction;
+import org.glavo.classfile.instruction.DiscontinuedInstruction;
 import org.glavo.classfile.instruction.FieldInstruction;
 import org.glavo.classfile.instruction.IncrementInstruction;
 import org.glavo.classfile.instruction.InvokeDynamicInstruction;
@@ -89,7 +90,8 @@ public abstract sealed class AbstractInstruction
             FMT_TableSwitch = "TableSwitch[OP=%s]",
             FMT_Throw = "Throw[OP=%s]",
             FMT_TypeCheck = "TypeCheck[OP=%s, type=%s]",
-            FMT_Unbound = "%s[op=%s]";
+            FMT_Unbound = "%s[op=%s]",
+            FMT_Discontinued = "Discontinued[OP=%s]";
 
     final Opcode op;
     final int size;
@@ -228,8 +230,8 @@ public abstract sealed class AbstractInstruction
 
         public int branchByteOffset() {
             return size == 3
-                   ? (int) (short) code.classReader.readU2(pos + 1)
-                   : code.classReader.readInt(pos + 1);
+                    ? (int) (short) code.classReader.readU2(pos + 1)
+                    : code.classReader.readInt(pos + 1);
         }
 
         @Override
@@ -681,8 +683,8 @@ public abstract sealed class AbstractInstruction
         public LoadableConstantEntry constantEntry() {
             return (LoadableConstantEntry)
                     code.classReader.entryByIndex(op == Opcode.LDC
-                                                  ? code.classReader.readU1(pos + 1)
-                                                  : code.classReader.readU2(pos + 1));
+                            ? code.classReader.readU1(pos + 1)
+                            : code.classReader.readU2(pos + 1));
         }
 
         @Override
@@ -701,6 +703,59 @@ public abstract sealed class AbstractInstruction
         @Override
         public String toString() {
             return String.format(FMT_LoadConstant, this.opcode(), constantValue());
+        }
+
+    }
+
+    public static final class BoundJsrInstruction
+            extends BoundInstruction implements DiscontinuedInstruction.JsrInstruction {
+
+        public BoundJsrInstruction(Opcode op, CodeImpl code, int pos) {
+            super(op, op.sizeIfFixed(), code, pos);
+        }
+
+        @Override
+        public Label target() {
+            return offsetToLabel(branchByteOffset());
+        }
+
+        public int branchByteOffset() {
+            return size == 3
+                    ? code.classReader.readS2(pos + 1)
+                    : code.classReader.readInt(pos + 1);
+        }
+
+        @Override
+        public void writeTo(DirectCodeBuilder writer) {
+            writer.writeBranch(opcode(), target());
+        }
+
+        @Override
+        public String toString() {
+            return String.format(FMT_Discontinued, this.opcode());
+        }
+
+    }
+
+    public static final class BoundRetInstruction
+            extends BoundInstruction implements DiscontinuedInstruction.RetInstruction {
+
+        public BoundRetInstruction(Opcode op, CodeImpl code, int pos) {
+            super(op, op.sizeIfFixed(), code, pos);
+        }
+
+        @Override
+        public String toString() {
+            return String.format(FMT_Discontinued, this.opcode());
+        }
+
+        @Override
+        public int slot() {
+            return switch (size) {
+                case 2 -> code.classReader.readU1(pos + 1);
+                case 4 -> code.classReader.readU2(pos + 2);
+                default -> throw new IllegalArgumentException("Unexpected op size: " + op.sizeIfFixed() + " -- " + op);
+            };
         }
 
     }
@@ -744,7 +799,7 @@ public abstract sealed class AbstractInstruction
 
         @Override
         public void writeTo(DirectCodeBuilder writer) {
-            writer.writeLoad(op, slot);
+            writer.writeLocalVar(op, slot);
         }
 
         @Override
@@ -775,7 +830,7 @@ public abstract sealed class AbstractInstruction
 
         @Override
         public void writeTo(DirectCodeBuilder writer) {
-            writer.writeStore(op, slot);
+            writer.writeLocalVar(op, slot);
         }
 
         @Override
@@ -792,8 +847,8 @@ public abstract sealed class AbstractInstruction
 
         public UnboundIncrementInstruction(int slot, int constant) {
             super(slot <= 255 && constant < 128 && constant > -127
-                  ? Opcode.IINC
-                  : Opcode.IINC_W);
+                    ? Opcode.IINC
+                    : Opcode.IINC_W);
             this.slot = slot;
             this.constant = constant;
         }
@@ -1004,8 +1059,8 @@ public abstract sealed class AbstractInstruction
         @Override
         public int count() {
             return op == Opcode.INVOKEINTERFACE
-                   ? Util.parameterSlots(methodEntry.nameAndType().type().stringValue()) + 1
-                   : 0;
+                    ? Util.parameterSlots(methodEntry.nameAndType().type().stringValue()) + 1
+                    : 0;
         }
 
         @Override
@@ -1338,5 +1393,55 @@ public abstract sealed class AbstractInstruction
             super(Opcode.NOP);
         }
 
+    }
+
+    public static final class UnboundJsrInstruction
+            extends UnboundInstruction implements DiscontinuedInstruction.JsrInstruction {
+        final Label target;
+
+        public UnboundJsrInstruction(Opcode op, Label target) {
+            super(op);
+            this.target = target;
+        }
+
+        @Override
+        public Label target() {
+            return target;
+        }
+
+        @Override
+        public void writeTo(DirectCodeBuilder writer) {
+            writer.writeBranch(op, target);
+        }
+
+        @Override
+        public String toString() {
+            return String.format(FMT_Discontinued, this.opcode());
+        }
+    }
+
+    public static final class UnboundRetInstruction
+            extends UnboundInstruction implements DiscontinuedInstruction.RetInstruction {
+        final int slot;
+
+        public UnboundRetInstruction(Opcode op, int slot) {
+            super(op);
+            this.slot = slot;
+        }
+
+        @Override
+        public int slot() {
+            return slot;
+        }
+
+        @Override
+        public void writeTo(DirectCodeBuilder writer) {
+            writer.writeLocalVar(op, slot);
+        }
+
+        @Override
+        public String toString() {
+            return String.format(FMT_Discontinued, this.opcode());
+        }
     }
 }

@@ -31,6 +31,7 @@ import org.glavo.classfile.instruction.ArrayStoreInstruction;
 import org.glavo.classfile.instruction.BranchInstruction;
 import org.glavo.classfile.instruction.ConstantInstruction;
 import org.glavo.classfile.instruction.ConvertInstruction;
+import org.glavo.classfile.instruction.DiscontinuedInstruction;
 import org.glavo.classfile.instruction.FieldInstruction;
 import org.glavo.classfile.instruction.IncrementInstruction;
 import org.glavo.classfile.instruction.InvokeDynamicInstruction;
@@ -56,9 +57,9 @@ import org.glavo.classfile.instruction.TypeCheckInstruction;
  */
 public sealed interface Instruction extends CodeElement
         permits ArrayLoadInstruction, ArrayStoreInstruction, BranchInstruction,
-        ConstantInstruction, ConvertInstruction, FieldInstruction,
-                InvokeDynamicInstruction, InvokeInstruction, LoadInstruction,
-                StoreInstruction, IncrementInstruction,
+                ConstantInstruction, ConvertInstruction, DiscontinuedInstruction,
+                FieldInstruction, InvokeDynamicInstruction, InvokeInstruction,
+                LoadInstruction, StoreInstruction, IncrementInstruction,
                 LookupSwitchInstruction, MonitorInstruction, NewMultiArrayInstruction,
                 NewObjectInstruction, NewPrimitiveArrayInstruction, NewReferenceArrayInstruction,
                 NopInstruction, OperatorInstruction, ReturnInstruction,
