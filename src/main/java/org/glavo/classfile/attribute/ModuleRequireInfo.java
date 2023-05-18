@@ -32,7 +32,7 @@ import org.glavo.classfile.Classfile;
 import org.glavo.classfile.constantpool.ModuleEntry;
 import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.AccessFlag;
-import org.glavo.classfile.java.lang.constant.ModuleDesc;
+import org.glavo.classfile.constant.ModuleDesc;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 import org.glavo.classfile.impl.Util;
@@ -101,7 +101,7 @@ public sealed interface ModuleRequireInfo
      * @param requiresVersion the required version
      */
     static ModuleRequireInfo of(ModuleDesc requires, int requiresFlags, String requiresVersion) {
-        return new UnboundAttribute.UnboundModuleRequiresInfo(TemporaryConstantPool.INSTANCE.moduleEntry(TemporaryConstantPool.INSTANCE.utf8Entry(requires.moduleName())), requiresFlags, Optional.ofNullable(requiresVersion).map(s -> TemporaryConstantPool.INSTANCE.utf8Entry(s)));
+        return new UnboundAttribute.UnboundModuleRequiresInfo(TemporaryConstantPool.INSTANCE.moduleEntry(TemporaryConstantPool.INSTANCE.utf8Entry(requires.name())), requiresFlags, Optional.ofNullable(requiresVersion).map(s -> TemporaryConstantPool.INSTANCE.utf8Entry(s)));
     }
 
     /**

@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.glavo.classfile.constantpool.PackageEntry;
-import org.glavo.classfile.java.lang.constant.PackageDesc;
+import org.glavo.classfile.constant.PackageDesc;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 
@@ -76,7 +76,7 @@ public sealed interface ModulePackagesAttribute
     static ModulePackagesAttribute ofNames(List<PackageDesc> packages) {
         var p = new PackageEntry[packages.size()];
         for (int i = 0; i < packages.size(); i++) {
-            p[i] = TemporaryConstantPool.INSTANCE.packageEntry(TemporaryConstantPool.INSTANCE.utf8Entry(packages.get(i).packageInternalName()));
+            p[i] = TemporaryConstantPool.INSTANCE.packageEntry(TemporaryConstantPool.INSTANCE.utf8Entry(packages.get(i).internalName()));
         }
         return of(p);
     }

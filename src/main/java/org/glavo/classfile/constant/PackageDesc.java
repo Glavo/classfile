@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,80 +22,88 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.glavo.classfile.java.lang.constant;
+package org.glavo.classfile.constant;
 
-import static java.util.Objects.requireNonNull;
 import org.glavo.classfile.impl.PackageDescImpl;
 
+import static java.util.Objects.requireNonNull;
+
 /**
- * A nominal descriptor for a {@link Package} constant.
+ * A nominal descriptor for a {@code Package} constant.
  *
- * <p>To create a {@linkplain PackageDesc} for a package, use {@link #of} or
- * {@link #ofInternalName(String)}.
+ * <p>
+ * To create a {@link PackageDesc} for a package,
+ * use the {@link #of(String)} or {@link #ofInternalName(String)} method.
  *
+ * @jvms 4.4.12 The CONSTANT_Package_info Structure
+ * @since 21
  */
 public sealed interface PackageDesc
         permits PackageDescImpl {
 
     /**
-     * Returns a {@linkplain PackageDesc} for a package,
+     * Returns a {@link PackageDesc} for a package,
      * given the name of the package, such as {@code "java.lang"}.
-     * <p>
-     * {@jls 13.1}
      *
-     * @param name the fully qualified (dot-separated) binary package name
-     * @return a {@linkplain PackageDesc} describing the desired package
+     * @param name the fully qualified (dot-separated) package name
+     * @return a {@link PackageDesc} describing the desired package
      * @throws NullPointerException if the argument is {@code null}
      * @throws IllegalArgumentException if the name string is not in the
      * correct format
+     * @jls 6.5.3 Module Names and Package Names
+     * @see PackageDesc#ofInternalName(String)
      */
     static PackageDesc of(String name) {
-        PackageDescImpl.validateBinaryPackageName(requireNonNull(name));
-        return new PackageDescImpl(PackageDescImpl.binaryToInternal(name));
+        ConstantUtils.validateBinaryPackageName(requireNonNull(name));
+        return new PackageDescImpl(ConstantUtils.binaryToInternal(name));
     }
 
     /**
-     * Returns a {@linkplain PackageDesc} for a package,
+     * Returns a {@link PackageDesc} for a package,
      * given the name of the package in internal form,
      * such as {@code "java/lang"}.
-     * <p>
-     * {@jvms 4.2.1} In this internal form, the ASCII periods (.) that normally separate the identifiers
-     * which make up the binary name are replaced by ASCII forward slashes (/).
-     * @param name the fully qualified class name, in internal (slash-separated) form
-     * @return a {@linkplain PackageDesc} describing the desired package
+     *
+     * @param name the fully qualified package name, in internal
+     * (slash-separated) form
+     * @return a {@link PackageDesc} describing the desired package
      * @throws NullPointerException if the argument is {@code null}
      * @throws IllegalArgumentException if the name string is not in the
      * correct format
+     * @jvms 4.2.1 Binary Class and Interface Names
+     * @jvms 4.2.3 Module and Package Names
+     * @see PackageDesc#of(String)
      */
     static PackageDesc ofInternalName(String name) {
-        PackageDescImpl.validateInternalPackageName(requireNonNull(name));
+        ConstantUtils.validateInternalPackageName(requireNonNull(name));
         return new PackageDescImpl(name);
     }
 
     /**
-     * Returns the fully qualified (slash-separated) internal package name
-     * of this {@linkplain PackageDesc}.
+     * Returns the fully qualified (slash-separated) package name in internal form
+     * of this {@link PackageDesc}.
      *
-     * @return the package name, or the empty string for the
-     * default package
+     * @return the package name in internal form, or the empty string for the
+     * unnamed package
+     * @see PackageDesc#name()
      */
-    String packageInternalName();
+    String internalName();
 
     /**
-     * Returns the fully qualified (dot-separated) binary package name
-     * of this {@linkplain PackageDesc}.
+     * Returns the fully qualified (dot-separated) package name
+     * of this {@link PackageDesc}.
      *
      * @return the package name, or the empty string for the
-     * default package
+     * unnamed package
+     * @see PackageDesc#internalName()
      */
-    default String packageName() {
-        return PackageDescImpl.internalToBinary(packageInternalName());
+    default String name() {
+        return ConstantUtils.internalToBinary(internalName());
     }
 
     /**
-     * Compare the specified object with this descriptor for equality.  Returns
-     * {@code true} if and only if the specified object is also a
-     * {@linkplain PackageDesc} and both describe the same package.
+     * Compare the specified object with this descriptor for equality.
+     * Returns {@code true} if and only if the specified object is
+     * also a {@link PackageDesc} and both describe the same package.
      *
      * @param o the other object
      * @return whether this descriptor is equal to the other object

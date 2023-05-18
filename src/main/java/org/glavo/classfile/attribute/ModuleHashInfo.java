@@ -25,7 +25,7 @@
 package org.glavo.classfile.attribute;
 
 import org.glavo.classfile.constantpool.ModuleEntry;
-import org.glavo.classfile.java.lang.constant.ModuleDesc;
+import org.glavo.classfile.constant.ModuleDesc;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 
@@ -60,6 +60,6 @@ public sealed interface ModuleHashInfo
      * @param hash the hash value
      */
     static ModuleHashInfo of(ModuleDesc moduleDesc, byte[] hash) {
-        return new UnboundAttribute.UnboundModuleHashInfo(TemporaryConstantPool.INSTANCE.moduleEntry(TemporaryConstantPool.INSTANCE.utf8Entry(moduleDesc.moduleName())), hash);
+        return new UnboundAttribute.UnboundModuleHashInfo(TemporaryConstantPool.INSTANCE.moduleEntry(TemporaryConstantPool.INSTANCE.utf8Entry(moduleDesc.name())), hash);
     }
 }

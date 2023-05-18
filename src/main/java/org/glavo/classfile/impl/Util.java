@@ -35,7 +35,7 @@ import java.util.function.Function;
 import org.glavo.classfile.Opcode;
 import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.constantpool.ModuleEntry;
-import org.glavo.classfile.java.lang.constant.ModuleDesc;
+import org.glavo.classfile.constant.ModuleDesc;
 import org.glavo.classfile.AccessFlag;
 import org.glavo.classfile.jdk.ClassDescUtils;
 import org.glavo.classfile.jdk.CollectionUtils;
@@ -195,7 +195,7 @@ public class Util {
     public static List<ModuleEntry> moduleEntryList(List<? extends ModuleDesc> list) {
         var result = new Object[list.size()]; // null check
         for (int i = 0; i < result.length; i++) {
-            result[i] = TemporaryConstantPool.INSTANCE.moduleEntry(TemporaryConstantPool.INSTANCE.utf8Entry(list.get(i).moduleName()));
+            result[i] = TemporaryConstantPool.INSTANCE.moduleEntry(TemporaryConstantPool.INSTANCE.utf8Entry(list.get(i).name()));
         }
         return CollectionUtils.listFromTrustedArrayNullsAllowed(result);
     }

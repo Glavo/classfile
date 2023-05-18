@@ -25,7 +25,7 @@
 package org.glavo.classfile.constantpool;
 
 import org.glavo.classfile.impl.AbstractPoolEntry;
-import org.glavo.classfile.java.lang.constant.ModuleDesc;
+import org.glavo.classfile.constant.ModuleDesc;
 
 /**
  * Models a {@code CONSTANT_Module_info} constant in the constant pool of a

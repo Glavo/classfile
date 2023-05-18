@@ -51,8 +51,8 @@ import org.glavo.classfile.constantpool.PackageEntry;
 import org.glavo.classfile.constantpool.PoolEntry;
 import org.glavo.classfile.constantpool.StringEntry;
 import org.glavo.classfile.constantpool.Utf8Entry;
-import org.glavo.classfile.java.lang.constant.ModuleDesc;
-import org.glavo.classfile.java.lang.constant.PackageDesc;
+import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.constant.PackageDesc;
 
 public abstract sealed class AbstractPoolEntry {
     /*

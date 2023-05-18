@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,27 +24,16 @@
  */
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.java.lang.constant.ModuleDesc;
+import org.glavo.classfile.constant.ModuleDesc;
 
-public record ModuleDescImpl(String moduleName) implements ModuleDesc {
+/*
+ * Implementation of {@code ModuleDesc}
+ * @param name must have been validated
+ */
+public record ModuleDescImpl(String name) implements ModuleDesc {
 
-    /**
-     * Validates the correctness of a module name. In particular checks for the presence of
-     * invalid characters in the name.
-     *
-     * {@jvms 4.2.3} Module and Package Names
-     *
-     * @param name the module name
-     * @return the module name passed if valid
-     * @throws IllegalArgumentException if the module name is invalid
-     */
-    public static String validateModuleName(String name) {
-        for (int i=name.length() - 1; i >= 0; i--) {
-            char ch = name.charAt(i);
-            if ((ch >= '\u0000' && ch <= '\u001F')
-            || ((ch == '\\' || ch == ':' || ch =='@') && (i == 0 || name.charAt(--i) != '\\')))
-                throw new IllegalArgumentException("Invalid module name: " + name);
-        }
-        return name;
+    @Override
+    public String toString() {
+        return String.format("ModuleDesc[%s]", name());
     }
 }

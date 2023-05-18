@@ -32,8 +32,8 @@ import org.glavo.classfile.*;
 import org.glavo.classfile.attribute.*;
 import org.glavo.classfile.constantpool.*;
 import org.glavo.classfile.instruction.*;
-import org.glavo.classfile.java.lang.constant.ModuleDesc;
-import org.glavo.classfile.java.lang.constant.PackageDesc;
+import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.constant.PackageDesc;
 import org.glavo.classfile.components.CodeStackTracker;
 
 class RebuildingTransformation {

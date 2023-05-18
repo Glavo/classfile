@@ -40,8 +40,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import org.glavo.classfile.AccessFlag;
-import org.glavo.classfile.java.lang.constant.ModuleDesc;
-import org.glavo.classfile.java.lang.constant.PackageDesc;
+import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.constant.PackageDesc;
 import org.glavo.classfile.impl.ModuleAttributeBuilderImpl;
 import org.glavo.classfile.impl.Util;
 

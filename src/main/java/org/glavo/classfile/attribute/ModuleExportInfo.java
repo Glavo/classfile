@@ -30,8 +30,8 @@ import java.util.Set;
 
 import org.glavo.classfile.constantpool.ModuleEntry;
 import org.glavo.classfile.constantpool.PackageEntry;
-import org.glavo.classfile.java.lang.constant.ModuleDesc;
-import org.glavo.classfile.java.lang.constant.PackageDesc;
+import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.constant.PackageDesc;
 import org.glavo.classfile.AccessFlag;
 
 import org.glavo.classfile.Classfile;
@@ -133,7 +133,7 @@ public sealed interface ModuleExportInfo
      */
     static ModuleExportInfo of(PackageDesc exports, int exportFlags,
                                List<ModuleDesc> exportsTo) {
-        return of(TemporaryConstantPool.INSTANCE.packageEntry(TemporaryConstantPool.INSTANCE.utf8Entry(exports.packageInternalName())),
+        return of(TemporaryConstantPool.INSTANCE.packageEntry(TemporaryConstantPool.INSTANCE.utf8Entry(exports.internalName())),
                 exportFlags,
                 Util.moduleEntryList(exportsTo));
     }

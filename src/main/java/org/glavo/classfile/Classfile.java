@@ -51,7 +51,7 @@ import org.glavo.classfile.attribute.CharacterRangeInfo;
 import org.glavo.classfile.attribute.LocalVariableInfo;
 import org.glavo.classfile.attribute.LocalVariableTypeInfo;
 import org.glavo.classfile.instruction.ExceptionCatch;
-import org.glavo.classfile.java.lang.constant.PackageDesc;
+import org.glavo.classfile.constant.PackageDesc;
 
 /**
  * Main entry points for parsing, transforming, and generating classfiles.
