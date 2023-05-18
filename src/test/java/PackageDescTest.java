@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,7 +28,7 @@
  * @summary Testing PackageDesc.
  * @run junit PackageDescTest
  */
-import org.glavo.classfile.java.lang.constant.PackageDesc;
+import org.glavo.classfile.constant.PackageDesc;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -49,15 +49,21 @@ class PackageDescTest {
     }
 
     @Test
+    void testNullInternalPackageNames() {
+        assertThrows(NullPointerException.class, () -> PackageDesc.ofInternalName(null));
+    }
+
+    @Test
     void testValidPackageNames() {
+        assertEquals(PackageDesc.of(""), PackageDesc.ofInternalName(""));
         assertEquals(PackageDesc.of("a"), PackageDesc.ofInternalName("a"));
         assertEquals(PackageDesc.of("a.b"), PackageDesc.ofInternalName("a/b"));
         assertEquals(PackageDesc.of("a.b.c"), PackageDesc.ofInternalName("a/b/c"));
-        assertEquals(PackageDesc.of("a").packageName(), PackageDesc.ofInternalName("a").packageName());
-        assertEquals(PackageDesc.of("a.b").packageName(), PackageDesc.ofInternalName("a/b").packageName());
-        assertEquals(PackageDesc.of("a.b.c").packageName(), PackageDesc.ofInternalName("a/b/c").packageName());
-        assertEquals(PackageDesc.of("a").packageInternalName(), PackageDesc.ofInternalName("a").packageInternalName());
-        assertEquals(PackageDesc.of("a.b").packageInternalName(), PackageDesc.ofInternalName("a/b").packageInternalName());
-        assertEquals(PackageDesc.of("a.b.c").packageInternalName(), PackageDesc.ofInternalName("a/b/c").packageInternalName());
+        assertEquals(PackageDesc.of("a").name(), PackageDesc.ofInternalName("a").name());
+        assertEquals(PackageDesc.of("a.b").name(), PackageDesc.ofInternalName("a/b").name());
+        assertEquals(PackageDesc.of("a.b.c").name(), PackageDesc.ofInternalName("a/b/c").name());
+        assertEquals(PackageDesc.of("a").internalName(), PackageDesc.ofInternalName("a").internalName());
+        assertEquals(PackageDesc.of("a.b").internalName(), PackageDesc.ofInternalName("a/b").internalName());
+        assertEquals(PackageDesc.of("a.b.c").internalName(), PackageDesc.ofInternalName("a/b/c").internalName());
     }
 }

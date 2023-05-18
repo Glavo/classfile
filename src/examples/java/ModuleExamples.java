@@ -46,8 +46,8 @@ import org.glavo.classfile.attribute.ModuleMainClassAttribute;
 import org.glavo.classfile.attribute.ModulePackagesAttribute;
 import org.glavo.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
 import org.glavo.classfile.Attributes;
-import org.glavo.classfile.java.lang.constant.PackageDesc;
-import org.glavo.classfile.java.lang.constant.ModuleDesc;
+import org.glavo.classfile.constant.PackageDesc;
+import org.glavo.classfile.constant.ModuleDesc;
 
 public class ModuleExamples {
     private static final FileSystem JRT = FileSystems.getFileSystem(URI.create("jrt:/"));

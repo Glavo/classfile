@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,49 +24,16 @@
  */
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.java.lang.constant.PackageDesc;
+import org.glavo.classfile.constant.PackageDesc;
 
-public record PackageDescImpl(String packageInternalName) implements PackageDesc {
+/*
+ * Implementation of {@code PackageDesc}
+ * @param internalName must have been validated
+ */
+public record PackageDescImpl(String internalName) implements PackageDesc {
 
-    /**
-     * Validates the correctness of a binary package name. In particular checks for the presence of
-     * invalid characters in the name.
-     *
-     * @param name the package name
-     * @return the package name passed if valid
-     * @throws IllegalArgumentException if the package name is invalid
-     */
-    public static String validateBinaryPackageName(String name) {
-        for (int i=0; i<name.length(); i++) {
-            char ch = name.charAt(i);
-            if (ch == ';' || ch == '[' || ch == '/')
-                throw new IllegalArgumentException("Invalid package name: " + name);
-        }
-        return name;
-    }
-
-    /**
-     * Validates the correctness of an internal package name.
-     * In particular checks for the presence of invalid characters in the name.
-     *
-     * @param name the package name
-     * @return the package name passed if valid
-     * @throws IllegalArgumentException if the package name is invalid
-     */
-    public static String validateInternalPackageName(String name) {
-        for (int i=0; i<name.length(); i++) {
-            char ch = name.charAt(i);
-            if (ch == ';' || ch == '[' || ch == '.')
-                throw new IllegalArgumentException("Invalid package name: " + name);
-        }
-        return name;
-    }
-
-    public static String internalToBinary(String name) {
-        return name.replace('/', '.');
-    }
-
-    public static String binaryToInternal(String name) {
-        return name.replace('.', '/');
+    @Override
+    public String toString() {
+        return String.format("PackageDesc[%s]", name());
     }
 }

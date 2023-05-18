@@ -40,8 +40,8 @@ import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.Classfile;
 import org.glavo.classfile.impl.ClassReaderImpl;
 import org.glavo.classfile.impl.Options;
-import org.glavo.classfile.java.lang.constant.ModuleDesc;
-import org.glavo.classfile.java.lang.constant.PackageDesc;
+import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.constant.PackageDesc;
 import org.glavo.classfile.WritableElement;
 import org.glavo.classfile.impl.SplitConstantPool;
 import org.glavo.classfile.impl.TemporaryConstantPool;
@@ -185,7 +185,7 @@ public sealed interface ConstantPoolBuilder
      * @param packageDesc the symbolic descriptor for the class
      */
     default PackageEntry packageEntry(PackageDesc packageDesc) {
-        return packageEntry(utf8Entry(packageDesc.packageInternalName()));
+        return packageEntry(utf8Entry(packageDesc.internalName()));
     }
 
     /**
@@ -209,7 +209,7 @@ public sealed interface ConstantPoolBuilder
      * @param moduleDesc the symbolic descriptor for the class
      */
     default ModuleEntry moduleEntry(ModuleDesc moduleDesc) {
-        return moduleEntry(utf8Entry(moduleDesc.moduleName()));
+        return moduleEntry(utf8Entry(moduleDesc.name()));
     }
 
     /**

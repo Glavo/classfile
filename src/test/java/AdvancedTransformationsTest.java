@@ -61,7 +61,7 @@ import org.glavo.classfile.instruction.ReturnInstruction;
 import org.glavo.classfile.instruction.StoreInstruction;
 import org.glavo.classfile.AccessFlag;
 import org.glavo.classfile.components.CodeRelabeler;
-import org.glavo.classfile.java.lang.constant.ModuleDesc;
+import org.glavo.classfile.constant.ModuleDesc;
 import org.glavo.classfile.components.ClassPrinter;
 import static java.lang.annotation.ElementType.*;
 import java.lang.annotation.Retention;
