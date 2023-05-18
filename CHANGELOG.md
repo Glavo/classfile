@@ -7,6 +7,7 @@ Sync upstream changes:
 * [JDK-8304837](https://github.com/openjdk/jdk/commit/a2d3fc83b0dd7eea38e1dd5898a97d6d7ff60194)
 * [JDK-8304937](https://github.com/openjdk/jdk/commit/dc4096ce136c867e0806070a2d7c8b4efef5294c)
 * [JDK-8304031](https://github.com/openjdk/jdk/commit/cd5d0ff5b29065222ffafbc4fb04b90f6f8909e2)
+* [JDK-8305990](https://github.com/openjdk/jdk/commit/a05560d99352bd5952f3feef37b56dceb74ede3b)
 
 ## Version 0.4.0 (2023-03-23)
 
