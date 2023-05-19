@@ -38,10 +38,12 @@ A tutorial is in the works, now you can look at the [examples](src/examples/java
 This library is extracted from [OpenJDK 21](https://github.com/openjdk/jdk/commit/4655b790d0b39b4ddabde78d7b3eed196b1152ed)
 and renamed package `jdk.internal.classfile` to `org.glavo.classfile`.
 
-In order to be compatible with Java 17, this library also copies some new APIs in Java 20:
+In order to be compatible with Java 17, this library also copies some new APIs in Java 20/21:
 
 * `java.lang.reflect.AccessFlag` -> `org.glavo.classfile.AccessFlag`
 * `java.lang.reflect.ClassFileFormatVersion` -> `org.glavo.classfile.ClassFileFormatVersion`
+* `java.lang.constant.ModuleDesc` -> `org.glavo.classfile.constant.ModuleDesc`
+* `java.lang.constant.PackageDesc` -> `org.glavo.classfile.constant.PackageDesc`
 
 Because the implementation in JDK is still in the `jdk.internal.classfile`
 package and does not belong to the public API, the API of this library is still unstable
