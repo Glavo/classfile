@@ -89,7 +89,7 @@ public sealed interface InvokeInstruction extends Instruction
      * {@return a symbolic descriptor for the method type}
      */
     default MethodTypeDesc typeSymbol() {
-        return MethodTypeDesc.ofDescriptor(type().stringValue());
+        return Util.methodTypeSymbol(method().nameAndType());
     }
 
 

@@ -24,6 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
+import java.lang.constant.MethodTypeDesc;
 import org.glavo.classfile.constantpool.Utf8Entry;
 
 import static org.glavo.classfile.Classfile.ACC_STATIC;
@@ -31,6 +32,7 @@ import static org.glavo.classfile.Classfile.ACC_STATIC;
 public interface MethodInfo {
     Utf8Entry methodName();
     Utf8Entry methodType();
+    MethodTypeDesc methodTypeSymbol();
     int methodFlags();
 
     default int receiverSlot() {

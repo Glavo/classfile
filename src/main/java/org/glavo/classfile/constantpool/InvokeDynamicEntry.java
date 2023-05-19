@@ -26,9 +26,9 @@ package org.glavo.classfile.constantpool;
 
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.DynamicCallSiteDesc;
-import java.lang.constant.MethodTypeDesc;
 
 import org.glavo.classfile.impl.AbstractPoolEntry;
+import org.glavo.classfile.impl.Util;
 
 /**
  * Models a constant pool entry for a dynamic call site.
@@ -42,10 +42,10 @@ public sealed interface InvokeDynamicEntry
      */
     default DynamicCallSiteDesc asSymbol() {
         return DynamicCallSiteDesc.of(bootstrap().bootstrapMethod().asSymbol(),
-                                      name().stringValue(),
-                                      MethodTypeDesc.ofDescriptor(type().stringValue()),
-                                      bootstrap().arguments().stream()
-                                                 .map(LoadableConstantEntry::constantValue)
-                                                 .toArray(ConstantDesc[]::new));
+                name().stringValue(),
+                Util.methodTypeSymbol(nameAndType()),
+                bootstrap().arguments().stream()
+                        .map(LoadableConstantEntry::constantValue)
+                        .toArray(ConstantDesc[]::new));
     }
 }

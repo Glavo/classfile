@@ -25,6 +25,7 @@
 package org.glavo.classfile.impl;
 
 import java.lang.constant.*;
+import java.lang.invoke.TypeDescriptor;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -154,7 +155,7 @@ public abstract sealed class AbstractPoolEntry {
         private String stringValue;
 
         Utf8EntryImpl(ConstantPool cpm, int index,
-                          byte[] rawBytes, int offset, int rawLen) {
+                      byte[] rawBytes, int offset, int rawLen) {
             super(cpm, Classfile.TAG_UTF8, index, 0);
             this.rawBytes = rawBytes;
             this.offset = offset;
@@ -163,6 +164,10 @@ public abstract sealed class AbstractPoolEntry {
         }
 
         Utf8EntryImpl(ConstantPool cpm, int index, String s) {
+            this(cpm, index, s, hashString(s.hashCode()));
+        }
+
+        Utf8EntryImpl(ConstantPool cpm, int index, String s, int hash) {
             super(cpm, Classfile.TAG_UTF8, index, 0);
             this.rawBytes = null;
             this.offset = 0;
@@ -170,7 +175,7 @@ public abstract sealed class AbstractPoolEntry {
             this.state = State.STRING;
             this.stringValue = s;
             this.charLen = s.length();
-            this.hash = hashString(s.hashCode());
+            this.hash = hash;
         }
 
         Utf8EntryImpl(ConstantPool cpm, int index, Utf8EntryImpl u) {
@@ -308,8 +313,8 @@ public abstract sealed class AbstractPoolEntry {
             if (cp.canWriteDirect(constantPool))
                 return this;
             return (state == State.STRING && rawBytes == null)
-                   ? (Utf8EntryImpl) cp.utf8Entry(stringValue)
-                   : ((SplitConstantPool) cp).maybeCloneUtf8Entry(this);
+                    ? (Utf8EntryImpl) cp.utf8Entry(stringValue)
+                    : ((SplitConstantPool) cp).maybeCloneUtf8Entry(this);
         }
 
         @Override
@@ -325,8 +330,8 @@ public abstract sealed class AbstractPoolEntry {
                 inflate();
             if (state != State.STRING) {
                 stringValue = (chars != null)
-                              ? new String(chars, 0, charLen)
-                              : new String(rawBytes, offset, charLen, StandardCharsets.UTF_8);
+                        ? new String(chars, 0, charLen)
+                        : new String(rawBytes, offset, charLen, StandardCharsets.UTF_8);
                 state = State.STRING;
             }
             return stringValue;
@@ -356,8 +361,8 @@ public abstract sealed class AbstractPoolEntry {
             if (state == State.RAW)
                 inflate();
             return (chars != null)
-                   ? chars[index]
-                   : (char) rawBytes[index + offset];
+                    ? chars[index]
+                    : (char) rawBytes[index + offset];
         }
 
         @Override
@@ -376,11 +381,11 @@ public abstract sealed class AbstractPoolEntry {
 
         public boolean equalsUtf8(Utf8EntryImpl u) {
             if (hashCode() != u.hashCode()
-                || length() != u.length())
+                    || length() != u.length())
                 return false;
             if (rawBytes != null && u.rawBytes != null)
                 return Arrays.equals(rawBytes, offset, offset + rawLen,
-                                     u.rawBytes, u.offset, u.offset + u.rawLen);
+                        u.rawBytes, u.offset, u.offset + u.rawLen);
             else if ((state == State.STRING && u.state == State.STRING))
                 return stringValue.equals(u.stringValue);
             else
@@ -556,18 +561,30 @@ public abstract sealed class AbstractPoolEntry {
 
     public static final class ClassEntryImpl extends AbstractNamedEntry implements ClassEntry {
 
+        public ClassDesc sym = null;
+
         ClassEntryImpl(ConstantPool cpm, int index, Utf8EntryImpl name) {
             super(cpm, Classfile.TAG_CLASS, index, name);
         }
 
         @Override
         public ClassEntry clone(ConstantPoolBuilder cp) {
-            return cp.canWriteDirect(constantPool) ? this : cp.classEntry(ref1);
+            if (cp.canWriteDirect(constantPool)) {
+                return this;
+            } else {
+                ClassEntryImpl ret = (ClassEntryImpl)cp.classEntry(ref1);
+                ret.sym = sym;
+                return ret;
+            }
         }
 
         @Override
         public ClassDesc asSymbol() {
-            return Util.toClassDesc(asInternalName());
+            var sym = this.sym;
+            if (sym != null) {
+                return sym;
+            }
+            return this.sym = Util.toClassDesc(asInternalName());
         }
 
         @Override
@@ -637,6 +654,8 @@ public abstract sealed class AbstractPoolEntry {
     public static final class NameAndTypeEntryImpl extends AbstractRefsEntry<Utf8EntryImpl, Utf8EntryImpl>
             implements NameAndTypeEntry {
 
+        public TypeDescriptor typeSym = null;
+
         NameAndTypeEntryImpl(ConstantPool cpm, int index, Utf8EntryImpl name, Utf8EntryImpl type) {
             super(cpm, Classfile.TAG_NAMEANDTYPE, index, name, type);
         }
@@ -651,9 +670,31 @@ public abstract sealed class AbstractPoolEntry {
             return ref2;
         }
 
+        public ClassDesc fieldTypeSymbol() {
+            if (typeSym instanceof ClassDesc cd) {
+                return cd;
+            } else {
+                return (ClassDesc)(typeSym = ClassDesc.ofDescriptor(ref2.stringValue()));
+            }
+        }
+
+        public MethodTypeDesc methodTypeSymbol() {
+            if (typeSym instanceof MethodTypeDesc mtd) {
+                return mtd;
+            } else {
+                return (MethodTypeDesc)(typeSym = MethodTypeDesc.ofDescriptor(ref2.stringValue()));
+            }
+        }
+
         @Override
         public NameAndTypeEntry clone(ConstantPoolBuilder cp) {
-            return cp.canWriteDirect(constantPool) ? this : cp.nameAndTypeEntry(ref1, ref2);
+            if (cp.canWriteDirect(constantPool)) {
+                return this;
+            } else {
+                var ret = (NameAndTypeEntryImpl)cp.nameAndTypeEntry(ref1, ref2);
+                ret.typeSym = typeSym;
+                return ret;
+            }
         }
 
         @Override
@@ -671,7 +712,7 @@ public abstract sealed class AbstractPoolEntry {
             implements MemberRefEntry {
 
         AbstractMemberRefEntry(ConstantPool cpm, int tag, int index, ClassEntryImpl owner,
-                       NameAndTypeEntryImpl nameAndType) {
+                               NameAndTypeEntryImpl nameAndType) {
             super(cpm, tag, index, owner, nameAndType);
         }
 
@@ -688,7 +729,7 @@ public abstract sealed class AbstractPoolEntry {
         @Override
         public String toString() {
             return tag() + " " + owner().asInternalName() + "." + nameAndType().name().stringValue()
-                   + "-" + nameAndType().type().stringValue();
+                    + "-" + nameAndType().type().stringValue();
         }
 
         @Override
@@ -696,8 +737,8 @@ public abstract sealed class AbstractPoolEntry {
             if (this == o) return true;
             if (o instanceof AbstractMemberRefEntry m) {
                 return tag == m.tag()
-                && owner().equals(m.owner())
-                && nameAndType().equals(m.nameAndType());
+                        && owner().equals(m.owner())
+                        && nameAndType().equals(m.nameAndType());
             }
             return false;
         }
@@ -706,7 +747,7 @@ public abstract sealed class AbstractPoolEntry {
     public static final class FieldRefEntryImpl extends AbstractMemberRefEntry implements FieldRefEntry {
 
         FieldRefEntryImpl(ConstantPool cpm, int index,
-                              ClassEntryImpl owner, NameAndTypeEntryImpl nameAndType) {
+                          ClassEntryImpl owner, NameAndTypeEntryImpl nameAndType) {
             super(cpm, Classfile.TAG_FIELDREF, index, owner, nameAndType);
         }
 
@@ -719,7 +760,7 @@ public abstract sealed class AbstractPoolEntry {
     public static final class MethodRefEntryImpl extends AbstractMemberRefEntry implements MethodRefEntry {
 
         MethodRefEntryImpl(ConstantPool cpm, int index,
-                               ClassEntryImpl owner, NameAndTypeEntryImpl nameAndType) {
+                           ClassEntryImpl owner, NameAndTypeEntryImpl nameAndType) {
             super(cpm, Classfile.TAG_METHODREF, index, owner, nameAndType);
         }
 
@@ -732,7 +773,7 @@ public abstract sealed class AbstractPoolEntry {
     public static final class InterfaceMethodRefEntryImpl extends AbstractMemberRefEntry implements InterfaceMethodRefEntry {
 
         InterfaceMethodRefEntryImpl(ConstantPool cpm, int index, ClassEntryImpl owner,
-                                        NameAndTypeEntryImpl nameAndType) {
+                                    NameAndTypeEntryImpl nameAndType) {
             super(cpm, Classfile.TAG_INTERFACEMETHODREF, index, owner, nameAndType);
         }
 
@@ -790,7 +831,7 @@ public abstract sealed class AbstractPoolEntry {
         @Override
         public String toString() {
             return tag() + " " + bootstrap() + "." + nameAndType().name().stringValue()
-                   + "-" + nameAndType().type().stringValue();
+                    + "-" + nameAndType().type().stringValue();
         }
 
         @Override
@@ -798,8 +839,8 @@ public abstract sealed class AbstractPoolEntry {
             if (this == o) return true;
             if (o instanceof AbstractDynamicConstantPoolEntry d) {
                 return this.tag() == d.tag()
-                && bootstrap().equals(d.bootstrap())
-                && nameAndType.equals(d.nameAndType());
+                        && bootstrap().equals(d.bootstrap())
+                        && nameAndType.equals(d.nameAndType());
             }
             return false;
         }
@@ -810,14 +851,14 @@ public abstract sealed class AbstractPoolEntry {
             implements InvokeDynamicEntry {
 
         InvokeDynamicEntryImpl(ConstantPool cpm, int index, int hash, BootstrapMethodEntryImpl bootstrapMethod,
-                                   NameAndTypeEntryImpl nameAndType) {
+                               NameAndTypeEntryImpl nameAndType) {
             super(cpm, Classfile.TAG_INVOKEDYNAMIC, index, hash, bootstrapMethod, nameAndType);
         }
 
         InvokeDynamicEntryImpl(ConstantPool cpm, int index, int bsmIndex,
-                                   NameAndTypeEntryImpl nameAndType) {
+                               NameAndTypeEntryImpl nameAndType) {
             super(cpm, Classfile.TAG_INVOKEDYNAMIC, index, hash2(Classfile.TAG_INVOKEDYNAMIC, bsmIndex, nameAndType.index()),
-                  bsmIndex, nameAndType);
+                    bsmIndex, nameAndType);
         }
 
         @Override
@@ -830,14 +871,14 @@ public abstract sealed class AbstractPoolEntry {
             implements ConstantDynamicEntry {
 
         ConstantDynamicEntryImpl(ConstantPool cpm, int index, int hash, BootstrapMethodEntryImpl bootstrapMethod,
-                                     NameAndTypeEntryImpl nameAndType) {
+                                 NameAndTypeEntryImpl nameAndType) {
             super(cpm, Classfile.TAG_CONSTANTDYNAMIC, index, hash, bootstrapMethod, nameAndType);
         }
 
         ConstantDynamicEntryImpl(ConstantPool cpm, int index, int bsmIndex,
-                                     NameAndTypeEntryImpl nameAndType) {
+                                 NameAndTypeEntryImpl nameAndType) {
             super(cpm, Classfile.TAG_CONSTANTDYNAMIC, index, hash2(Classfile.TAG_CONSTANTDYNAMIC, bsmIndex, nameAndType.index()),
-                  bsmIndex, nameAndType);
+                    bsmIndex, nameAndType);
         }
 
         @Override
@@ -900,7 +941,7 @@ public abstract sealed class AbstractPoolEntry {
         @Override
         public String toString() {
             return tag() + " " + kind() + ":" + ((MemberRefEntry) reference()).owner().asInternalName() + "." + ((MemberRefEntry) reference()).nameAndType().name().stringValue()
-                   + "-" + ((MemberRefEntry) reference()).nameAndType().type().stringValue();
+                    + "-" + ((MemberRefEntry) reference()).nameAndType().type().stringValue();
         }
 
         @Override
@@ -908,7 +949,7 @@ public abstract sealed class AbstractPoolEntry {
             if (this == o) return true;
             if (o instanceof MethodHandleEntryImpl m) {
                 return kind() == m.kind()
-                && reference.equals(m.reference());
+                        && reference.equals(m.reference());
             }
             return false;
         }
@@ -917,6 +958,8 @@ public abstract sealed class AbstractPoolEntry {
     public static final class MethodTypeEntryImpl
             extends AbstractRefEntry<Utf8EntryImpl>
             implements MethodTypeEntry {
+
+        public MethodTypeDesc sym = null;
 
         MethodTypeEntryImpl(ConstantPool cpm, int index, Utf8EntryImpl descriptor) {
             super(cpm, Classfile.TAG_METHODTYPE, index, descriptor);
@@ -929,7 +972,22 @@ public abstract sealed class AbstractPoolEntry {
 
         @Override
         public MethodTypeEntry clone(ConstantPoolBuilder cp) {
-            return cp.canWriteDirect(constantPool) ? this : cp.methodTypeEntry(ref1);
+            if (cp.canWriteDirect(constantPool)) {
+                return this;
+            } else {
+                var ret = (MethodTypeEntryImpl)cp.methodTypeEntry(ref1);
+                ret.sym = sym;
+                return ret;
+            }
+        }
+
+        @Override
+        public MethodTypeDesc asSymbol() {
+            var sym = this.sym;
+            if (sym != null) {
+                return sym;
+            }
+            return this.sym = MethodTypeDesc.ofDescriptor(descriptor().stringValue());
         }
 
         @Override
