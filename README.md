@@ -35,8 +35,7 @@ A tutorial is in the works, now you can look at the [examples](src/examples/java
 
 ## Note
 
-This library is extracted from [OpenJDK 21](https://github.com/openjdk/jdk/commit/4655b790d0b39b4ddabde78d7b3eed196b1152ed)
-and renamed package `jdk.internal.classfile` to `org.glavo.classfile`.
+This library is extracted from OpenJDK 21 and renamed package `jdk.internal.classfile` to `org.glavo.classfile`.
 
 In order to be compatible with Java 17, this library also copies some new APIs in Java 20/21:
 
