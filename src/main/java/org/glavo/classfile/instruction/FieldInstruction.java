@@ -35,6 +35,7 @@ import org.glavo.classfile.constantpool.FieldRefEntry;
 import org.glavo.classfile.constantpool.NameAndTypeEntry;
 import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.impl.AbstractInstruction;
+import org.glavo.classfile.impl.AbstractPoolEntry;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.Util;
 
@@ -76,7 +77,7 @@ public sealed interface FieldInstruction extends Instruction
      * {@return a symbolic descriptor for the type of the field}
      */
     default ClassDesc typeSymbol() {
-        return ClassDesc.ofDescriptor(type().stringValue());
+        return Util.fieldTypeSymbol(field().nameAndType());
     }
 
     /**

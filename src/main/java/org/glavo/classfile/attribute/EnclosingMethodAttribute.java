@@ -30,19 +30,19 @@ import java.util.Optional;
 
 import org.glavo.classfile.Attribute;
 import org.glavo.classfile.ClassElement;
-import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.constantpool.NameAndTypeEntry;
 import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
+import org.glavo.classfile.impl.Util;
 
 /**
  * Models the {@code EnclosingMethod} attribute {@jvms 4.7.7}, which can appear
  * on classes, and indicates that the class is a local or anonymous class.
  * Delivered as a {@link ClassElement} when traversing the elements of a {@link
- * ClassModel}.
+ * org.glavo.classfile.ClassModel}.
  */
 public sealed interface EnclosingMethodAttribute
         extends Attribute<EnclosingMethodAttribute>, ClassElement
@@ -82,7 +82,7 @@ public sealed interface EnclosingMethodAttribute
      * immediately enclosed by a method or constructor}
      */
     default Optional<MethodTypeDesc> enclosingMethodTypeSymbol() {
-        return enclosingMethodType().map(n -> MethodTypeDesc.ofDescriptor(n.stringValue()));
+        return enclosingMethod().map(Util::methodTypeSymbol);
     }
 
     /**

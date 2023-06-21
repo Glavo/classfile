@@ -69,7 +69,7 @@ public sealed interface InvokeDynamicInstruction extends Instruction
      * {@return the invocation type of the call site, as a symbolic descriptor}
      */
     default MethodTypeDesc typeSymbol() {
-        return MethodTypeDesc.ofDescriptor(type().stringValue());
+        return Util.methodTypeSymbol(invokedynamic().nameAndType());
     }
 
     /**

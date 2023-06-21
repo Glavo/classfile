@@ -25,7 +25,7 @@
 package org.glavo.classfile.constantpool;
 
 import org.glavo.classfile.TypeKind;
-import java.lang.constant.ClassDesc;
+import org.glavo.classfile.impl.Util;
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.DynamicConstantDesc;
 
@@ -49,11 +49,11 @@ public sealed interface ConstantDynamicEntry
      */
     default DynamicConstantDesc<?> asSymbol() {
         return DynamicConstantDesc.ofNamed(bootstrap().bootstrapMethod().asSymbol(),
-                                           name().stringValue(),
-                                           ClassDesc.ofDescriptor(type().stringValue()),
-                                           bootstrap().arguments().stream()
-                                                      .map(LoadableConstantEntry::constantValue)
-                                                      .toArray(ConstantDesc[]::new));
+                name().stringValue(),
+                Util.fieldTypeSymbol(nameAndType()),
+                bootstrap().arguments().stream()
+                        .map(LoadableConstantEntry::constantValue)
+                        .toArray(ConstantDesc[]::new));
     }
 
     /**
