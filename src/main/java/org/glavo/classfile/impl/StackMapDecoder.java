@@ -27,25 +27,25 @@ package org.glavo.classfile.impl;
 
 import java.lang.constant.ConstantDescs;
 import java.lang.constant.MethodTypeDesc;
-import org.glavo.classfile.AccessFlag;
+import java.lang.reflect.AccessFlag;
 import java.util.List;
 import java.util.TreeMap;
-import org.glavo.classfile.BufWriter;
+import java.lang.classfile.BufWriter;
 
-import org.glavo.classfile.constantpool.ClassEntry;
-import org.glavo.classfile.attribute.StackMapFrameInfo;
-import org.glavo.classfile.attribute.StackMapFrameInfo.*;
-import org.glavo.classfile.ClassReader;
+import java.lang.classfile.constantpool.ClassEntry;
+import java.lang.classfile.attribute.StackMapFrameInfo;
+import java.lang.classfile.attribute.StackMapFrameInfo.*;
+import java.lang.classfile.ClassReader;
 
-import static org.glavo.classfile.Classfile.*;
-import org.glavo.classfile.Label;
-import org.glavo.classfile.MethodModel;
+import static java.lang.classfile.ClassFile.*;
+import java.lang.classfile.Label;
+import java.lang.classfile.MethodModel;
 
 public class StackMapDecoder {
 
     private static final int
-            SAME_LOCALS_1_STACK_ITEM_EXTENDED = 247,
-            SAME_EXTENDED = 251;
+                    SAME_LOCALS_1_STACK_ITEM_EXTENDED = 247,
+                    SAME_EXTENDED = 251;
 
     private final ClassReader classReader;
     private final int pos;
@@ -80,7 +80,8 @@ public class StackMapDecoder {
         } else {
             vtis = new VerificationTypeInfo[methodType.parameterCount()];
         }
-        for(var arg : methodType.parameterList()) {
+        for (int pi = 0; pi < methodType.parameterCount(); pi++) {
+            var arg = methodType.parameterType(pi);
             vtis[i++] = switch (arg.descriptorString().charAt(0)) {
                 case 'I', 'S', 'C' ,'B', 'Z' -> SimpleVerificationTypeInfo.ITEM_INTEGER;
                 case 'J' -> SimpleVerificationTypeInfo.ITEM_LONG;
@@ -162,11 +163,11 @@ public class StackMapDecoder {
         bw.writeU1(vti.tag());
         switch (vti) {
             case SimpleVerificationTypeInfo svti ->
-            {}
+                {}
             case ObjectVerificationTypeInfo ovti ->
-                    bw.writeIndex(ovti.className());
+                bw.writeIndex(ovti.className());
             case UninitializedVerificationTypeInfo uvti ->
-                    bw.writeU2(bw.labelContext().labelToBci(uvti.newTarget()));
+                bw.writeU2(bw.labelContext().labelToBci(uvti.newTarget()));
         }
     }
 
@@ -213,9 +214,9 @@ public class StackMapDecoder {
                 }
             }
             entries[ei] = new StackMapFrameImpl(frameType,
-                    ctx.getLabel(bci),
-                    locals,
-                    stack);
+                        ctx.getLabel(bci),
+                        locals,
+                        stack);
         }
         return List.of(entries);
     }

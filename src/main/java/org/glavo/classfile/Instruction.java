@@ -54,10 +54,12 @@ import org.glavo.classfile.instruction.TypeCheckInstruction;
 
 /**
  * Models an executable instruction in a method body.
+ *
+ * @since 22
  */
 public sealed interface Instruction extends CodeElement
         permits ArrayLoadInstruction, ArrayStoreInstruction, BranchInstruction,
-                ConstantInstruction, ConvertInstruction, DiscontinuedInstruction,
+        ConstantInstruction, ConvertInstruction, DiscontinuedInstruction,
                 FieldInstruction, InvokeDynamicInstruction, InvokeInstruction,
                 LoadInstruction, StoreInstruction, IncrementInstruction,
                 LookupSwitchInstruction, MonitorInstruction, NewMultiArrayInstruction,

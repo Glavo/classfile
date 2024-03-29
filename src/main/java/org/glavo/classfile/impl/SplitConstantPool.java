@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,61 +27,38 @@ package org.glavo.classfile.impl;
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import org.glavo.classfile.Attribute;
-import org.glavo.classfile.Attributes;
-import org.glavo.classfile.ClassReader;
-import org.glavo.classfile.Classfile;
-import org.glavo.classfile.constantpool.ClassEntry;
-import org.glavo.classfile.constantpool.ConstantDynamicEntry;
-import org.glavo.classfile.constantpool.ConstantPoolBuilder;
-import org.glavo.classfile.constantpool.ConstantPool;
-import org.glavo.classfile.BootstrapMethodEntry;
-import org.glavo.classfile.BufWriter;
-import org.glavo.classfile.attribute.BootstrapMethodsAttribute;
-import org.glavo.classfile.constantpool.DoubleEntry;
-import org.glavo.classfile.constantpool.FieldRefEntry;
-import org.glavo.classfile.constantpool.FloatEntry;
-import org.glavo.classfile.constantpool.IntegerEntry;
-import org.glavo.classfile.constantpool.InterfaceMethodRefEntry;
-import org.glavo.classfile.constantpool.InvokeDynamicEntry;
-import org.glavo.classfile.constantpool.LoadableConstantEntry;
-import org.glavo.classfile.constantpool.LongEntry;
-import org.glavo.classfile.constantpool.MemberRefEntry;
-import org.glavo.classfile.constantpool.MethodHandleEntry;
-import org.glavo.classfile.constantpool.MethodRefEntry;
-import org.glavo.classfile.constantpool.MethodTypeEntry;
-import org.glavo.classfile.constantpool.ModuleEntry;
-import org.glavo.classfile.constantpool.NameAndTypeEntry;
-import org.glavo.classfile.constantpool.PackageEntry;
-import org.glavo.classfile.constantpool.PoolEntry;
-import org.glavo.classfile.constantpool.StringEntry;
-import org.glavo.classfile.constantpool.Utf8Entry;
+import java.lang.classfile.Attribute;
+import java.lang.classfile.Attributes;
+import java.lang.classfile.ClassReader;
+import java.lang.classfile.ClassFile;
+import java.lang.classfile.BootstrapMethodEntry;
+import java.lang.classfile.BufWriter;
+import java.lang.classfile.attribute.BootstrapMethodsAttribute;
+import java.lang.classfile.constantpool.*;
 
-import static org.glavo.classfile.Classfile.TAG_CLASS;
-import static org.glavo.classfile.Classfile.TAG_CONSTANTDYNAMIC;
-import static org.glavo.classfile.Classfile.TAG_DOUBLE;
-import static org.glavo.classfile.Classfile.TAG_FIELDREF;
-import static org.glavo.classfile.Classfile.TAG_FLOAT;
-import static org.glavo.classfile.Classfile.TAG_INTEGER;
-import static org.glavo.classfile.Classfile.TAG_INTERFACEMETHODREF;
-import static org.glavo.classfile.Classfile.TAG_INVOKEDYNAMIC;
-import static org.glavo.classfile.Classfile.TAG_LONG;
-import static org.glavo.classfile.Classfile.TAG_METHODHANDLE;
-import static org.glavo.classfile.Classfile.TAG_METHODREF;
-import static org.glavo.classfile.Classfile.TAG_METHODTYPE;
-import static org.glavo.classfile.Classfile.TAG_MODULE;
-import static org.glavo.classfile.Classfile.TAG_NAMEANDTYPE;
-import static org.glavo.classfile.Classfile.TAG_PACKAGE;
-import static org.glavo.classfile.Classfile.TAG_STRING;
+import static java.lang.classfile.ClassFile.TAG_CLASS;
+import static java.lang.classfile.ClassFile.TAG_CONSTANTDYNAMIC;
+import static java.lang.classfile.ClassFile.TAG_DOUBLE;
+import static java.lang.classfile.ClassFile.TAG_FIELDREF;
+import static java.lang.classfile.ClassFile.TAG_FLOAT;
+import static java.lang.classfile.ClassFile.TAG_INTEGER;
+import static java.lang.classfile.ClassFile.TAG_INTERFACEMETHODREF;
+import static java.lang.classfile.ClassFile.TAG_INVOKEDYNAMIC;
+import static java.lang.classfile.ClassFile.TAG_LONG;
+import static java.lang.classfile.ClassFile.TAG_METHODHANDLE;
+import static java.lang.classfile.ClassFile.TAG_METHODREF;
+import static java.lang.classfile.ClassFile.TAG_METHODTYPE;
+import static java.lang.classfile.ClassFile.TAG_MODULE;
+import static java.lang.classfile.ClassFile.TAG_NAMEANDTYPE;
+import static java.lang.classfile.ClassFile.TAG_PACKAGE;
+import static java.lang.classfile.ClassFile.TAG_STRING;
 
 public final class SplitConstantPool implements ConstantPoolBuilder {
 
     private final ClassReaderImpl parent;
     private final int parentSize, parentBsmSize;
-    final Options options;
 
     private int size, bsmSize;
     private PoolEntry[] myEntries;
@@ -91,10 +68,6 @@ public final class SplitConstantPool implements ConstantPoolBuilder {
     private EntryMap<BootstrapMethodEntryImpl> bsmMap;
 
     public SplitConstantPool() {
-        this(new Options(Collections.emptyList()));
-    }
-
-    public SplitConstantPool(Options options) {
         this.size = 1;
         this.bsmSize = 0;
         this.myEntries = new PoolEntry[1024];
@@ -102,35 +75,22 @@ public final class SplitConstantPool implements ConstantPoolBuilder {
         this.parent = null;
         this.parentSize = 0;
         this.parentBsmSize = 0;
-        this.options = options;
         this.doneFullScan = true;
     }
 
     public SplitConstantPool(ClassReader parent) {
-        this.options = ((ClassReaderImpl) parent).options;
         this.parent = (ClassReaderImpl) parent;
-        this.parentSize = parent.entryCount();
+        this.parentSize = parent.size();
         this.parentBsmSize = parent.bootstrapMethodCount();
         this.size = parentSize;
         this.bsmSize = parentBsmSize;
         this.myEntries = new PoolEntry[8];
         this.myBsmEntries = new BootstrapMethodEntryImpl[8];
-    }
-
-    //clone constructor for internal purposes
-    SplitConstantPool(SplitConstantPool cloneFrom, Options options) {
-        this.options = options;
-        this.parent = cloneFrom.parent;
-        this.parentSize = cloneFrom.parentSize;
-        this.parentBsmSize = cloneFrom.parentBsmSize;
-        this.size = cloneFrom.size;
-        this.bsmSize = cloneFrom.bsmSize;
-        this.myEntries = Arrays.copyOf(cloneFrom.myEntries, cloneFrom.myEntries.length);
-        this.myBsmEntries = Arrays.copyOf(cloneFrom.myBsmEntries, cloneFrom.myBsmEntries.length);
+        this.doneFullScan = true;
     }
 
     @Override
-    public int entryCount() {
+    public int size() {
         return size;
     }
 
@@ -141,20 +101,26 @@ public final class SplitConstantPool implements ConstantPoolBuilder {
 
     @Override
     public PoolEntry entryByIndex(int index) {
-        return (index < parentSize)
+        if (index <= 0 || index >= size()) {
+            throw new ConstantPoolException("Bad CP index: " + index);
+        }
+        PoolEntry pe = (index < parentSize)
                ? parent.entryByIndex(index)
                : myEntries[index - parentSize];
+        if (pe == null) {
+            throw new ConstantPoolException("Unusable CP index: " + index);
+        }
+        return pe;
     }
 
     @Override
     public BootstrapMethodEntryImpl bootstrapMethodEntry(int index) {
+        if (index < 0 || index >= bootstrapMethodCount()) {
+            throw new ConstantPoolException("Bad BSM index: " + index);
+        }
         return (index < parentBsmSize)
                ? parent.bootstrapMethodEntry(index)
                : myBsmEntries[index - parentBsmSize];
-    }
-
-    public Options options() {
-        return options;
     }
 
     @Override
@@ -194,12 +160,15 @@ public final class SplitConstantPool implements ConstantPoolBuilder {
     @Override
     public void writeTo(BufWriter buf) {
         int writeFrom = 1;
-        buf.writeU2(entryCount());
+        if (size() >= 65536) {
+            throw new IllegalArgumentException(String.format("Constant pool is too large %d", size()));
+        }
+        buf.writeU2(size());
         if (parent != null && buf.constantPool().canWriteDirect(this)) {
             parent.writeConstantPoolEntries(buf);
-            writeFrom = parent.entryCount();
+            writeFrom = parent.size();
         }
-        for (int i = writeFrom; i < entryCount(); ) {
+        for (int i = writeFrom; i < size(); ) {
             PoolEntry info = entryByIndex(i);
             info.writeTo(buf);
             i += info.width();
@@ -220,10 +189,15 @@ public final class SplitConstantPool implements ConstantPoolBuilder {
             // So we inflate the map with whatever we've got from the parent, and
             // later, if we miss, we do a one-time full inflation before creating
             // a new entry.
-            for (int i=1; i<parentSize; i++) {
+            for (int i=1; i<parentSize;) {
                 PoolEntry cpi = parent.cp[i];
-                if (cpi != null)
+                if (cpi == null) {
+                    doneFullScan = false;
+                    i++;
+                } else {
                     map.put(cpi.hashCode(), cpi.index());
+                    i += cpi.width();
+                }
             }
             for (int i = Math.max(parentSize, 1); i < size; ) {
                 PoolEntry cpi = myEntries[i - parentSize];
@@ -350,7 +324,7 @@ public final class SplitConstantPool implements ConstantPoolBuilder {
         for (int token = map.firstToken(hash); token != -1;
              token = map.nextToken(hash, token)) {
             PoolEntry e = map.getElementByToken(token);
-            if (e.tag() == Classfile.TAG_UTF8
+            if (e.tag() == ClassFile.TAG_UTF8
                 && e instanceof AbstractPoolEntry.Utf8EntryImpl ce
                 && ce.hashCode() == hash
                 && target.equals(ce.stringValue()))
@@ -367,7 +341,7 @@ public final class SplitConstantPool implements ConstantPoolBuilder {
         EntryMap<PoolEntry> map = map();
         for (int token = map.firstToken(hash); token != -1; token = map.nextToken(hash, token)) {
             PoolEntry e = map.getElementByToken(token);
-            if (e.tag() == Classfile.TAG_UTF8
+            if (e.tag() == ClassFile.TAG_UTF8
                 && e instanceof AbstractPoolEntry.Utf8EntryImpl ce
                 && target.equalsUtf8(ce))
                 return ce;
@@ -480,7 +454,7 @@ public final class SplitConstantPool implements ConstantPoolBuilder {
                 case TAG_FIELDREF -> fieldRefEntry(reference.owner(), reference.nameAndType());
                 case TAG_METHODREF -> methodRefEntry(reference.owner(), reference.nameAndType());
                 case TAG_INTERFACEMETHODREF -> interfaceMethodRefEntry(reference.owner(), reference.nameAndType());
-                default -> throw new IllegalStateException(String.format("Bad tag %d", reference.tag()));
+                default -> throw new IllegalArgumentException(String.format("Bad tag %d", reference.tag()));
             };
         }
 

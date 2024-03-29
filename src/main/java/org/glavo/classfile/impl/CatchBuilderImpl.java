@@ -24,9 +24,9 @@
  */
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.CodeBuilder;
-import org.glavo.classfile.Label;
-import org.glavo.classfile.Opcode;
+import java.lang.classfile.CodeBuilder;
+import java.lang.classfile.Label;
+import java.lang.classfile.Opcode;
 
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDesc;

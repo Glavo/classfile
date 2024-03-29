@@ -32,6 +32,8 @@ import java.util.Objects;
 import org.glavo.classfile.impl.ClassHierarchyImpl;
 import org.glavo.classfile.impl.Util;
 
+import static org.glavo.classfile.impl.verifier.VerifierImpl.*;
+
 /**
  * @see <a href="https://raw.githubusercontent.com/openjdk/jdk/master/src/hotspot/share/classfile/verificationType.hpp">hotspot/share/classfile/verificationType.hpp</a>
  * @see <a href="https://raw.githubusercontent.com/openjdk/jdk/master/src/hotspot/share/classfile/verificationType.cpp">hotspot/share/classfile/verificationType.cpp</a>
@@ -114,7 +116,7 @@ class VerificationType {
                             Category1                    = (Category1Flag         << BitsPerByte) | Primitive,
                             Category2                    = (Category2Flag         << BitsPerByte) | Primitive,
                             Category2_2nd            = (Category2_2ndFlag << BitsPerByte) | Primitive,
-                            // Primitive values (type descriminator stored in most-signifcant bytes)
+                            // Primitive values (type discriminator stored in most-significant bytes)
                             // Bogus needs the " | Primitive".    Else, isReference(Bogus) returns TRUE.
                             Bogus                            = (ITEM_Bogus            << 2 * BitsPerByte) | Primitive,
                             Boolean                        = (ITEM_Boolean        << 2 * BitsPerByte) | Category1,
@@ -129,7 +131,7 @@ class VerificationType {
                             Double_2nd                 = (ITEM_Double_2nd << 2 * BitsPerByte) | Category2_2nd,
                             // Used by Uninitialized (second and third bytes hold the bci)
                             BciMask                        = 0xffff << BitsPerByte,
-                            // A bci of -1 is an Unintialized-This
+                            // A bci of -1 is an Uninitialized-This
                             BciForThis = 0xffff,
                             // Query values
                             ReferenceQuery         = (ReferenceFlag         << BitsPerByte) | TypeQuery,
@@ -210,7 +212,7 @@ class VerificationType {
         // the 'query' types should technically return 'false' here, if we
         // allow this to return true, we can perform the test using only
         // 2 operations rather than 8 (3 masks, 3 compares and 2 logical 'ands').
-        // Since noone should call this on a query type anyway, this is ok.
+        // Since no one should call this on a query type anyway, this is ok.
         if(is_check()) context.verifyError("Must not be a check type (wrong value returned)");
         // should only return false if it's a primitive, and the category1 flag
         // is not set.
@@ -234,43 +236,43 @@ class VerificationType {
     }
 
     boolean is_int_array() {
-        return is_x_array(VerifierImpl.JVM_SIGNATURE_INT);
+        return is_x_array(JVM_SIGNATURE_INT);
     }
 
     boolean is_byte_array() {
-        return is_x_array(VerifierImpl.JVM_SIGNATURE_BYTE);
+        return is_x_array(JVM_SIGNATURE_BYTE);
     }
 
     boolean is_bool_array() {
-        return is_x_array(VerifierImpl.JVM_SIGNATURE_BOOLEAN);
+        return is_x_array(JVM_SIGNATURE_BOOLEAN);
     }
 
     boolean is_char_array() {
-        return is_x_array(VerifierImpl.JVM_SIGNATURE_CHAR);
+        return is_x_array(JVM_SIGNATURE_CHAR);
     }
 
     boolean is_short_array() {
-        return is_x_array(VerifierImpl.JVM_SIGNATURE_SHORT);
+        return is_x_array(JVM_SIGNATURE_SHORT);
     }
 
     boolean is_long_array() {
-        return is_x_array(VerifierImpl.JVM_SIGNATURE_LONG);
+        return is_x_array(JVM_SIGNATURE_LONG);
     }
 
     boolean is_float_array() {
-        return is_x_array(VerifierImpl.JVM_SIGNATURE_FLOAT);
+        return is_x_array(JVM_SIGNATURE_FLOAT);
     }
 
     boolean is_double_array() {
-        return is_x_array(VerifierImpl.JVM_SIGNATURE_DOUBLE);
+        return is_x_array(JVM_SIGNATURE_DOUBLE);
     }
 
     boolean is_object_array() {
-        return is_x_array(VerifierImpl.JVM_SIGNATURE_CLASS);
+        return is_x_array(JVM_SIGNATURE_CLASS);
     }
 
     boolean is_array_array() {
-        return is_x_array(VerifierImpl.JVM_SIGNATURE_ARRAY);
+        return is_x_array(JVM_SIGNATURE_ARRAY);
     }
 
     boolean is_reference_array() {
@@ -278,11 +280,11 @@ class VerificationType {
     }
 
     boolean is_object() {
-        return (is_reference() && !is_null() && name().length() >= 1 && name().charAt(0) != VerifierImpl.JVM_SIGNATURE_ARRAY);
+        return (is_reference() && !is_null() && name().length() >= 1 && name().charAt(0) != JVM_SIGNATURE_ARRAY);
     }
 
     boolean is_array() {
-        return (is_reference() && !is_null() && name().length() >= 2 && name().charAt(0) == VerifierImpl.JVM_SIGNATURE_ARRAY);
+        return (is_reference() && !is_null() && name().length() >= 2 && name().charAt(0) == JVM_SIGNATURE_ARRAY);
     }
 
     boolean is_uninitialized() {
@@ -358,7 +360,7 @@ class VerificationType {
     int dimensions(VerifierImpl context) {
         if (!(is_array())) context.verifyError("Must be an array");
         int index = 0;
-        while (name().charAt(index) == VerifierImpl.JVM_SIGNATURE_ARRAY) index++;
+        while (name().charAt(index) == JVM_SIGNATURE_ARRAY) index++;
         return index;
     }
 

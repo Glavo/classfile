@@ -25,8 +25,8 @@
 package org.glavo.classfile.impl;
 
 import java.lang.constant.MethodTypeDesc;
-import org.glavo.classfile.*;
-import org.glavo.classfile.constantpool.Utf8Entry;
+import java.lang.classfile.*;
+import java.lang.classfile.constantpool.Utf8Entry;
 
 import java.util.List;
 import java.util.Optional;
@@ -137,12 +137,12 @@ public final class MethodImpl
         }
         else {
             builder.withMethod(methodName(), methodType(), methodFlags(),
-                    new Consumer<>() {
-                        @Override
-                        public void accept(MethodBuilder mb) {
-                            MethodImpl.this.forEachElement(mb);
-                        }
-                    });
+                               new Consumer<>() {
+                @Override
+                public void accept(MethodBuilder mb) {
+                    MethodImpl.this.forEachElement(mb);
+                }
+            });
         }
     }
 

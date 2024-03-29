@@ -24,30 +24,29 @@
  */
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.BootstrapMethodEntry;
-import org.glavo.classfile.BufWriter;
-import org.glavo.classfile.constantpool.ClassEntry;
-import org.glavo.classfile.constantpool.ConstantDynamicEntry;
-import org.glavo.classfile.constantpool.ConstantPool;
-import org.glavo.classfile.constantpool.ConstantPoolBuilder;
-import org.glavo.classfile.constantpool.DoubleEntry;
-import org.glavo.classfile.constantpool.FieldRefEntry;
-import org.glavo.classfile.constantpool.FloatEntry;
-import org.glavo.classfile.constantpool.IntegerEntry;
-import org.glavo.classfile.constantpool.InterfaceMethodRefEntry;
-import org.glavo.classfile.constantpool.InvokeDynamicEntry;
-import org.glavo.classfile.constantpool.LoadableConstantEntry;
-import org.glavo.classfile.constantpool.LongEntry;
-import org.glavo.classfile.constantpool.MemberRefEntry;
-import org.glavo.classfile.constantpool.MethodHandleEntry;
-import org.glavo.classfile.constantpool.MethodRefEntry;
-import org.glavo.classfile.constantpool.MethodTypeEntry;
-import org.glavo.classfile.constantpool.ModuleEntry;
-import org.glavo.classfile.constantpool.NameAndTypeEntry;
-import org.glavo.classfile.constantpool.PackageEntry;
-import org.glavo.classfile.constantpool.PoolEntry;
-import org.glavo.classfile.constantpool.StringEntry;
-import org.glavo.classfile.constantpool.Utf8Entry;
+import java.lang.classfile.*;
+import java.lang.classfile.constantpool.ClassEntry;
+import java.lang.classfile.constantpool.ConstantDynamicEntry;
+import java.lang.classfile.constantpool.ConstantPool;
+import java.lang.classfile.constantpool.ConstantPoolBuilder;
+import java.lang.classfile.constantpool.DoubleEntry;
+import java.lang.classfile.constantpool.FieldRefEntry;
+import java.lang.classfile.constantpool.FloatEntry;
+import java.lang.classfile.constantpool.IntegerEntry;
+import java.lang.classfile.constantpool.InterfaceMethodRefEntry;
+import java.lang.classfile.constantpool.InvokeDynamicEntry;
+import java.lang.classfile.constantpool.LoadableConstantEntry;
+import java.lang.classfile.constantpool.LongEntry;
+import java.lang.classfile.constantpool.MemberRefEntry;
+import java.lang.classfile.constantpool.MethodHandleEntry;
+import java.lang.classfile.constantpool.MethodRefEntry;
+import java.lang.classfile.constantpool.MethodTypeEntry;
+import java.lang.classfile.constantpool.ModuleEntry;
+import java.lang.classfile.constantpool.NameAndTypeEntry;
+import java.lang.classfile.constantpool.PackageEntry;
+import java.lang.classfile.constantpool.PoolEntry;
+import java.lang.classfile.constantpool.StringEntry;
+import java.lang.classfile.constantpool.Utf8Entry;
 
 import java.lang.constant.MethodTypeDesc;
 import java.util.List;
@@ -167,7 +166,7 @@ public final class TemporaryConstantPool implements ConstantPoolBuilder {
     }
 
     @Override
-    public int entryCount() {
+    public int size() {
         throw new UnsupportedOperationException();
     }
 

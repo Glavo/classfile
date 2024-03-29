@@ -37,6 +37,8 @@ import org.glavo.classfile.instruction.ExceptionCatch;
  * Models the body of a method (the {@code Code} attribute).  The instructions
  * of the method body are accessed via a streaming view (e.g., {@link
  * #elements()}).
+ *
+ * @since 22
  */
 public sealed interface CodeModel
         extends CompoundElement<CodeElement>, AttributedElement, MethodElement

@@ -50,11 +50,14 @@ import org.glavo.classfile.attribute.SyntheticAttribute;
 import org.glavo.classfile.attribute.UnknownAttribute;
 
 /**
- * A {@link ClassfileElement} that can appear when traversing the elements
- * of a {@link ClassModel} or be presented to a {@link ClassBuilder}.
+ * A marker interface for elements that can appear when traversing
+ * a {@link ClassModel} or be presented to a {@link ClassBuilder}.
+ *
+ * @sealedGraph
+ * @since 22
  */
-public sealed interface ClassElement extends ClassfileElement
-        permits AccessFlags, Superclass, Interfaces, ClassfileVersion,
+public sealed interface ClassElement extends ClassFileElement
+        permits AccessFlags, Superclass, Interfaces, ClassFileVersion,
                 FieldModel, MethodModel,
                 CustomAttribute, CompilationIDAttribute, DeprecatedAttribute,
         EnclosingMethodAttribute, InnerClassesAttribute,

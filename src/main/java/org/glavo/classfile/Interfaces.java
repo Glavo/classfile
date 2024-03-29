@@ -35,6 +35,8 @@ import org.glavo.classfile.impl.Util;
 /**
  * Models the interfaces of a class.  Delivered as a {@link
  * ClassElement} when traversing a {@link ClassModel}.
+ *
+ * @since 22
  */
 public sealed interface Interfaces
         extends ClassElement

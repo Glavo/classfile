@@ -28,6 +28,8 @@ import org.glavo.classfile.impl.UnboundAttribute;
 
 /**
  * Models a single line number in the {@link LineNumberTableAttribute}.
+ *
+ * @since 22
  */
 public sealed interface LineNumberInfo
         permits UnboundAttribute.UnboundLineNumberInfo {

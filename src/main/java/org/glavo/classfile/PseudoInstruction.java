@@ -39,7 +39,9 @@ import org.glavo.classfile.impl.AbstractPseudoInstruction;
  * between instructions and labels.  Pseudo-instructions are delivered as part
  * of the element stream of a {@link CodeModel}.  Delivery of some
  * pseudo-instructions can be disabled by modifying the value of classfile
- * options (e.g., {@link Classfile.Option#processDebug(boolean)}).
+ * options (e.g., {@link ClassFile.DebugElementsOption}).
+ *
+ * @since 22
  */
 public sealed interface PseudoInstruction
         extends CodeElement

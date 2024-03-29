@@ -28,43 +28,43 @@ import java.lang.constant.ConstantDesc;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.glavo.classfile.Classfile;
-import org.glavo.classfile.Instruction;
-import org.glavo.classfile.constantpool.ClassEntry;
-import org.glavo.classfile.instruction.SwitchCase;
-import org.glavo.classfile.constantpool.FieldRefEntry;
-import org.glavo.classfile.constantpool.InterfaceMethodRefEntry;
-import org.glavo.classfile.constantpool.InvokeDynamicEntry;
-import org.glavo.classfile.constantpool.LoadableConstantEntry;
-import org.glavo.classfile.constantpool.MemberRefEntry;
-import org.glavo.classfile.instruction.ArrayLoadInstruction;
-import org.glavo.classfile.instruction.ArrayStoreInstruction;
-import org.glavo.classfile.instruction.BranchInstruction;
-import org.glavo.classfile.instruction.ConstantInstruction;
-import org.glavo.classfile.instruction.ConvertInstruction;
-import org.glavo.classfile.instruction.DiscontinuedInstruction;
-import org.glavo.classfile.instruction.FieldInstruction;
-import org.glavo.classfile.instruction.IncrementInstruction;
-import org.glavo.classfile.instruction.InvokeDynamicInstruction;
-import org.glavo.classfile.instruction.InvokeInstruction;
-import org.glavo.classfile.instruction.LoadInstruction;
-import org.glavo.classfile.instruction.LookupSwitchInstruction;
-import org.glavo.classfile.instruction.MonitorInstruction;
-import org.glavo.classfile.instruction.NewMultiArrayInstruction;
-import org.glavo.classfile.instruction.NewObjectInstruction;
-import org.glavo.classfile.instruction.NewPrimitiveArrayInstruction;
-import org.glavo.classfile.instruction.NewReferenceArrayInstruction;
-import org.glavo.classfile.instruction.NopInstruction;
-import org.glavo.classfile.instruction.OperatorInstruction;
-import org.glavo.classfile.instruction.ReturnInstruction;
-import org.glavo.classfile.instruction.StackInstruction;
-import org.glavo.classfile.instruction.StoreInstruction;
-import org.glavo.classfile.instruction.TableSwitchInstruction;
-import org.glavo.classfile.instruction.ThrowInstruction;
-import org.glavo.classfile.instruction.TypeCheckInstruction;
-import org.glavo.classfile.Label;
-import org.glavo.classfile.Opcode;
-import org.glavo.classfile.TypeKind;
+import java.lang.classfile.ClassFile;
+import java.lang.classfile.Instruction;
+import java.lang.classfile.constantpool.ClassEntry;
+import java.lang.classfile.instruction.SwitchCase;
+import java.lang.classfile.constantpool.FieldRefEntry;
+import java.lang.classfile.constantpool.InterfaceMethodRefEntry;
+import java.lang.classfile.constantpool.InvokeDynamicEntry;
+import java.lang.classfile.constantpool.LoadableConstantEntry;
+import java.lang.classfile.constantpool.MemberRefEntry;
+import java.lang.classfile.instruction.ArrayLoadInstruction;
+import java.lang.classfile.instruction.ArrayStoreInstruction;
+import java.lang.classfile.instruction.BranchInstruction;
+import java.lang.classfile.instruction.ConstantInstruction;
+import java.lang.classfile.instruction.ConvertInstruction;
+import java.lang.classfile.instruction.DiscontinuedInstruction;
+import java.lang.classfile.instruction.FieldInstruction;
+import java.lang.classfile.instruction.IncrementInstruction;
+import java.lang.classfile.instruction.InvokeDynamicInstruction;
+import java.lang.classfile.instruction.InvokeInstruction;
+import java.lang.classfile.instruction.LoadInstruction;
+import java.lang.classfile.instruction.LookupSwitchInstruction;
+import java.lang.classfile.instruction.MonitorInstruction;
+import java.lang.classfile.instruction.NewMultiArrayInstruction;
+import java.lang.classfile.instruction.NewObjectInstruction;
+import java.lang.classfile.instruction.NewPrimitiveArrayInstruction;
+import java.lang.classfile.instruction.NewReferenceArrayInstruction;
+import java.lang.classfile.instruction.NopInstruction;
+import java.lang.classfile.instruction.OperatorInstruction;
+import java.lang.classfile.instruction.ReturnInstruction;
+import java.lang.classfile.instruction.StackInstruction;
+import java.lang.classfile.instruction.StoreInstruction;
+import java.lang.classfile.instruction.TableSwitchInstruction;
+import java.lang.classfile.instruction.ThrowInstruction;
+import java.lang.classfile.instruction.TypeCheckInstruction;
+import java.lang.classfile.Label;
+import java.lang.classfile.Opcode;
+import java.lang.classfile.TypeKind;
 
 public abstract sealed class AbstractInstruction
         extends AbstractElement
@@ -114,7 +114,7 @@ public abstract sealed class AbstractInstruction
     @Override
     public abstract void writeTo(DirectCodeBuilder writer);
 
-    public static abstract sealed class BoundInstruction extends AbstractInstruction {
+    public abstract static sealed class BoundInstruction extends AbstractInstruction {
         final CodeImpl code;
         final int pos;
 
@@ -230,8 +230,8 @@ public abstract sealed class AbstractInstruction
 
         public int branchByteOffset() {
             return size == 3
-                    ? (int) (short) code.classReader.readU2(pos + 1)
-                    : code.classReader.readInt(pos + 1);
+                   ? (int) (short) code.classReader.readU2(pos + 1)
+                   : code.classReader.readInt(pos + 1);
         }
 
         @Override
@@ -383,7 +383,7 @@ public abstract sealed class AbstractInstruction
         @Override
         public FieldRefEntry field() {
             if (fieldEntry == null)
-                fieldEntry = (FieldRefEntry) code.classReader.readEntry(pos + 1);
+                fieldEntry = code.classReader.readEntry(pos + 1, FieldRefEntry.class);
             return fieldEntry;
         }
 
@@ -413,18 +413,18 @@ public abstract sealed class AbstractInstruction
         @Override
         public MemberRefEntry method() {
             if (methodEntry == null)
-                methodEntry = (MemberRefEntry) code.classReader.readEntry(pos + 1);
+                methodEntry = code.classReader.readEntry(pos + 1, MemberRefEntry.class);
             return methodEntry;
         }
 
         @Override
         public boolean isInterface() {
-            return method().tag() == Classfile.TAG_INTERFACEMETHODREF;
+            return method().tag() == ClassFile.TAG_INTERFACEMETHODREF;
         }
 
         @Override
         public int count() {
-            return Util.parameterSlots(Util.methodTypeSymbol(method().nameAndType()));
+            return 0;
         }
 
         @Override
@@ -453,7 +453,7 @@ public abstract sealed class AbstractInstruction
         @Override
         public MemberRefEntry method() {
             if (methodEntry == null)
-                methodEntry = (InterfaceMethodRefEntry) code.classReader.readEntry(pos + 1);
+                methodEntry = code.classReader.readEntry(pos + 1, InterfaceMethodRefEntry.class);
             return methodEntry;
         }
 
@@ -493,7 +493,7 @@ public abstract sealed class AbstractInstruction
         @Override
         public InvokeDynamicEntry invokedynamic() {
             if (indyEntry == null)
-                indyEntry = (InvokeDynamicEntry) code.classReader.readEntry(pos + 1);
+                indyEntry = code.classReader.readEntry(pos + 1, InvokeDynamicEntry.class);
             return indyEntry;
         }
 
@@ -683,8 +683,8 @@ public abstract sealed class AbstractInstruction
         public LoadableConstantEntry constantEntry() {
             return (LoadableConstantEntry)
                     code.classReader.entryByIndex(op == Opcode.LDC
-                            ? code.classReader.readU1(pos + 1)
-                            : code.classReader.readU2(pos + 1));
+                                                  ? code.classReader.readU1(pos + 1)
+                                                  : code.classReader.readU2(pos + 1));
         }
 
         @Override
@@ -721,8 +721,8 @@ public abstract sealed class AbstractInstruction
 
         public int branchByteOffset() {
             return size == 3
-                    ? code.classReader.readS2(pos + 1)
-                    : code.classReader.readInt(pos + 1);
+                   ? code.classReader.readS2(pos + 1)
+                   : code.classReader.readInt(pos + 1);
         }
 
         @Override
@@ -760,7 +760,7 @@ public abstract sealed class AbstractInstruction
 
     }
 
-    public static abstract sealed class UnboundInstruction extends AbstractInstruction {
+    public abstract static sealed class UnboundInstruction extends AbstractInstruction {
 
         UnboundInstruction(Opcode op) {
             super(op, op.sizeIfFixed());
@@ -847,8 +847,8 @@ public abstract sealed class AbstractInstruction
 
         public UnboundIncrementInstruction(int slot, int constant) {
             super(slot <= 255 && constant < 128 && constant > -127
-                    ? Opcode.IINC
-                    : Opcode.IINC_W);
+                  ? Opcode.IINC
+                  : Opcode.IINC_W);
             this.slot = slot;
             this.constant = constant;
         }
@@ -1059,8 +1059,8 @@ public abstract sealed class AbstractInstruction
         @Override
         public int count() {
             return op == Opcode.INVOKEINTERFACE
-                    ? Util.parameterSlots(Util.methodTypeSymbol(methodEntry.nameAndType())) + 1
-                    : 0;
+                   ? Util.parameterSlots(Util.methodTypeSymbol(methodEntry.nameAndType())) + 1
+                   : 0;
         }
 
         @Override

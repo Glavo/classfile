@@ -36,8 +36,14 @@ import org.glavo.classfile.impl.LabelImpl;
  * CodeElement} during traversal of the elements of a {@link CodeModel}.
  *
  * @see PseudoInstruction
+ *
+ * @since 22
  */
 public sealed interface LabelTarget extends PseudoInstruction
         permits LabelImpl {
+
+    /**
+     * {@return the label corresponding to this target}
+     */
     Label label();
 }

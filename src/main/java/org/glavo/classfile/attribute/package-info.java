@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,34 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.glavo.classfile;
-
-import org.glavo.classfile.impl.ClassfileVersionImpl;
 
 /**
- * Models the classfile version information for a class.  Delivered as a {@link
- * ClassElement} when traversing the elements of a {@link
- * ClassModel}.
+ * <h2>Provides interfaces describing classfile attributes for the {@link java.lang.classfile} library.</h2>
+ *
+ * The {@code java.lang.classfile.attribute} package contains interfaces describing classfile attributes.
+ *
+ * @since 22
  */
-public sealed interface ClassfileVersion
-        extends ClassElement
-        permits ClassfileVersionImpl {
-    /**
-     * {@return the major classfile version}
-     */
-    int majorVersion();
+package org.glavo.classfile.attribute;
 
-    /**
-     * {@return the minor classfile version}
-     */
-    int minorVersion();
-
-    /**
-     * {@return a {@link ClassfileVersion} element}
-     * @param majorVersion the major classfile version
-     * @param minorVersion the minor classfile version
-     */
-    static ClassfileVersion of(int majorVersion, int minorVersion) {
-        return new ClassfileVersionImpl(majorVersion, minorVersion);
-    }
-}

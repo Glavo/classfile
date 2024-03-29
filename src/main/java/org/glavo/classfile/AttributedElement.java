@@ -32,10 +32,13 @@ import org.glavo.classfile.attribute.RecordComponentInfo;
 import org.glavo.classfile.impl.AbstractUnboundModel;
 
 /**
- * A {@link ClassfileElement} describing an entity that has attributes, such
+ * A {@link ClassFileElement} describing an entity that has attributes, such
  * as a class, field, method, code attribute, or record component.
+ *
+ * @sealedGraph
+ * @since 22
  */
-public sealed interface AttributedElement extends ClassfileElement
+public sealed interface AttributedElement extends ClassFileElement
         permits ClassModel, CodeModel, FieldModel, MethodModel,
         RecordComponentInfo, AbstractUnboundModel {
 

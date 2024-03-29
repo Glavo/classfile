@@ -22,18 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.glavo.classfile.impl;
 
-import org.glavo.classfile.constant.ModuleDesc;
-
-/*
- * Implementation of {@code ModuleDesc}
- * @param name must have been validated
+/**
+ * <h2>Provides interfaces describing classfile constant pool entries for the {@link java.lang.classfile} library.</h2>
+ *
+ * The {@code java.lang.classfile.constantpool} package contains interfaces describing classfile constant pool entries.
+ *
+ * @since 22
  */
-public record ModuleDescImpl(String name) implements ModuleDesc {
+package org.glavo.classfile.constantpool;
 
-    @Override
-    public String toString() {
-        return String.format("ModuleDesc[%s]", name());
-    }
-}

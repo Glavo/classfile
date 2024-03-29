@@ -37,6 +37,8 @@ import org.glavo.classfile.impl.Util;
  * attribute.  Corresponding opcodes will have a {@code kind} of {@link
  * Opcode.Kind#ARRAY_LOAD}.  Delivered as a {@link CodeElement} when
  * traversing the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface ArrayLoadInstruction extends Instruction
         permits AbstractInstruction.UnboundArrayLoadInstruction {

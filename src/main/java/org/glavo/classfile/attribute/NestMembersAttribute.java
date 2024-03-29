@@ -41,6 +41,14 @@ import org.glavo.classfile.impl.Util;
  * appear on classes to indicate that this class is the host of a nest.
  * Delivered as a {@link ClassElement} when
  * traversing the elements of a {@link ClassModel}.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ * <p>
+ * The attribute was introduced in the Java SE Platform version 11.
+ *
+ * @since 22
  */
 public sealed interface NestMembersAttribute extends Attribute<NestMembersAttribute>, ClassElement
         permits BoundAttribute.BoundNestMembersAttribute, UnboundAttribute.UnboundNestMembersAttribute {

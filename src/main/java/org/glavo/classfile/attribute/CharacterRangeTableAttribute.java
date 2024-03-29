@@ -54,11 +54,15 @@ import org.glavo.classfile.impl.UnboundAttribute;
  * several code index ranges, but there will be a smallest code index range, and
  * for each kind of range in which it is enclosed there will be a smallest code
  * index range. The character range entries may appear in any order.
+ * <p>
+ * The attribute permits multiple instances in a given location.
+ *
+ * @since 22
  */
 public sealed interface CharacterRangeTableAttribute
         extends Attribute<CharacterRangeTableAttribute>
         permits BoundAttribute.BoundCharacterRangeTableAttribute,
-        UnboundAttribute.UnboundCharacterRangeTableAttribute {
+                UnboundAttribute.UnboundCharacterRangeTableAttribute {
 
     /**
      * {@return the entries of the character range table}

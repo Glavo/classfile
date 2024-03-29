@@ -27,10 +27,10 @@ package org.glavo.classfile.attribute;
 import java.util.List;
 
 import org.glavo.classfile.Attribute;
-import org.glavo.classfile.Classfile;
-import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.UnboundAttribute;
+import org.glavo.classfile.ClassFile;
+import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.instruction.LineNumber;
 
 /**
@@ -39,7 +39,11 @@ import org.glavo.classfile.instruction.LineNumber;
  * the code table and line numbers in the source file.
  * Delivered as a {@link LineNumber} when traversing the
  * elements of a {@link CodeModel}, according to the setting of the
- * {@link Classfile.Option#processLineNumbers(boolean)} option.
+ * {@link ClassFile.LineNumbersOption} option.
+ * <p>
+ * The attribute permits multiple instances in a given location.
+ *
+ * @since 22
  */
 public sealed interface LineNumberTableAttribute
         extends Attribute<LineNumberTableAttribute>

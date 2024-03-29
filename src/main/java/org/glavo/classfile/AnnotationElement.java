@@ -35,6 +35,8 @@ import org.glavo.classfile.impl.TemporaryConstantPool;
  *
  * @see Annotation
  * @see AnnotationValue
+ *
+ * @since 22
  */
 public sealed interface AnnotationElement
         extends WritableElement<AnnotationElement>

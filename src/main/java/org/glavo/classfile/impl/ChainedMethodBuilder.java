@@ -27,13 +27,13 @@ package org.glavo.classfile.impl;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import org.glavo.classfile.CodeBuilder;
-import org.glavo.classfile.CodeModel;
-import org.glavo.classfile.CodeTransform;
-import org.glavo.classfile.MethodBuilder;
-import org.glavo.classfile.MethodElement;
-import org.glavo.classfile.MethodModel;
-import org.glavo.classfile.constantpool.ConstantPoolBuilder;
+import java.lang.classfile.CodeBuilder;
+import java.lang.classfile.CodeModel;
+import java.lang.classfile.CodeTransform;
+import java.lang.classfile.MethodBuilder;
+import java.lang.classfile.MethodElement;
+import java.lang.classfile.MethodModel;
+import java.lang.classfile.constantpool.ConstantPoolBuilder;
 
 public final class ChainedMethodBuilder implements MethodBuilder {
     final MethodBuilder downstream;

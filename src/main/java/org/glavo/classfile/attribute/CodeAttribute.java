@@ -25,14 +25,24 @@
 
 package org.glavo.classfile.attribute;
 
-import org.glavo.classfile.*;
+import org.glavo.classfile.Attribute;
+import org.glavo.classfile.CodeModel;
+import org.glavo.classfile.Label;
 import org.glavo.classfile.impl.BoundAttribute;
+import org.glavo.classfile.MethodElement;
+import org.glavo.classfile.MethodModel;
 
 /**
  * Models the {@code Code} attribute {@jvms 4.7.3}, appears on non-native,
  * non-abstract methods and contains the bytecode of the method body.  Delivered
  * as a {@link MethodElement} when traversing the elements of a
  * {@link MethodModel}.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ *
+ * @since 22
  */
 public sealed interface CodeAttribute extends Attribute<CodeAttribute>, CodeModel
         permits BoundAttribute.BoundCodeAttribute {

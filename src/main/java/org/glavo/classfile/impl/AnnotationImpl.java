@@ -24,14 +24,13 @@
  */
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.Annotation;
-import org.glavo.classfile.AnnotationElement;
-import org.glavo.classfile.AnnotationValue;
-import org.glavo.classfile.BufWriter;
-import org.glavo.classfile.constantpool.*;
+import java.lang.classfile.*;
+import java.lang.classfile.constantpool.*;
 
 import java.lang.constant.ConstantDesc;
 import java.util.List;
+
+import static java.lang.classfile.ClassFile.*;
 
 public final class AnnotationImpl implements Annotation {
     private final Utf8Entry className;
@@ -116,7 +115,7 @@ public final class AnnotationImpl implements Annotation {
 
         @Override
         public char tag() {
-            return 's';
+            return AEV_STRING;
         }
 
         @Override
@@ -130,7 +129,7 @@ public final class AnnotationImpl implements Annotation {
 
         @Override
         public char tag() {
-            return 'D';
+            return AEV_DOUBLE;
         }
 
         @Override
@@ -144,7 +143,7 @@ public final class AnnotationImpl implements Annotation {
 
         @Override
         public char tag() {
-            return 'F';
+            return AEV_FLOAT;
         }
 
         @Override
@@ -158,7 +157,7 @@ public final class AnnotationImpl implements Annotation {
 
         @Override
         public char tag() {
-            return 'J';
+            return AEV_LONG;
         }
 
         @Override
@@ -172,7 +171,7 @@ public final class AnnotationImpl implements Annotation {
 
         @Override
         public char tag() {
-            return 'I';
+            return AEV_INT;
         }
 
         @Override
@@ -186,7 +185,7 @@ public final class AnnotationImpl implements Annotation {
 
         @Override
         public char tag() {
-            return 'S';
+            return AEV_SHORT;
         }
 
         @Override
@@ -200,7 +199,7 @@ public final class AnnotationImpl implements Annotation {
 
         @Override
         public char tag() {
-            return 'C';
+            return AEV_CHAR;
         }
 
         @Override
@@ -214,7 +213,7 @@ public final class AnnotationImpl implements Annotation {
 
         @Override
         public char tag() {
-            return 'B';
+            return AEV_BYTE;
         }
 
         @Override
@@ -228,7 +227,7 @@ public final class AnnotationImpl implements Annotation {
 
         @Override
         public char tag() {
-            return 'Z';
+            return AEV_BOOLEAN;
         }
 
         @Override
@@ -246,7 +245,7 @@ public final class AnnotationImpl implements Annotation {
 
         @Override
         public char tag() {
-            return '[';
+            return AEV_ARRAY;
         }
 
         @Override
@@ -261,7 +260,7 @@ public final class AnnotationImpl implements Annotation {
             implements AnnotationValue.OfEnum {
         @Override
         public char tag() {
-            return 'e';
+            return AEV_ENUM;
         }
 
         @Override
@@ -277,7 +276,7 @@ public final class AnnotationImpl implements Annotation {
             implements AnnotationValue.OfAnnotation {
         @Override
         public char tag() {
-            return '@';
+            return AEV_ANNOTATION;
         }
 
         @Override
@@ -292,7 +291,7 @@ public final class AnnotationImpl implements Annotation {
             implements AnnotationValue.OfClass {
         @Override
         public char tag() {
-            return 'c';
+            return AEV_CLASS;
         }
 
         @Override

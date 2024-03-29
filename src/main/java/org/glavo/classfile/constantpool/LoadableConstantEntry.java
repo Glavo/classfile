@@ -30,6 +30,9 @@ import org.glavo.classfile.TypeKind;
 /**
  * Marker interface for constant pool entries suitable for loading via the
  * {@code LDC} instructions.
+ *
+ * @sealedGraph
+ * @since 22
  */
 public sealed interface LoadableConstantEntry extends PoolEntry
         permits ClassEntry, ConstantDynamicEntry, ConstantValueEntry, MethodHandleEntry, MethodTypeEntry {

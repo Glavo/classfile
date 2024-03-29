@@ -30,6 +30,9 @@ import java.lang.constant.ConstantDesc;
  * Models a constant pool entry that can be used as the constant in a
  * {@code ConstantValue} attribute; this includes the four primitive constant
  * types and {@linkplain String} constants.
+ *
+ * @sealedGraph
+ * @since 22
  */
 public sealed interface ConstantValueEntry extends LoadableConstantEntry
         permits DoubleEntry, FloatEntry, IntegerEntry, LongEntry, StringEntry {

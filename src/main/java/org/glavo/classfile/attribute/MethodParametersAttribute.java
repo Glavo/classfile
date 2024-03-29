@@ -29,15 +29,23 @@ import java.util.List;
 
 import org.glavo.classfile.Attribute;
 import org.glavo.classfile.MethodElement;
-import org.glavo.classfile.MethodModel;
 import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.UnboundAttribute;
+import org.glavo.classfile.MethodModel;
 
 /**
  * Models the {@code MethodParameters} attribute {@jvms 4.7.24}, which can
  * appear on methods, and records optional information about the method's
  * parameters.  Delivered as a {@link MethodElement} when
  * traversing the elements of a {@link MethodModel}.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ * <p>
+ * The attribute was introduced in the Java SE Platform version 8.
+ *
+ * @since 22
  */
 public sealed interface MethodParametersAttribute
         extends Attribute<MethodParametersAttribute>, MethodElement
@@ -46,7 +54,7 @@ public sealed interface MethodParametersAttribute
 
     /**
      * {@return information about the parameters of the method}  The i'th entry
-     * in the list correponds to the i'th parameter in the method declaration.
+     * in the list corresponds to the i'th parameter in the method declaration.
      */
     List<MethodParameterInfo> parameters();
 

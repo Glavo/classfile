@@ -28,23 +28,23 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import org.glavo.classfile.ClassBuilder;
-import org.glavo.classfile.ClassElement;
-import org.glavo.classfile.ClassTransform;
-import org.glavo.classfile.ClassfileElement;
-import org.glavo.classfile.ClassfileTransform;
-import org.glavo.classfile.CodeBuilder;
-import org.glavo.classfile.CodeElement;
-import org.glavo.classfile.CodeModel;
-import org.glavo.classfile.CodeTransform;
-import org.glavo.classfile.FieldBuilder;
-import org.glavo.classfile.FieldElement;
-import org.glavo.classfile.FieldModel;
-import org.glavo.classfile.FieldTransform;
-import org.glavo.classfile.MethodBuilder;
-import org.glavo.classfile.MethodElement;
-import org.glavo.classfile.MethodModel;
-import org.glavo.classfile.MethodTransform;
+import java.lang.classfile.ClassBuilder;
+import java.lang.classfile.ClassElement;
+import java.lang.classfile.ClassTransform;
+import java.lang.classfile.ClassFileElement;
+import java.lang.classfile.ClassFileTransform;
+import java.lang.classfile.CodeBuilder;
+import java.lang.classfile.CodeElement;
+import java.lang.classfile.CodeModel;
+import java.lang.classfile.CodeTransform;
+import java.lang.classfile.FieldBuilder;
+import java.lang.classfile.FieldElement;
+import java.lang.classfile.FieldModel;
+import java.lang.classfile.FieldTransform;
+import java.lang.classfile.MethodBuilder;
+import java.lang.classfile.MethodElement;
+import java.lang.classfile.MethodModel;
+import java.lang.classfile.MethodTransform;
 
 public class TransformImpl {
     // ClassTransform
@@ -75,10 +75,10 @@ public class TransformImpl {
         }
     }
 
-    public record ResolvedTransformImpl<E extends ClassfileElement>(Consumer<E> consumer,
+    public record ResolvedTransformImpl<E extends ClassFileElement>(Consumer<E> consumer,
                                      Runnable endHandler,
                                      Runnable startHandler)
-            implements ClassfileTransform.ResolvedTransform<E> {
+            implements ClassFileTransform.ResolvedTransform<E> {
 
         public ResolvedTransformImpl(Consumer<E> consumer) {
             this(consumer, NOTHING, NOTHING);

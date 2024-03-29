@@ -25,18 +25,19 @@
 
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.constantpool.ClassEntry;
-import org.glavo.classfile.constantpool.ModuleEntry;
-import org.glavo.classfile.constantpool.Utf8Entry;
-import org.glavo.classfile.constant.ModuleDesc;
-import org.glavo.classfile.constant.PackageDesc;
-import org.glavo.classfile.attribute.*;
+import java.lang.classfile.attribute.*;
+import java.lang.classfile.attribute.ModuleAttribute.ModuleAttributeBuilder;
+import java.lang.classfile.constantpool.ClassEntry;
+import java.lang.classfile.constantpool.ModuleEntry;
+import java.lang.classfile.constantpool.Utf8Entry;
+import java.lang.constant.ModuleDesc;
+import java.lang.constant.PackageDesc;
 
 import java.lang.constant.ClassDesc;
 import java.util.*;
 
 public final class ModuleAttributeBuilderImpl
-        implements ModuleAttribute.ModuleAttributeBuilder {
+        implements ModuleAttributeBuilder {
 
     private ModuleEntry moduleEntry;
     private Utf8Entry moduleVersion;
@@ -48,9 +49,13 @@ public final class ModuleAttributeBuilderImpl
     private final Set<ClassEntry> uses = new LinkedHashSet<>();
     private final Set<ModuleProvideInfo> provides = new LinkedHashSet<>();
 
-    public ModuleAttributeBuilderImpl(ModuleDesc moduleName) {
-        this.moduleEntry = TemporaryConstantPool.INSTANCE.moduleEntry(TemporaryConstantPool.INSTANCE.utf8Entry(moduleName.name()));
+    public ModuleAttributeBuilderImpl(ModuleEntry moduleName) {
+        this.moduleEntry = moduleName;
         this.moduleFlags = 0;
+    }
+
+    public ModuleAttributeBuilderImpl(ModuleDesc moduleName) {
+        this(TemporaryConstantPool.INSTANCE.moduleEntry(TemporaryConstantPool.INSTANCE.utf8Entry(moduleName.name())));
     }
 
     @Override
@@ -60,39 +65,39 @@ public final class ModuleAttributeBuilderImpl
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder moduleName(ModuleDesc moduleName) {
+    public ModuleAttributeBuilder moduleName(ModuleDesc moduleName) {
         Objects.requireNonNull(moduleName);
         moduleEntry = TemporaryConstantPool.INSTANCE.moduleEntry(TemporaryConstantPool.INSTANCE.utf8Entry(moduleName.name()));
         return this;
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder moduleFlags(int flags) {
+    public ModuleAttributeBuilder moduleFlags(int flags) {
         this.moduleFlags = flags;
         return this;
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder moduleVersion(String version) {
+    public ModuleAttributeBuilder moduleVersion(String version) {
         moduleVersion = version == null ? null : TemporaryConstantPool.INSTANCE.utf8Entry(version);
         return this;
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder requires(ModuleDesc module, int flags, String version) {
+    public ModuleAttributeBuilder requires(ModuleDesc module, int flags, String version) {
         Objects.requireNonNull(module);
         return requires(ModuleRequireInfo.of(TemporaryConstantPool.INSTANCE.moduleEntry(TemporaryConstantPool.INSTANCE.utf8Entry(module.name())), flags, version == null ? null : TemporaryConstantPool.INSTANCE.utf8Entry(version)));
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder requires(ModuleRequireInfo requires) {
+    public ModuleAttributeBuilder requires(ModuleRequireInfo requires) {
         Objects.requireNonNull(requires);
         this.requires.add(requires);
         return this;
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder exports(PackageDesc pkge, int flags, ModuleDesc... exportsToModules) {
+    public ModuleAttributeBuilder exports(PackageDesc pkge, int flags, ModuleDesc... exportsToModules) {
         Objects.requireNonNull(pkge);
         var exportsTo = new ArrayList<ModuleEntry>(exportsToModules.length);
         for (var e : exportsToModules)
@@ -101,14 +106,14 @@ public final class ModuleAttributeBuilderImpl
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder exports(ModuleExportInfo exports) {
+    public ModuleAttributeBuilder exports(ModuleExportInfo exports) {
         Objects.requireNonNull(exports);
         this.exports.add(exports);
         return this;
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder opens(PackageDesc pkge, int flags, ModuleDesc... opensToModules) {
+    public ModuleAttributeBuilder opens(PackageDesc pkge, int flags, ModuleDesc... opensToModules) {
         Objects.requireNonNull(pkge);
         var opensTo = new ArrayList<ModuleEntry>(opensToModules.length);
         for (var e : opensToModules)
@@ -117,27 +122,27 @@ public final class ModuleAttributeBuilderImpl
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder opens(ModuleOpenInfo opens) {
+    public ModuleAttributeBuilder opens(ModuleOpenInfo opens) {
         Objects.requireNonNull(opens);
         this.opens.add(opens);
         return this;
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder uses(ClassDesc service) {
+    public ModuleAttributeBuilder uses(ClassDesc service) {
         Objects.requireNonNull(service);
         return uses(TemporaryConstantPool.INSTANCE.classEntry(service));
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder uses(ClassEntry uses) {
+    public ModuleAttributeBuilder uses(ClassEntry uses) {
         Objects.requireNonNull(uses);
         this.uses.add(uses);
         return this;
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder provides(ClassDesc service, ClassDesc... implClasses) {
+    public ModuleAttributeBuilder provides(ClassDesc service, ClassDesc... implClasses) {
         Objects.requireNonNull(service);
         var impls = new ArrayList<ClassEntry>(implClasses.length);
         for (var seq : implClasses)
@@ -146,7 +151,7 @@ public final class ModuleAttributeBuilderImpl
     }
 
     @Override
-    public ModuleAttribute.ModuleAttributeBuilder provides(ModuleProvideInfo provides) {
+    public ModuleAttributeBuilder provides(ModuleProvideInfo provides) {
         Objects.requireNonNull(provides);
         this.provides.add(provides);
         return this;

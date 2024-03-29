@@ -26,8 +26,8 @@ package org.glavo.classfile.impl;
 
 import java.util.Objects;
 
-import org.glavo.classfile.Label;
-import org.glavo.classfile.instruction.LabelTarget;
+import java.lang.classfile.Label;
+import java.lang.classfile.instruction.LabelTarget;
 
 /**
  * Labels are created with a parent context, which is either a code attribute

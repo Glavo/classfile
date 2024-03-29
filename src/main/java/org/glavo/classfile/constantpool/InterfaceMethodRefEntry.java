@@ -25,13 +25,24 @@
 package org.glavo.classfile.constantpool;
 
 import org.glavo.classfile.impl.AbstractPoolEntry;
+import org.glavo.classfile.impl.Util;
+import java.lang.constant.MethodTypeDesc;
 
 /**
  * Models a {@code CONSTANT_InterfaceMethodRef_info} constant in the constant pool of a
  * classfile.
+ * @jvms 4.4.2 The CONSTANT_Fieldref_info, CONSTANT_Methodref_info, and CONSTANT_InterfaceMethodref_info Structures
+ *
+ * @since 22
  */
 public sealed interface InterfaceMethodRefEntry
         extends MemberRefEntry
         permits AbstractPoolEntry.InterfaceMethodRefEntryImpl {
 
+    /**
+     * {@return a symbolic descriptor for the interface method's type}
+     */
+    default MethodTypeDesc typeSymbol() {
+        return Util.methodTypeSymbol(nameAndType());
+    }
 }

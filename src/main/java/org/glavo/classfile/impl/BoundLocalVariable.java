@@ -26,14 +26,14 @@
 package org.glavo.classfile.impl;
 
 import java.lang.constant.ClassDesc;
-import org.glavo.classfile.attribute.LocalVariableInfo;
-import org.glavo.classfile.constantpool.Utf8Entry;
-import org.glavo.classfile.instruction.LocalVariable;
+import java.lang.classfile.attribute.LocalVariableInfo;
+import java.lang.classfile.constantpool.Utf8Entry;
+import java.lang.classfile.instruction.LocalVariable;
 
 public final class BoundLocalVariable
         extends AbstractBoundLocalVariable
         implements LocalVariableInfo,
-        LocalVariable {
+                   LocalVariable {
 
     public BoundLocalVariable(CodeImpl code, int offset) {
         super(code, offset);

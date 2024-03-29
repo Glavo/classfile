@@ -24,14 +24,14 @@
  */
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.CodeBuilder;
-import org.glavo.classfile.CodeElement;
-import org.glavo.classfile.Label;
-import org.glavo.classfile.TypeKind;
-import org.glavo.classfile.instruction.LabelTarget;
+import java.lang.classfile.CodeBuilder;
+import java.lang.classfile.CodeElement;
+import java.lang.classfile.Label;
+import java.lang.classfile.TypeKind;
+import java.lang.classfile.instruction.LabelTarget;
 
 import java.util.Objects;
-import org.glavo.classfile.Instruction;
+import java.lang.classfile.Instruction;
 
 public final class BlockCodeBuilderImpl
         extends NonterminalCodeBuilder

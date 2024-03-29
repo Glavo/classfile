@@ -24,7 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.instruction.LineNumber;
+import java.lang.classfile.instruction.LineNumber;
 
 public final class LineNumberImpl
         extends AbstractElement

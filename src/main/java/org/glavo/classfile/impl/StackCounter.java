@@ -1,10 +1,12 @@
 /*
- * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.
+ * published by the Free Software Foundation.  Oracle designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,26 +25,26 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.constant.ClassDesc;
+import java.lang.classfile.TypeKind;
+import java.lang.classfile.constantpool.ConstantDynamicEntry;
+import java.lang.classfile.constantpool.DynamicConstantPoolEntry;
+import java.lang.classfile.constantpool.MemberRefEntry;
 import java.lang.constant.MethodTypeDesc;
 import java.nio.ByteBuffer;
+import java.util.ArrayDeque;
 import java.util.BitSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
-import org.glavo.classfile.TypeKind;
-import org.glavo.classfile.constantpool.ConstantDynamicEntry;
-import org.glavo.classfile.constantpool.DynamicConstantPoolEntry;
-import org.glavo.classfile.constantpool.MemberRefEntry;
-import static org.glavo.classfile.Classfile.*;
+import java.util.Queue;
 
+import static java.lang.classfile.ClassFile.*;
 
 public final class StackCounter {
+
+    private record Target(int bci, int stack) {}
 
     static StackCounter of(DirectCodeBuilder dcb, BufWriterImpl buf) {
         return new StackCounter(
                 dcb,
-                buf.thisClass().asSymbol(),
                 dcb.methodInfo.methodName().stringValue(),
                 dcb.methodInfo.methodTypeSymbol(),
                 (dcb.methodInfo.methodFlags() & ACC_STATIC) != 0,
@@ -57,12 +59,12 @@ public final class StackCounter {
     private final String methodName;
     private final MethodTypeDesc methodDesc;
     private final SplitConstantPool cp;
-    private final LinkedHashMap<Integer, Integer> map;
+    private final Queue<Target> targets;
     private final BitSet visited;
 
     private void jump(int targetBci) {
         if (!visited.get(targetBci)) {
-            map.put(targetBci, stack);
+            targets.add(new Target(targetBci, stack));
         }
     }
 
@@ -76,13 +78,11 @@ public final class StackCounter {
     }
 
     private boolean next() {
-        var it = map.entrySet().iterator();
-        while (it.hasNext()) {
-            var en = it.next();
-            it.remove();
-            if (!visited.get(en.getKey())) {
-                bcs.nextBci = en.getKey();
-                stack = en.getValue();
+        Target en;
+        while ((en = targets.poll()) != null) {
+            if (!visited.get(en.bci)) {
+                bcs.nextBci = en.bci;
+                stack = en.stack;
                 return true;
             }
         }
@@ -91,26 +91,23 @@ public final class StackCounter {
     }
 
     public StackCounter(LabelContext labelContext,
-                        ClassDesc thisClass,
-                        String methodName,
-                        MethodTypeDesc methodDesc,
-                        boolean isStatic,
-                        ByteBuffer bytecode,
-                        SplitConstantPool cp,
-                        List<AbstractPseudoInstruction.ExceptionCatchImpl> handlers) {
+                     String methodName,
+                     MethodTypeDesc methodDesc,
+                     boolean isStatic,
+                     ByteBuffer bytecode,
+                     SplitConstantPool cp,
+                     List<AbstractPseudoInstruction.ExceptionCatchImpl> handlers) {
         this.methodName = methodName;
         this.methodDesc = methodDesc;
         this.cp = cp;
-        map = new LinkedHashMap<>();
+        targets = new ArrayDeque<>();
         maxStack = stack = rets = 0;
-        for (var h : handlers) map.put(labelContext.labelToBci(h.handler), 1);
+        for (var h : handlers) targets.add(new Target(labelContext.labelToBci(h.handler), 1));
         maxLocals = isStatic ? 0 : 1;
-        for (var cd : methodDesc.parameterList()) {
-            maxLocals += Util.slotSize(cd);
-        }
+        maxLocals += Util.parameterSlots(methodDesc);
         bcs = new RawBytecodeHelper(bytecode);
         visited = new BitSet(bcs.endBci);
-        map.put(0, 0);
+        targets.add(new Target(0, 0));
         while (next()) {
             while (!bcs.isLastBytecode()) {
                 bcs.rawNext();
@@ -119,27 +116,27 @@ public final class StackCounter {
                 visited.set(bci);
                 switch (opcode) {
                     case NOP, LALOAD, DALOAD, SWAP, INEG, ARRAYLENGTH, INSTANCEOF, LNEG, FNEG, DNEG, I2F, L2D, F2I, D2L, I2B, I2C, I2S,
-                            NEWARRAY, CHECKCAST, ANEWARRAY -> {}
+                         NEWARRAY, CHECKCAST, ANEWARRAY -> {}
                     case RETURN ->
-                            next();
+                        next();
                     case ACONST_NULL, ICONST_M1, ICONST_0, ICONST_1, ICONST_2, ICONST_3, ICONST_4, ICONST_5, SIPUSH, BIPUSH,
-                            FCONST_0, FCONST_1, FCONST_2, DUP, DUP_X1, DUP_X2, I2L, I2D, F2L, F2D, NEW ->
-                            addStackSlot(+1);
+                         FCONST_0, FCONST_1, FCONST_2, DUP, DUP_X1, DUP_X2, I2L, I2D, F2L, F2D, NEW ->
+                        addStackSlot(+1);
                     case LCONST_0, LCONST_1, DCONST_0, DCONST_1, DUP2, DUP2_X1, DUP2_X2 ->
-                            addStackSlot(+2);
+                        addStackSlot(+2);
                     case POP, MONITORENTER, MONITOREXIT, IADD, ISUB, IMUL, IDIV, IREM, ISHL, ISHR, IUSHR, IOR, IXOR, IAND,
-                            LSHL, LSHR, LUSHR, FADD, FSUB, FMUL, FDIV, FREM, L2I, L2F, D2F, FCMPL, FCMPG, D2I ->
-                            addStackSlot(-1);
+                         LSHL, LSHR, LUSHR, FADD, FSUB, FMUL, FDIV, FREM, L2I, L2F, D2F, FCMPL, FCMPG, D2I ->
+                        addStackSlot(-1);
                     case POP2, LADD, LSUB, LMUL, LDIV, LREM, LAND, LOR, LXOR, DADD, DSUB, DMUL, DDIV, DREM ->
-                            addStackSlot(-2);
+                        addStackSlot(-2);
                     case IASTORE, BASTORE, CASTORE, SASTORE, FASTORE, AASTORE, LCMP, DCMPL, DCMPG ->
-                            addStackSlot(-3);
+                        addStackSlot(-3);
                     case LASTORE, DASTORE ->
-                            addStackSlot(-4);
+                        addStackSlot(-4);
                     case LDC ->
-                            processLdc(bcs.getIndexU1());
+                        processLdc(bcs.getIndexU1());
                     case LDC_W, LDC2_W ->
-                            processLdc(bcs.getIndexU2());
+                        processLdc(bcs.getIndexU2());
                     case ILOAD, FLOAD, ALOAD -> {
                         ensureLocalSlot(bcs.getIndex());
                         addStackSlot(+1);
@@ -224,7 +221,7 @@ public final class StackCounter {
                         addStackSlot(-2);
                     }
                     case IINC ->
-                            ensureLocalSlot(bcs.getIndex());
+                        ensureLocalSlot(bcs.getIndex());
                     case IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE -> {
                         addStackSlot(-2);
                         jump(bcs.dest());
@@ -292,30 +289,27 @@ public final class StackCounter {
                         var tk = TypeKind.fromDescriptor(((MemberRefEntry)cp.entryByIndex(bcs.getIndexU2())).nameAndType().type().stringValue());
                         switch (bcs.rawCode) {
                             case GETSTATIC ->
-                                    addStackSlot(tk.slotSize());
+                                addStackSlot(tk.slotSize());
                             case PUTSTATIC ->
-                                    addStackSlot(-tk.slotSize());
+                                addStackSlot(-tk.slotSize());
                             case GETFIELD ->
-                                    addStackSlot(tk.slotSize() - 1);
+                                addStackSlot(tk.slotSize() - 1);
                             case PUTFIELD ->
-                                    addStackSlot(-tk.slotSize() - 1);
+                                addStackSlot(-tk.slotSize() - 1);
                             default -> throw new AssertionError("Should not reach here");
                         }
                     }
                     case INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC, INVOKEINTERFACE, INVOKEDYNAMIC -> {
                         var cpe = cp.entryByIndex(bcs.getIndexU2());
                         var nameAndType = opcode == INVOKEDYNAMIC ? ((DynamicConstantPoolEntry)cpe).nameAndType() : ((MemberRefEntry)cpe).nameAndType();
-                        var mDesc = MethodTypeDesc.ofDescriptor(nameAndType.type().stringValue());
-                        for (var arg : mDesc.parameterList()) {
-                            addStackSlot(-TypeKind.from(arg).slotSize());
-                        }
+                        var mtd = Util.methodTypeSymbol(nameAndType);
+                        addStackSlot(Util.slotSize(mtd.returnType()) - Util.parameterSlots(mtd));
                         if (opcode != INVOKESTATIC && opcode != INVOKEDYNAMIC) {
                             addStackSlot(-1);
                         }
-                        addStackSlot(TypeKind.from(mDesc.returnType()).slotSize());
                     }
                     case MULTIANEWARRAY ->
-                            addStackSlot (1 - bcs.getU1(bcs.bci + 3));
+                        addStackSlot (1 - bcs.getU1(bcs.bci + 3));
                     case JSR -> {
                         addStackSlot(+1);
                         jump(bcs.dest()); //here we lost track of the exact stack size after return from subroutine
@@ -332,7 +326,7 @@ public final class StackCounter {
                         next();
                     }
                     default ->
-                            error(String.format("Bad instruction: %02x", opcode));
+                        error(String.format("Bad instruction: %02x", opcode));
                 }
             }
         }
@@ -360,13 +354,13 @@ public final class StackCounter {
     private void processLdc(int index) {
         switch (cp.entryByIndex(index).tag()) {
             case TAG_UTF8, TAG_STRING, TAG_CLASS, TAG_INTEGER, TAG_FLOAT, TAG_METHODHANDLE, TAG_METHODTYPE ->
-                    addStackSlot(+1);
+                addStackSlot(+1);
             case TAG_DOUBLE, TAG_LONG ->
-                    addStackSlot(+2);
+                addStackSlot(+2);
             case TAG_CONSTANTDYNAMIC ->
-                    addStackSlot(((ConstantDynamicEntry)cp.entryByIndex(index)).typeKind().slotSize());
+                addStackSlot(((ConstantDynamicEntry)cp.entryByIndex(index)).typeKind().slotSize());
             default ->
-                    error("CP entry #%d %s is not loadable constant".formatted(index, cp.entryByIndex(index).tag()));
+                error("CP entry #%d %s is not loadable constant".formatted(index, cp.entryByIndex(index).tag()));
         }
     }
 

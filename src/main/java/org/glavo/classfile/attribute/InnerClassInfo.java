@@ -30,7 +30,7 @@ import java.util.Set;
 
 import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.constantpool.Utf8Entry;
-import org.glavo.classfile.AccessFlag;
+import java.lang.reflect.AccessFlag;
 
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
@@ -38,6 +38,8 @@ import org.glavo.classfile.impl.Util;
 
 /**
  * Models a single inner class in the {@link InnerClassesAttribute}.
+ *
+ * @since 22
  */
 public sealed interface InnerClassInfo
         permits UnboundAttribute.UnboundInnerClassInfo {
@@ -54,8 +56,7 @@ public sealed interface InnerClassInfo
     Optional<ClassEntry> outerClass();
 
     /**
-     * {@return the name of the class or interface of which this class is a
-     * member, if it is a member of a class or interface}
+     * {@return the simple name of this class, or empty if this class is anonymous}
      */
     Optional<Utf8Entry> innerName();
 
@@ -99,6 +100,7 @@ public sealed interface InnerClassInfo
      * @param outerClass the class containing the inner class, if any
      * @param innerName the name of the inner class, if it is not anonymous
      * @param flags the inner class access flags
+     * @throws IllegalArgumentException if {@code innerClass} or {@code outerClass} represents a primitive type
      */
     static InnerClassInfo of(ClassDesc innerClass, Optional<ClassDesc> outerClass, Optional<String> innerName, int flags) {
         return new UnboundAttribute.UnboundInnerClassInfo(TemporaryConstantPool.INSTANCE.classEntry(innerClass),
@@ -113,6 +115,7 @@ public sealed interface InnerClassInfo
      * @param outerClass the class containing the inner class, if any
      * @param innerName the name of the inner class, if it is not anonymous
      * @param flags the inner class access flags
+     * @throws IllegalArgumentException if {@code innerClass} or {@code outerClass} represents a primitive type
      */
     static InnerClassInfo of(ClassDesc innerClass, Optional<ClassDesc> outerClass, Optional<String> innerName, AccessFlag... flags) {
         return of(innerClass, outerClass, innerName, Util.flagsToBits(AccessFlag.Location.INNER_CLASS, flags));

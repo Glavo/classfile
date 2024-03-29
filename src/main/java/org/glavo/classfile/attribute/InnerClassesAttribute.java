@@ -29,20 +29,26 @@ import java.util.List;
 
 import org.glavo.classfile.Attribute;
 import org.glavo.classfile.ClassElement;
-import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.UnboundAttribute;
+import org.glavo.classfile.ClassModel;
 
 /**
  * Models the {@code InnerClasses} attribute {@jvms 4.7.6}, which can
  * appear on classes, and records which classes referenced by this classfile
  * are inner classes. Delivered as a {@link ClassElement} when
  * traversing the elements of a {@link ClassModel}.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ *
+ * @since 22
  */
 public sealed interface InnerClassesAttribute
         extends Attribute<InnerClassesAttribute>, ClassElement
         permits BoundAttribute.BoundInnerClassesAttribute,
-        UnboundAttribute.UnboundInnerClassesAttribute {
+                UnboundAttribute.UnboundInnerClassesAttribute {
 
     /**
      * {@return the inner classes used by this class}

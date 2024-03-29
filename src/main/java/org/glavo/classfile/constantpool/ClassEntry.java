@@ -31,6 +31,9 @@ import org.glavo.classfile.impl.AbstractPoolEntry;
 /**
  * Models a {@code CONSTANT_Class_info} constant in the constant pool of a
  * classfile.
+ * @jvms 4.4.1 The CONSTANT_Class_info Structure
+ *
+ * @since 22
  */
 public sealed interface ClassEntry
         extends LoadableConstantEntry

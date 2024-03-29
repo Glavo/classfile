@@ -35,7 +35,6 @@ import org.glavo.classfile.constantpool.FieldRefEntry;
 import org.glavo.classfile.constantpool.NameAndTypeEntry;
 import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.impl.AbstractInstruction;
-import org.glavo.classfile.impl.AbstractPoolEntry;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.Util;
 
@@ -44,6 +43,8 @@ import org.glavo.classfile.impl.Util;
  * attribute.  Corresponding opcodes will have a {@code kind} of {@link
  * Opcode.Kind#FIELD_ACCESS}.  Delivered as a {@link CodeElement} when
  * traversing the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface FieldInstruction extends Instruction
         permits AbstractInstruction.BoundFieldInstruction, AbstractInstruction.UnboundFieldInstruction {
@@ -77,7 +78,7 @@ public sealed interface FieldInstruction extends Instruction
      * {@return a symbolic descriptor for the type of the field}
      */
     default ClassDesc typeSymbol() {
-        return Util.fieldTypeSymbol(field().nameAndType());
+        return field().typeSymbol();
     }
 
     /**

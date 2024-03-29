@@ -43,28 +43,43 @@ import java.util.List;
  *
  * @see Annotation
  * @see AnnotationElement
+ *
+ * @sealedGraph
+ * @since 22
  */
-
 public sealed interface AnnotationValue extends WritableElement<AnnotationValue>
         permits AnnotationValue.OfAnnotation, AnnotationValue.OfArray,
                 AnnotationValue.OfConstant, AnnotationValue.OfClass,
                 AnnotationValue.OfEnum {
 
-    /** Models an annotation-valued element */
+    /**
+     * Models an annotation-valued element
+     *
+     * @since 22
+     */
     sealed interface OfAnnotation extends AnnotationValue
             permits AnnotationImpl.OfAnnotationImpl {
         /** {@return the annotation} */
         Annotation annotation();
     }
 
-    /** Models an array-valued element */
+    /**
+     * Models an array-valued element
+     *
+     * @since 22
+     */
     sealed interface OfArray extends AnnotationValue
             permits AnnotationImpl.OfArrayImpl {
         /** {@return the values} */
         List<AnnotationValue> values();
     }
 
-    /** Models a constant-valued element */
+    /**
+     * Models a constant-valued element
+     *
+     * @sealedGraph
+     * @since 22
+     */
     sealed interface OfConstant extends AnnotationValue
             permits AnnotationValue.OfString, AnnotationValue.OfDouble,
                     AnnotationValue.OfFloat, AnnotationValue.OfLong,
@@ -77,70 +92,110 @@ public sealed interface AnnotationValue extends WritableElement<AnnotationValue>
         ConstantDesc constantValue();
     }
 
-    /** Models a constant-valued element */
+    /**
+     * Models a constant-valued element
+     *
+     * @since 22
+     */
     sealed interface OfString extends AnnotationValue.OfConstant
             permits AnnotationImpl.OfStringImpl {
         /** {@return the constant} */
         String stringValue();
     }
 
-    /** Models a constant-valued element */
+    /**
+     * Models a constant-valued element
+     *
+     * @since 22
+     */
     sealed interface OfDouble extends AnnotationValue.OfConstant
             permits AnnotationImpl.OfDoubleImpl {
         /** {@return the constant} */
         double doubleValue();
     }
 
-    /** Models a constant-valued element */
+    /**
+     * Models a constant-valued element
+     *
+     * @since 22
+     */
     sealed interface OfFloat extends AnnotationValue.OfConstant
             permits AnnotationImpl.OfFloatImpl {
         /** {@return the constant} */
         float floatValue();
     }
 
-    /** Models a constant-valued element */
+    /**
+     * Models a constant-valued element
+     *
+     * @since 22
+     */
     sealed interface OfLong extends AnnotationValue.OfConstant
             permits AnnotationImpl.OfLongImpl {
         /** {@return the constant} */
         long longValue();
     }
 
-    /** Models a constant-valued element */
+    /**
+     * Models a constant-valued element
+     *
+     * @since 22
+     */
     sealed interface OfInteger extends AnnotationValue.OfConstant
             permits AnnotationImpl.OfIntegerImpl {
         /** {@return the constant} */
         int intValue();
     }
 
-    /** Models a constant-valued element */
+    /**
+     * Models a constant-valued element
+     *
+     * @since 22
+     */
     sealed interface OfShort extends AnnotationValue.OfConstant
             permits AnnotationImpl.OfShortImpl {
         /** {@return the constant} */
         short shortValue();
     }
 
-    /** Models a constant-valued element */
+    /**
+     * Models a constant-valued element
+     *
+     * @since 22
+     */
     sealed interface OfCharacter extends AnnotationValue.OfConstant
             permits AnnotationImpl.OfCharacterImpl {
         /** {@return the constant} */
         char charValue();
     }
 
-    /** Models a constant-valued element */
+    /**
+     * Models a constant-valued element
+     *
+     * @since 22
+     */
     sealed interface OfByte extends AnnotationValue.OfConstant
             permits AnnotationImpl.OfByteImpl {
         /** {@return the constant} */
         byte byteValue();
     }
 
-    /** Models a constant-valued element */
+    /**
+     * Models a constant-valued element
+     *
+     * @since 22
+     */
     sealed interface OfBoolean extends AnnotationValue.OfConstant
             permits AnnotationImpl.OfBooleanImpl {
         /** {@return the constant} */
         boolean booleanValue();
     }
 
-    /** Models a class-valued element */
+    /**
+     * Models a class-valued element
+     *
+     * @since 22
+     */
     sealed interface OfClass extends AnnotationValue
             permits AnnotationImpl.OfClassImpl {
         /** {@return the class name} */
@@ -152,7 +207,11 @@ public sealed interface AnnotationValue extends WritableElement<AnnotationValue>
         }
     }
 
-    /** Models an enum-valued element */
+    /**
+     * Models an enum-valued element
+     *
+     * @since 22
+     */
     sealed interface OfEnum extends AnnotationValue
             permits AnnotationImpl.OfEnumImpl {
         /** {@return the enum class name} */
@@ -168,7 +227,7 @@ public sealed interface AnnotationValue extends WritableElement<AnnotationValue>
     }
 
     /**
-     * @return the tag character for this type as per {@jvms 4.7.16.1}
+     * {@return the tag character for this type as per {@jvms 4.7.16.1}}
      */
     char tag();
 
@@ -379,10 +438,13 @@ public sealed interface AnnotationValue extends WritableElement<AnnotationValue>
 
     /**
      * {@return an annotation element}  The {@code value} parameter must be
-     * a primitive, a String, a ClassDesc, an enum constant, or an array of
-     * one of these.
+     * a primitive, a wrapper of primitive, a String, a ClassDesc, an enum
+     * constant, or an array of one of these.
      *
      * @param value the annotation value
+     * @throws IllegalArgumentException when the {@code value} parameter is not
+     *         a primitive, a wrapper of primitive, a String, a ClassDesc,
+     *         an enum constant, or an array of one of these.
      */
     static AnnotationValue of(Object value) {
         if (value instanceof String s) {

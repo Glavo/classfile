@@ -42,6 +42,8 @@ import org.glavo.classfile.impl.Util;
  * constant" instructions (e.g., {@code LDC}).  Corresponding opcodes will have
  * a {@code kind} of {@link Opcode.Kind#CONSTANT}.  Delivered as a {@link
  * CodeElement} when traversing the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface ConstantInstruction extends Instruction {
 
@@ -58,8 +60,10 @@ public sealed interface ConstantInstruction extends Instruction {
     /**
      * Models an "intrinsic constant" instruction (e.g., {@code
      * iconst_0}).
+     *
+     * @since 22
      */
-    sealed interface IntrinsicConstantInstruction extends ConstantInstruction
+        sealed interface IntrinsicConstantInstruction extends ConstantInstruction
             permits AbstractInstruction.UnboundIntrinsicConstantInstruction {
 
         /**
@@ -74,8 +78,10 @@ public sealed interface ConstantInstruction extends Instruction {
     /**
      * Models an "argument constant" instruction (e.g., {@code
      * bipush}).
+     *
+     * @since 22
      */
-    sealed interface ArgumentConstantInstruction extends ConstantInstruction
+        sealed interface ArgumentConstantInstruction extends ConstantInstruction
             permits AbstractInstruction.BoundArgumentConstantInstruction,
                     AbstractInstruction.UnboundArgumentConstantInstruction {
 
@@ -94,8 +100,10 @@ public sealed interface ConstantInstruction extends Instruction {
     /**
      * Models a "load constant" instruction (e.g., {@code
      * ldc}).
+     *
+     * @since 22
      */
-    sealed interface LoadConstantInstruction extends ConstantInstruction
+        sealed interface LoadConstantInstruction extends ConstantInstruction
             permits AbstractInstruction.BoundLoadConstantInstruction,
                     AbstractInstruction.UnboundLoadConstantInstruction {
 
@@ -136,7 +144,7 @@ public sealed interface ConstantInstruction extends Instruction {
     static ArgumentConstantInstruction ofArgument(Opcode op, int value) {
         Util.checkKind(op, Opcode.Kind.CONSTANT);
         if (op != Opcode.BIPUSH && op != Opcode.SIPUSH)
-            throw new IllegalArgumentException(String.format("Wrong opcode specified; found %s, expected BIPUSH or SIPUSH", op, op.kind()));
+            throw new IllegalArgumentException(String.format("Wrong opcode specified; found %s, expected BIPUSH or SIPUSH", op));
         return new AbstractInstruction.UnboundArgumentConstantInstruction(op, value);
     }
 
@@ -150,7 +158,7 @@ public sealed interface ConstantInstruction extends Instruction {
     static LoadConstantInstruction ofLoad(Opcode op, LoadableConstantEntry constant) {
         Util.checkKind(op, Opcode.Kind.CONSTANT);
         if (op != Opcode.LDC && op != Opcode.LDC_W && op != Opcode.LDC2_W)
-            throw new IllegalArgumentException(String.format("Wrong opcode specified; found %s, expected LDC, LDC_W or LDC2_W", op, op.kind()));
+            throw new IllegalArgumentException(String.format("Wrong opcode specified; found %s, expected LDC, LDC_W or LDC2_W", op));
         return new AbstractInstruction.UnboundLoadConstantInstruction(op, constant);
     }
 }

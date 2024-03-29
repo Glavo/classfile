@@ -34,6 +34,8 @@ import org.glavo.classfile.impl.AbstractInstruction;
  * Models a {@code new} instruction in the {@code code} array of a {@code Code}
  * attribute.  Delivered as a {@link CodeElement} when traversing the elements
  * of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface NewObjectInstruction extends Instruction
         permits AbstractInstruction.BoundNewObjectInstruction, AbstractInstruction.UnboundNewObjectInstruction {

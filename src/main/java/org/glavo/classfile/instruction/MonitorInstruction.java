@@ -35,6 +35,8 @@ import org.glavo.classfile.impl.Util;
  * Models a {@code monitorenter} or {@code monitorexit} instruction in the
  * {@code code} array of a {@code Code} attribute.  Delivered as a {@link
  * CodeElement} when traversing the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface MonitorInstruction extends Instruction
         permits AbstractInstruction.UnboundMonitorInstruction {

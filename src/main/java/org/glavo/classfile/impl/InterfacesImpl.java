@@ -27,8 +27,8 @@ package org.glavo.classfile.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.glavo.classfile.constantpool.ClassEntry;
-import org.glavo.classfile.Interfaces;
+import java.lang.classfile.constantpool.ClassEntry;
+import java.lang.classfile.Interfaces;
 
 public final class InterfacesImpl
         extends AbstractElement

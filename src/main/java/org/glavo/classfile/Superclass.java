@@ -30,6 +30,8 @@ import org.glavo.classfile.impl.SuperclassImpl;
 /**
  * Models the superclass of a class.  Delivered as a {@link
  * ClassElement} when traversing a {@link ClassModel}.
+ *
+ * @since 22
  */
 public sealed interface Superclass
         extends ClassElement

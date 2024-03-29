@@ -43,6 +43,14 @@ import org.glavo.classfile.impl.UnboundAttribute;
  * {@link ClassElement}, {@link FieldElement}, or
  * {@link MethodElement} when traversing
  * the corresponding model type.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ * <p>
+ * The attribute was introduced in the Java SE Platform version 5.0.
+ *
+ * @since 22
  */
 public sealed interface SignatureAttribute
         extends Attribute<SignatureAttribute>,
@@ -55,7 +63,7 @@ public sealed interface SignatureAttribute
     Utf8Entry signature();
 
     /**
-     * Parse the siganture as a class signature.
+     * Parse the signature as a class signature.
      * @return the class signature
      */
     default ClassSignature asClassSignature() {
@@ -71,7 +79,7 @@ public sealed interface SignatureAttribute
     }
 
     /**
-     * Parse the siganture as a type signature.
+     * Parse the signature as a type signature.
      * @return the type signature
      */
     default Signature asTypeSignature() {

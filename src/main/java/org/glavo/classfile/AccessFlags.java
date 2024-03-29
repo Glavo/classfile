@@ -26,12 +26,14 @@ package org.glavo.classfile;
 
 import java.util.Set;
 import org.glavo.classfile.impl.AccessFlagsImpl;
+import java.lang.reflect.AccessFlag;
 
 /**
  * Models the access flags for a class, method, or field.  Delivered as a
- *  {@link ClassElement}, {@link FieldElement}, or
- *  {@link MethodElement} when traversing
- *  the corresponding model type.
+ * {@link ClassElement}, {@link FieldElement}, or {@link MethodElement}
+ * when traversing the corresponding model type.
+ *
+ * @since 22
  */
 public sealed interface AccessFlags
         extends ClassElement, MethodElement, FieldElement

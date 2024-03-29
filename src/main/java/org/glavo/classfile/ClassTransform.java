@@ -34,11 +34,13 @@ import org.glavo.classfile.impl.TransformImpl;
 /**
  * A transformation on streams of {@link ClassElement}.
  *
- * @see ClassfileTransform
+ * @see ClassFileTransform
+ *
+ * @since 22
  */
 @FunctionalInterface
 public non-sealed interface ClassTransform
-        extends ClassfileTransform<ClassTransform, ClassElement, ClassBuilder> {
+        extends ClassFileTransform<ClassTransform, ClassElement, ClassBuilder> {
 
     /**
      * A class transform that sends all elements to the builder.
@@ -156,11 +158,22 @@ public non-sealed interface ClassTransform
         return new TransformImpl.ClassFieldTransform(xform, f -> true);
     }
 
+    /**
+     * @implSpec
+     * The default implementation returns this class transform chained with another
+     * class transform from the argument. Chaining of two transforms requires to
+     * involve a chained builder serving as a target builder for this transform
+     * and also as a source of elements for the downstream transform.
+     */
     @Override
     default ClassTransform andThen(ClassTransform t) {
         return new TransformImpl.ChainedClassTransform(this, t);
     }
 
+    /**
+     * @implSpec The default implementation returns a resolved transform bound
+     *           to the given class builder.
+     */
     @Override
     default ResolvedTransform<ClassElement> resolve(ClassBuilder builder) {
         return new TransformImpl.ResolvedTransformImpl<>(e -> accept(builder, e),

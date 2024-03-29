@@ -26,10 +26,10 @@ package org.glavo.classfile.impl;
 
 import java.util.Optional;
 
-import org.glavo.classfile.CodeBuilder;
-import org.glavo.classfile.CodeModel;
-import org.glavo.classfile.Label;
-import org.glavo.classfile.constantpool.ConstantPoolBuilder;
+import java.lang.classfile.CodeBuilder;
+import java.lang.classfile.CodeModel;
+import java.lang.classfile.Label;
+import java.lang.classfile.constantpool.ConstantPoolBuilder;
 
 public abstract sealed class NonterminalCodeBuilder implements CodeBuilder
     permits ChainedCodeBuilder, BlockCodeBuilderImpl {
@@ -41,7 +41,6 @@ public abstract sealed class NonterminalCodeBuilder implements CodeBuilder
         this.terminal = switch (parent) {
             case NonterminalCodeBuilder cb -> cb.terminal;
             case TerminalCodeBuilder cb -> cb;
-            default -> throw new AssertionError();
         };
     }
 

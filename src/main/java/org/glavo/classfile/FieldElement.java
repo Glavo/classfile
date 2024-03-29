@@ -35,10 +35,13 @@ import org.glavo.classfile.attribute.SyntheticAttribute;
 import org.glavo.classfile.attribute.UnknownAttribute;
 
 /**
- * A {@link ClassfileElement} that can appear when traversing the elements
- * of a {@link FieldModel} or be presented to a {@link FieldBuilder}.
+ * A marker interface for elements that can appear when traversing
+ * a {@link FieldModel} or be presented to a {@link FieldBuilder}.
+ *
+ * @sealedGraph
+ * @since 22
  */
-public sealed interface FieldElement extends ClassfileElement
+public sealed interface FieldElement extends ClassFileElement
         permits AccessFlags,
                 CustomAttribute, ConstantValueAttribute, DeprecatedAttribute,
         RuntimeInvisibleAnnotationsAttribute, RuntimeInvisibleTypeAnnotationsAttribute,

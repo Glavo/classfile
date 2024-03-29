@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,21 +28,21 @@ import java.lang.constant.ClassDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.AbstractList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-import org.glavo.classfile.Opcode;
-import org.glavo.classfile.constantpool.ClassEntry;
-import org.glavo.classfile.constantpool.ModuleEntry;
-import org.glavo.classfile.constantpool.NameAndTypeEntry;
-import org.glavo.classfile.constant.ModuleDesc;
-import org.glavo.classfile.AccessFlag;
+import java.lang.classfile.Attribute;
+import java.lang.classfile.AttributeMapper;
+import java.lang.classfile.ClassFile;
+import java.lang.classfile.Opcode;
+import java.lang.classfile.constantpool.ClassEntry;
+import java.lang.classfile.constantpool.ModuleEntry;
+import java.lang.classfile.constantpool.NameAndTypeEntry;
+import java.lang.constant.ModuleDesc;
+import java.lang.reflect.AccessFlag;
+import jdk.internal.access.SharedSecrets;
 
-import static org.glavo.classfile.Classfile.ACC_STATIC;
-
-import org.glavo.classfile.jdk.ClassDescUtils;
-import org.glavo.classfile.jdk.CollectionUtils;
+import static java.lang.classfile.ClassFile.ACC_STATIC;
 
 /**
  * Helper to create and manipulate type descriptors, where type descriptors are
@@ -54,8 +54,13 @@ public class Util {
     private Util() {
     }
 
-    public static String arrayOf(CharSequence s) {
-        return "[" + s;
+    private static final int ATTRIBUTE_STABILITY_COUNT = AttributeMapper.AttributeStability.values().length;
+
+    public static boolean isAttributeAllowed(final Attribute<?> attr,
+                                             final ClassFile.AttributesProcessingOption processingOption) {
+        return attr instanceof BoundAttribute
+                ? ATTRIBUTE_STABILITY_COUNT - attr.attributeMapper().stability().ordinal() > processingOption.ordinal()
+                : true;
     }
 
     public static int parameterSlots(MethodTypeDesc mDesc) {
@@ -84,60 +89,26 @@ public class Util {
         return count;
     }
 
-    public static String toClassString(String desc) {
-        //TODO: this doesn't look right L ... ;
-        return desc.replace('/', '.');
-    }
-
-    public static Iterator<String> parameterTypes(String s) {
-        //TODO: gracefully non-method types
-        return new Iterator<>() {
-            int ch = 1;
-
-            @Override
-            public boolean hasNext() {
-                return s.charAt(ch) != ')';
-            }
-
-            @Override
-            public String next() {
-                char curr = s.charAt(ch);
-                switch (curr) {
-                    case 'C', 'B', 'S', 'I', 'J', 'F', 'D', 'Z':
-                        ch++;
-                        return String.valueOf(curr);
-                    case '[':
-                        ch++;
-                        return "[" + next();
-                    case 'L': {
-                        int start = ch;
-                        while (s.charAt(++ch) != ';') { }
-                        ++ch;
-                        return s.substring(start, ch);
-                    }
-                    default:
-                        throw new AssertionError("cannot parse string: " + s);
-                }
-            }
-        };
-    }
-
-    public static String returnDescriptor(String s) {
-        return s.substring(s.indexOf(')') + 1);
+    /**
+     * Converts a descriptor of classes or interfaces into
+     * a binary name. Rejects primitive types or arrays.
+     * This is an inverse of {@link ClassDesc#of(String)}.
+     */
+    public static String toBinaryName(ClassDesc cd) {
+        return toInternalName(cd).replace('/', '.');
     }
 
     public static String toInternalName(ClassDesc cd) {
         var desc = cd.descriptorString();
-        return switch (desc.charAt(0)) {
-            case 'L' -> desc.substring(1, desc.length() - 1);
-            default -> throw new IllegalArgumentException(desc);
-        };
+        if (desc.charAt(0) == 'L')
+            return desc.substring(1, desc.length() - 1);
+        throw new IllegalArgumentException(desc);
     }
 
     public static ClassDesc toClassDesc(String classInternalNameOrArrayDesc) {
         return classInternalNameOrArrayDesc.charAt(0) == '['
                 ? ClassDesc.ofDescriptor(classInternalNameOrArrayDesc)
-                : ClassDescUtils.ofInternalName(classInternalNameOrArrayDesc);
+                : ClassDesc.ofInternalName(classInternalNameOrArrayDesc);
     }
 
     public static<T, U> List<U> mappedList(List<? extends T> list, Function<T, U> mapper) {
@@ -159,7 +130,7 @@ public class Util {
         for (int i = 0; i < result.length; i++) {
             result[i] = TemporaryConstantPool.INSTANCE.classEntry(list.get(i));
         }
-        return CollectionUtils.listFromTrustedArrayNullsAllowed(result);
+        return SharedSecrets.getJavaUtilCollectionAccess().listFromTrustedArray(result);
     }
 
     public static List<ModuleEntry> moduleEntryList(List<? extends ModuleDesc> list) {
@@ -167,7 +138,7 @@ public class Util {
         for (int i = 0; i < result.length; i++) {
             result[i] = TemporaryConstantPool.INSTANCE.moduleEntry(TemporaryConstantPool.INSTANCE.utf8Entry(list.get(i).name()));
         }
-        return CollectionUtils.listFromTrustedArrayNullsAllowed(result);
+        return SharedSecrets.getJavaUtilCollectionAccess().listFromTrustedArray(result);
     }
 
     public static void checkKind(Opcode op, Opcode.Kind k) {

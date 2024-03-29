@@ -31,18 +31,21 @@ import java.util.function.Consumer;
 import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.impl.ChainedMethodBuilder;
 import org.glavo.classfile.impl.TerminalMethodBuilder;
+import java.lang.reflect.AccessFlag;
 
 /**
  * A builder for methods.  Builders are not created directly; they are passed
  * to handlers by methods such as {@link ClassBuilder#withMethod(Utf8Entry, Utf8Entry, int, Consumer)}
  * or to method transforms.  The elements of a method can be specified
- * abstractly (by passing a {@link MethodElement} to {@link #with(ClassfileElement)}
+ * abstractly (by passing a {@link MethodElement} to {@link #with(ClassFileElement)}
  * or concretely by calling the various {@code withXxx} methods.
  *
  * @see MethodTransform
+ *
+ * @since 22
  */
 public sealed interface MethodBuilder
-        extends ClassfileBuilder<MethodElement, MethodBuilder>
+        extends ClassFileBuilder<MethodElement, MethodBuilder>
         permits ChainedMethodBuilder, TerminalMethodBuilder {
 
     /**

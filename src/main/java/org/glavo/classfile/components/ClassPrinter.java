@@ -47,21 +47,31 @@ import org.glavo.classfile.impl.ClassPrinterImpl;
  * <p>
  * Level of details to print or to export is driven by {@link Verbosity} option.
  * <p>
+ * Printing is for debugging purposes only. Printed text schema, tree content and structure
+ * not guaranteed. It may change anytime in a future.
+ * <p>
  * The most frequent use case is to simply print a class:
- * {@snippet lang="java" class="ComponentsPackageSnippets" region="printClass"}
+ * {@snippet lang="java" class="PackageSnippets" region="printClass"}
  * <p>
  * {@link ClassPrinter} allows to traverse tree of simple printable nodes to hook custom printer:
- * {@snippet lang="java" class="ComponentsPackageSnippets" region="customPrint"}
+ * {@snippet lang="java" class="PackageSnippets" region="customPrint"}
  * <p>
  * Another use case for {@link ClassPrinter} is to simplify writing of automated tests:
- * {@snippet lang="java" class="ComponentsPackageSnippets" region="printNodesInTest"}
+ * {@snippet lang="java" class="PackageSnippets" region="printNodesInTest"}
+ *
+ * @since 22
  */
 public final class ClassPrinter {
 
+    private ClassPrinter() {
+    }
+
     /**
      * Level of detail to print or export.
+     *
+     * @since 22
      */
-    public enum Verbosity {
+        public enum Verbosity {
 
         /**
          * Only top level class info, class members and attribute names are printed.
@@ -92,8 +102,10 @@ public final class ClassPrinter {
 
     /**
      * Named, traversable, and printable node parent.
+     *
+     * @since 22
      */
-    public sealed interface Node {
+        public sealed interface Node {
 
         /**
          * Printable name of the node.
@@ -134,8 +146,10 @@ public final class ClassPrinter {
 
     /**
      * A leaf node holding single printable value.
+     *
+     * @since 22
      */
-    public sealed interface LeafNode extends Node
+        public sealed interface LeafNode extends Node
             permits ClassPrinterImpl.LeafNodeImpl {
 
         /**
@@ -147,8 +161,10 @@ public final class ClassPrinter {
 
     /**
      * A tree node holding {@link List} of nested nodes.
+     *
+     * @since 22
      */
-    public sealed interface ListNode extends Node, List<Node>
+        public sealed interface ListNode extends Node, List<Node>
             permits ClassPrinterImpl.ListNodeImpl {
     }
 
@@ -156,8 +172,10 @@ public final class ClassPrinter {
      * A tree node holding {@link Map} of nested nodes.
      * <p>
      * Each {@link Map.Entry#getKey()} == {@link Map.Entry#getValue()}.{@link #name()}.
+     *
+     * @since 22
      */
-    public sealed interface MapNode extends Node, Map<ConstantDesc, Node>
+        public sealed interface MapNode extends Node, Map<ConstantDesc, Node>
             permits ClassPrinterImpl.MapNodeImpl {
     }
 

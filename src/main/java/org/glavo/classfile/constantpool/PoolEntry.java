@@ -28,6 +28,9 @@ import org.glavo.classfile.WritableElement;
 
 /**
  * Models an entry in the constant pool of a classfile.
+ *
+ * @sealedGraph
+ * @since 22
  */
 public sealed interface PoolEntry extends WritableElement<PoolEntry>
         permits AnnotationConstantValueEntry, DynamicConstantPoolEntry,

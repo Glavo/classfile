@@ -28,14 +28,16 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.glavo.classfile.constantpool.Utf8Entry;
-import org.glavo.classfile.AccessFlag;
-import org.glavo.classfile.Classfile;
+import java.lang.reflect.AccessFlag;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 import org.glavo.classfile.impl.Util;
 
 /**
  * Models a single method parameter in the {@link MethodParametersAttribute}.
+ *
+ * @since 22
  */
 public sealed interface MethodParameterInfo
         permits UnboundAttribute.UnboundMethodParameterInfo {
@@ -48,8 +50,8 @@ public sealed interface MethodParameterInfo
 
     /**
      * Parameter access flags for this parameter, as a bit mask.  Valid
-     * parameter flags include {@link Classfile#ACC_FINAL},
-     * {@link Classfile#ACC_SYNTHETIC}, and {@link Classfile#ACC_MANDATED}.
+     * parameter flags include {@link ClassFile#ACC_FINAL},
+     * {@link ClassFile#ACC_SYNTHETIC}, and {@link ClassFile#ACC_MANDATED}.
      *
      * @return the access flags, as a bit mask
      */

@@ -36,6 +36,8 @@ import org.glavo.classfile.impl.FieldImpl;
  * Models a field.  The contents of the field can be traversed via
  * a streaming view (e.g., {@link #elements()}), or via random access (e.g.,
  * {@link #flags()}), or by freely mixing the two.
+ *
+ * @since 22
  */
 public sealed interface FieldModel
         extends WritableElement<FieldModel>, CompoundElement<FieldElement>, AttributedElement, ClassElement

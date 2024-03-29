@@ -36,6 +36,8 @@ import org.glavo.classfile.impl.AbstractInstruction;
  * Models a {@code lookupswitch} instruction in the {@code code} array of a
  * {@code Code} attribute.  Delivered as a {@link CodeElement} when traversing
  * the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface LookupSwitchInstruction extends Instruction
         permits AbstractInstruction.BoundLookupSwitchInstruction,

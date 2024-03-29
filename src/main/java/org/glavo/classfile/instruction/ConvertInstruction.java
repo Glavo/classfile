@@ -38,6 +38,8 @@ import org.glavo.classfile.impl.Util;
  * {@code Code} attribute, such as {@code i2l}.  Corresponding opcodes will have
  * a {@code kind} of {@link Opcode.Kind#CONVERT}.  Delivered as a {@link
  * CodeElement} when traversing the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface ConvertInstruction extends Instruction
         permits AbstractInstruction.UnboundConvertInstruction {

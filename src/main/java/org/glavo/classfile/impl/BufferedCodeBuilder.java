@@ -24,18 +24,18 @@
  */
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.BufWriter;
-import org.glavo.classfile.CodeBuilder;
-import org.glavo.classfile.CodeElement;
-import org.glavo.classfile.CodeModel;
-import org.glavo.classfile.TypeKind;
-import org.glavo.classfile.constantpool.ConstantPoolBuilder;
-import org.glavo.classfile.Label;
-import org.glavo.classfile.MethodModel;
-import org.glavo.classfile.instruction.ExceptionCatch;
-import org.glavo.classfile.instruction.IncrementInstruction;
-import org.glavo.classfile.instruction.LoadInstruction;
-import org.glavo.classfile.instruction.StoreInstruction;
+import java.lang.classfile.BufWriter;
+import java.lang.classfile.CodeBuilder;
+import java.lang.classfile.CodeElement;
+import java.lang.classfile.CodeModel;
+import java.lang.classfile.TypeKind;
+import java.lang.classfile.constantpool.ConstantPoolBuilder;
+import java.lang.classfile.Label;
+import java.lang.classfile.MethodModel;
+import java.lang.classfile.instruction.ExceptionCatch;
+import java.lang.classfile.instruction.IncrementInstruction;
+import java.lang.classfile.instruction.LoadInstruction;
+import java.lang.classfile.instruction.StoreInstruction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +45,7 @@ import java.util.function.Consumer;
 public final class BufferedCodeBuilder
         implements TerminalCodeBuilder, LabelContext {
     private final SplitConstantPool constantPool;
+    private final ClassFileImpl context;
     private final List<CodeElement> elements = new ArrayList<>();
     private final LabelImpl startLabel, endLabel;
     private final CodeModel original;
@@ -54,8 +55,10 @@ public final class BufferedCodeBuilder
 
     public BufferedCodeBuilder(MethodInfo methodInfo,
                                SplitConstantPool constantPool,
+                               ClassFileImpl context,
                                CodeModel original) {
         this.constantPool = constantPool;
+        this.context = context;
         this.startLabel = new LabelImpl(this, -1);
         this.endLabel = new LabelImpl(this, -1);
         this.original = original;
@@ -204,7 +207,7 @@ public final class BufferedCodeBuilder
         }
 
         public void writeTo(BufWriter buf) {
-            DirectCodeBuilder.build(methodInfo, cb -> elements.forEach(cb), constantPool, null).writeTo(buf);
+            DirectCodeBuilder.build(methodInfo, cb -> elements.forEach(cb), constantPool, context, null).writeTo(buf);
         }
 
         @Override

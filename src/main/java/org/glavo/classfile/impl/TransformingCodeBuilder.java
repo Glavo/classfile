@@ -24,14 +24,14 @@
  */
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.CodeBuilder;
-import org.glavo.classfile.CodeModel;
+import java.lang.classfile.CodeBuilder;
+import java.lang.classfile.CodeModel;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.glavo.classfile.CodeElement;
-import org.glavo.classfile.Label;
-import org.glavo.classfile.TypeKind;
-import org.glavo.classfile.constantpool.ConstantPoolBuilder;
+import java.lang.classfile.CodeElement;
+import java.lang.classfile.Label;
+import java.lang.classfile.TypeKind;
+import java.lang.classfile.constantpool.ConstantPoolBuilder;
 
 public final class TransformingCodeBuilder implements TerminalCodeBuilder {
 

@@ -24,10 +24,10 @@
  */
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.CodeBuilder;
-import org.glavo.classfile.CodeElement;
-import org.glavo.classfile.TypeKind;
-import org.glavo.classfile.Label;
+import java.lang.classfile.CodeBuilder;
+import java.lang.classfile.CodeElement;
+import java.lang.classfile.TypeKind;
+import java.lang.classfile.Label;
 
 import java.util.function.Consumer;
 

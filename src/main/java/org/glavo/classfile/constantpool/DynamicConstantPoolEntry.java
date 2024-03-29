@@ -29,6 +29,10 @@ import org.glavo.classfile.BootstrapMethodEntry;
 /**
  * Models a dynamic constant pool entry, which is either {@link ConstantDynamicEntry}
  * or {@link InvokeDynamicEntry}.
+ * @jvms 4.4.10 The CONSTANT_Dynamic_info and CONSTANT_InvokeDynamic_info Structures
+ *
+ * @sealedGraph
+ * @since 22
  */
 public sealed interface DynamicConstantPoolEntry extends PoolEntry
         permits ConstantDynamicEntry, InvokeDynamicEntry {
@@ -37,6 +41,11 @@ public sealed interface DynamicConstantPoolEntry extends PoolEntry
      * {@return the entry in the bootstrap method table for this constant}
      */
     BootstrapMethodEntry bootstrap();
+
+    /**
+     * {@return index of the entry in the bootstrap method table for this constant}
+     */
+    int bootstrapMethodIndex();
 
     /**
      * {@return the invocation name and type}

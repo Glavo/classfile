@@ -41,6 +41,14 @@ import org.glavo.classfile.impl.Util;
  * appear on classes to indicate which classes may extend this class.
  * Delivered as a {@link ClassElement} when
  * traversing the elements of a {@link ClassModel}.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ * <p>
+ * The attribute was introduced in the Java SE Platform version 17.
+ *
+ * @since 22
  */
 public sealed interface PermittedSubclassesAttribute
         extends Attribute<PermittedSubclassesAttribute>, ClassElement

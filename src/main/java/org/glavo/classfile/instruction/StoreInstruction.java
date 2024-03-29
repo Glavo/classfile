@@ -38,17 +38,27 @@ import org.glavo.classfile.impl.Util;
  * {@code Code} attribute.  Corresponding opcodes will have a {@code kind} of
  * {@link Opcode.Kind#STORE}.  Delivered as a {@link CodeElement} when
  * traversing the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface StoreInstruction extends Instruction
         permits AbstractInstruction.BoundStoreInstruction, AbstractInstruction.UnboundStoreInstruction {
+
+    /**
+     * {@return the local variable slot to store to}
+     */
     int slot();
+
+    /**
+     * {@return the type of the value to be stored}
+     */
     TypeKind typeKind();
 
     /**
      * {@return a local variable store instruction}
      *
      * @param kind the type of the value to be stored
-     * @param slot the local varaible slot to store to
+     * @param slot the local variable slot to store to
      */
     static StoreInstruction of(TypeKind kind, int slot) {
         return of(BytecodeHelpers.storeOpcode(kind, slot), slot);
@@ -59,7 +69,7 @@ public sealed interface StoreInstruction extends Instruction
      *
      * @param op the opcode for the specific type of store instruction,
      *           which must be of kind {@link Opcode.Kind#STORE}
-     * @param slot the local varaible slot to store to
+     * @param slot the local variable slot to store to
      */
     static StoreInstruction of(Opcode op, int slot) {
         Util.checkKind(op, Opcode.Kind.STORE);

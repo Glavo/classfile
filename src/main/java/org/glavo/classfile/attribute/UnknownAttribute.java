@@ -33,6 +33,8 @@ import org.glavo.classfile.impl.BoundAttribute;
 
 /**
  * Models an unknown attribute on a class, method, or field.
+ *
+ * @since 22
  */
 public sealed interface UnknownAttribute
         extends Attribute<UnknownAttribute>,

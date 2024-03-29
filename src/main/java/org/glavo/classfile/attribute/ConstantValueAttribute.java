@@ -38,11 +38,17 @@ import org.glavo.classfile.impl.UnboundAttribute;
  * fields and indicates that the field's value is a constant.  Delivered as a
  * {@link FieldElement} when traversing the elements of a
  * {@link FieldModel}.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ *
+ * @since 22
  */
 public sealed interface ConstantValueAttribute
         extends Attribute<ConstantValueAttribute>, FieldElement
         permits BoundAttribute.BoundConstantValueAttribute,
-        UnboundAttribute.UnboundConstantValueAttribute {
+                UnboundAttribute.UnboundConstantValueAttribute {
 
     /**
      * {@return the constant value of the field}
@@ -68,7 +74,7 @@ public sealed interface ConstantValueAttribute
             case Long l -> TemporaryConstantPool.INSTANCE.longEntry(l);
             case Double d -> TemporaryConstantPool.INSTANCE.doubleEntry(d);
             case String s -> TemporaryConstantPool.INSTANCE.stringEntry(s);
-            default -> throw new IllegalArgumentException("Invalid ConstantValueAtrtibute value: " + value);
+            default -> throw new IllegalArgumentException("Invalid ConstantValueAttribute value: " + value);
         });
     }
 }

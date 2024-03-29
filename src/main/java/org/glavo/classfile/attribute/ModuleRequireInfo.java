@@ -28,17 +28,19 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.constantpool.ModuleEntry;
 import org.glavo.classfile.constantpool.Utf8Entry;
-import org.glavo.classfile.AccessFlag;
-import org.glavo.classfile.constant.ModuleDesc;
+import java.lang.reflect.AccessFlag;
+import java.lang.constant.ModuleDesc;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 import org.glavo.classfile.impl.Util;
 
 /**
  * Models a single "requires" declaration in the {@link ModuleAttribute}.
+ *
+ * @since 22
  */
 public sealed interface ModuleRequireInfo
         permits UnboundAttribute.UnboundModuleRequiresInfo {
@@ -50,13 +52,16 @@ public sealed interface ModuleRequireInfo
 
     /**
      * {@return the flags associated with this require declaration, as a bit mask}
-     * Valid flags include {@link Classfile#ACC_TRANSITIVE},
-     * {@link Classfile#ACC_STATIC_PHASE},
-     * {@link Classfile#ACC_SYNTHETIC} and
-     * {@link Classfile#ACC_MANDATED}
+     * Valid flags include {@link ClassFile#ACC_TRANSITIVE},
+     * {@link ClassFile#ACC_STATIC_PHASE},
+     * {@link ClassFile#ACC_SYNTHETIC} and
+     * {@link ClassFile#ACC_MANDATED}
      */
     int requiresFlagsMask();
 
+    /**
+     * {@return the access flags}
+     */
     default Set<AccessFlag> requiresFlags() {
         return AccessFlag.maskToAccessFlags(requiresFlagsMask(), AccessFlag.Location.MODULE_REQUIRES);
     }

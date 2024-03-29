@@ -27,10 +27,10 @@ package org.glavo.classfile.impl;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import org.glavo.classfile.FieldBuilder;
-import org.glavo.classfile.FieldElement;
-import org.glavo.classfile.FieldModel;
-import org.glavo.classfile.constantpool.ConstantPoolBuilder;
+import java.lang.classfile.FieldBuilder;
+import java.lang.classfile.FieldElement;
+import java.lang.classfile.FieldModel;
+import java.lang.classfile.constantpool.ConstantPoolBuilder;
 
 public final class ChainedFieldBuilder implements FieldBuilder {
     private final TerminalFieldBuilder terminal;

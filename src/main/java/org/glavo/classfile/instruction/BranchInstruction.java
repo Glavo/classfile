@@ -37,6 +37,8 @@ import org.glavo.classfile.impl.Util;
  * code} array of a {@code Code} attribute.  Corresponding opcodes will have a
  * {@code kind} of {@link Opcode.Kind#BRANCH}.  Delivered as a {@link
  * CodeElement} when traversing the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface BranchInstruction extends Instruction
         permits AbstractInstruction.BoundBranchInstruction,
@@ -51,6 +53,7 @@ public sealed interface BranchInstruction extends Instruction
      *
      * @param op the opcode for the specific type of branch instruction,
      *           which must be of kind {@link Opcode.Kind#BRANCH}
+     * @param target the target of the branch
      */
     static BranchInstruction of(Opcode op, Label target) {
         Util.checkKind(op, Opcode.Kind.BRANCH);
