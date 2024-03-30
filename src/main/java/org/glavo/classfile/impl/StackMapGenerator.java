@@ -60,7 +60,7 @@ import org.glavo.classfile.attribute.CodeAttribute;
  * <ol>
  * <li>{@linkplain #detectFrameOffsets() Detection} of mandatory stack map frames offsets:<ul>
  *      <li>Mandatory stack map frame offsets include all jump and switch instructions targets,
- *          offsets immediately following {@linkplain #noControlFlow(int) "no control flow"}
+ *          offsets immediately following "no control flow"
  *          and all exception table handlers.
  *      <li>Detection is performed in a single fast pass through the bytecode,
  *          with no auxiliary structures construction nor further instructions processing.

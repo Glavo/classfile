@@ -24,7 +24,7 @@
  */
 
 /**
- * <h2>Provides interfaces describing code instructions for the {@link java.lang.classfile} library.</h2>
+ * <h2>Provides interfaces describing code instructions for the {@link org.glavo.classfile} library.</h2>
  *
  * The {@code java.lang.classfile.attribute} package contains interfaces describing code instructions.
  *

@@ -24,7 +24,7 @@
  */
 
 /**
- * <h2>Provides interfaces describing classfile constant pool entries for the {@link java.lang.classfile} library.</h2>
+ * <h2>Provides interfaces describing classfile constant pool entries for the {@link org.glavo.classfile} library.</h2>
  *
  * The {@code java.lang.classfile.constantpool} package contains interfaces describing classfile constant pool entries.
  *

@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "org.glavo"
-version = "0.5.0" + "-SNAPSHOT"
+version = "0.5.0"// + "-SNAPSHOT"
 description = "Java 21 Classfile API"
 
 val sourceToolchainVersion = 17
@@ -58,7 +58,7 @@ tasks.javadoc {
 
     options.addStringOption("Xdoclint:none", "-quiet")
     options.addBooleanOption("-enable-preview", true)
-    options.addStringOption("-source", "20")
+    options.addStringOption("-source", "21")
     options.addStringOption("link", "https://docs.oracle.com/en/java/javase/17/docs/api/")
 
     options.addStringOption("-snippet-path", file("src/main/snippet-files").absolutePath)

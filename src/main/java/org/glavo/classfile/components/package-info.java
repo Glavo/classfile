@@ -25,7 +25,7 @@
 
 /**
  * <h2>Provides specific components, transformations, and tools built on top of the
- * {@link java.lang.classfile} library.</h2>
+ * {@link org.glavo.classfile} library.</h2>
  *
  * The {@code java.lang.classfile.components} package contains specific
  * transformation components and utility classes helping to compose very complex
@@ -45,15 +45,15 @@
  * processing.
  * <p>
  * The most frequent use case is to simply print a class:
- * {@snippet lang="java" class="PackageSnippets" region="printClass"}
+ * {@snippet lang="java" class="ComponentsPackageSnippets" region="printClass"}
  * <p>
  * {@link ClassPrinter} allows to traverse tree of simple printable nodes to
  * hook custom printer:
- * {@snippet lang="java" class="PackageSnippets" region="customPrint"}
+ * {@snippet lang="java" class="ComponentsPackageSnippets" region="customPrint"}
  * <p>
  * Another use case for {@link ClassPrinter} is to simplify writing of automated
  * tests:
- * {@snippet lang="java" class="PackageSnippets" region="printNodesInTest"}
+ * {@snippet lang="java" class="ComponentsPackageSnippets" region="printNodesInTest"}
  *
  * <h3>{@link ClassRemapper}</h3>
  * ClassRemapper is a {@link org.glavo.classfile.ClassTransform}, {@link
@@ -73,10 +73,10 @@
  * types and composed back to arrays.
  * <p>
  * Single class remapping example:
- * {@snippet lang="java" class="PackageSnippets" region="singleClassRemap"}
+ * {@snippet lang="java" class="ComponentsPackageSnippets" region="singleClassRemap"}
  * <p>
  * Remapping of all classes under specific package:
- * {@snippet lang="java" class="PackageSnippets" region="allPackageRemap"}
+ * {@snippet lang="java" class="ComponentsPackageSnippets" region="allPackageRemap"}
  *
  * <h3>{@link CodeLocalsShifter}</h3>
  * {@link CodeLocalsShifter} is a {@link org.glavo.classfile.CodeTransform}
@@ -86,7 +86,7 @@
  * in order of appearance.
  * <p>
  * Sample of code transformation shifting all locals in all methods:
- * {@snippet lang="java" class="PackageSnippets" region="codeLocalsShifting"}
+ * {@snippet lang="java" class="ComponentsPackageSnippets" region="codeLocalsShifting"}
  *
  * <h3>{@link CodeRelabeler}</h3>
  * {@link CodeRelabeler} is a {@link org.glavo.classfile.CodeTransform}
@@ -103,13 +103,13 @@
  * exactly once.
  * <p>
  * Sample transformation relabeling all methods:
- * {@snippet lang="java" class="PackageSnippets" region="codeRelabeling"}
+ * {@snippet lang="java" class="ComponentsPackageSnippets" region="codeRelabeling"}
  *
  * <h3>Class Instrumentation Sample</h3>
  * Following snippet is sample composition of {@link ClassRemapper}, {@link
  * CodeLocalsShifter} and {@link CodeRelabeler} into fully functional class
  * instrumenting transformation:
- * {@snippet lang="java" class="PackageSnippets" region="classInstrumentation"}
+ * {@snippet lang="java" class="ComponentsPackageSnippets" region="classInstrumentation"}
  *
  * @since 22
  */

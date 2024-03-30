@@ -137,7 +137,7 @@ public interface ClassHierarchyResolver {
      * Returns a ClassHierarchyResolver that caches class hierarchy information from this
      * resolver. The returned resolver will not update if delegate resolver returns differently.
      * The returned resolver is not thread-safe.
-     * {@snippet file="PackageSnippets.java" region="lookup-class-hierarchy-resolver"}
+     * {@snippet file="RootPackageSnippets.java" region="lookup-class-hierarchy-resolver"}
      *
      * @return the ClassHierarchyResolver
      *
