@@ -100,7 +100,7 @@ tasks.test {
 
     useJUnitPlatform()
 
-    jvmArgs("--add-opens=java.base/java.util=ALL-UNNAMED", "-Xlog:class+load=info:class.txt")
+    jvmArgs("--add-opens=java.base/java.util=ALL-UNNAMED")
 }
 
 tasks.jacocoTestReport {
