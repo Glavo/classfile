@@ -39,10 +39,16 @@ import org.glavo.classfile.impl.Util;
  * Models an {@code instanceof} or {@code checkcast} instruction in the {@code
  * code} array of a {@code Code} attribute.  Delivered as a {@link CodeElement}
  * when traversing the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface TypeCheckInstruction extends Instruction
         permits AbstractInstruction.BoundTypeCheckInstruction,
                 AbstractInstruction.UnboundTypeCheckInstruction {
+
+    /**
+     * {@return the type against which the instruction checks or casts}
+     */
     ClassEntry type();
 
     /**

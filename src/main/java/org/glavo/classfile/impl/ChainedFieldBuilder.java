@@ -24,6 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -38,11 +39,15 @@ public final class ChainedFieldBuilder implements FieldBuilder {
 
     public ChainedFieldBuilder(FieldBuilder downstream,
                                Consumer<FieldElement> consumer) {
+        Objects.requireNonNull(downstream);
         this.consumer = consumer;
-        this.terminal = switch (downstream) {
-            case ChainedFieldBuilder cb -> cb.terminal;
-            case TerminalFieldBuilder tb -> tb;
-        };
+        if (downstream instanceof ChainedFieldBuilder cb) {
+            this.terminal = cb.terminal;
+        } else if (downstream instanceof TerminalFieldBuilder tb) {
+            this.terminal = tb;
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override

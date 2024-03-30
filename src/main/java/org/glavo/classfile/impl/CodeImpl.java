@@ -24,10 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 import org.glavo.classfile.*;
@@ -38,7 +35,7 @@ import org.glavo.classfile.attribute.StackMapTableAttribute;
 import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.instruction.*;
 
-import static org.glavo.classfile.Classfile.*;
+import static org.glavo.classfile.ClassFile.*;
 
 public final class CodeImpl
         extends BoundAttribute.BoundCodeAttribute
@@ -97,6 +94,9 @@ public final class CodeImpl
 
     @Override
     public Label getLabel(int bci) {
+        if (bci < 0 || bci > codeLength)
+            throw new IllegalArgumentException(String.format("Bytecode offset out of range; bci=%d, codeLength=%d",
+                                                             bci, codeLength));
         if (labels == null)
             labels = new LabelImpl[codeLength + 1];
         LabelImpl l = labels[bci];
@@ -118,7 +118,7 @@ public final class CodeImpl
         if (!inflated) {
             if (labels == null)
                 labels = new LabelImpl[codeLength + 1];
-            if (((ClassReaderImpl)classReader).options().processLineNumbers)
+            if (((ClassReaderImpl)classReader).context().lineNumbersOption() == ClassFile.LineNumbersOption.PASS_LINE_NUMBERS)
                 inflateLineNumbers();
             inflateJumpTargets();
             inflateTypeAnnotations();
@@ -131,7 +131,7 @@ public final class CodeImpl
     @Override
     public List<Attribute<?>> attributes() {
         if (attributes == null) {
-            attributes = readAttributes(this, classReader, attributePos, classReader.customAttributes());
+            attributes = BoundAttribute.readAttributes(this, classReader, attributePos, classReader.customAttributes());
         }
         return attributes;
     }
@@ -150,6 +150,7 @@ public final class CodeImpl
                                         }
                                     },
                                     (SplitConstantPool)buf.constantPool(),
+                                    ((BufWriterImpl)buf).context(),
                                     null).writeTo(buf);
         }
     }
@@ -166,7 +167,7 @@ public final class CodeImpl
         inflateMetadata();
         boolean doLineNumbers = (lineNumbers != null);
         generateCatchTargets(consumer);
-        if (((ClassReaderImpl)classReader).options().processDebug)
+        if (((ClassReaderImpl)classReader).context().debugElementsOption() == ClassFile.DebugElementsOption.PASS_DEBUG)
             generateDebugElements(consumer);
         for (int pos=codeStart; pos<codeEnd; ) {
             if (labels[pos - codeStart] != null)
@@ -243,14 +244,14 @@ public final class CodeImpl
     private void inflateJumpTargets() {
         Optional<StackMapTableAttribute> a = findAttribute(Attributes.STACK_MAP_TABLE);
         if (a.isEmpty()) {
-            if (classReader.readU2(6) <= Classfile.JAVA_6_VERSION) {
+            if (classReader.readU2(6) <= ClassFile.JAVA_6_VERSION) {
                 //fallback to jump targets inflation without StackMapTableAttribute
                 for (int pos=codeStart; pos<codeEnd; ) {
                     var i = bcToInstruction(classReader.readU1(pos), pos);
-                    switch (i) {
-                        case BranchInstruction br -> br.target();
-                        case DiscontinuedInstruction.JsrInstruction jsr -> jsr.target();
-                        default -> {}
+                    if (i instanceof BranchInstruction br) {
+                        br.target();
+                    } else if (i instanceof DiscontinuedInstruction.JsrInstruction jsr) {
+                        jsr.target();
                     }
                     pos += i.sizeInBytes();
                 }
@@ -455,8 +456,8 @@ public final class CodeImpl
                     case DSTORE -> new AbstractInstruction.BoundStoreInstruction(Opcode.DSTORE_W, this, pos);
                     case ASTORE -> new AbstractInstruction.BoundStoreInstruction(Opcode.ASTORE_W, this, pos);
                     case IINC -> new AbstractInstruction.BoundIncrementInstruction(Opcode.IINC_W, this, pos);
-                    case RET -> new AbstractInstruction.BoundRetInstruction(Opcode.RET_W, this, pos);
-                    default -> throw new UnsupportedOperationException("unknown wide instruction: " + bclow);
+                    case RET ->  new AbstractInstruction.BoundRetInstruction(Opcode.RET_W, this, pos);
+                    default -> throw new IllegalArgumentException("unknown wide instruction: " + bclow);
                 };
             }
 
@@ -471,7 +472,7 @@ public final class CodeImpl
             default -> {
                 Instruction instr = SINGLETON_INSTRUCTIONS[bc];
                 if (instr == null)
-                    throw new UnsupportedOperationException("unknown instruction: " + bc);
+                    throw new IllegalArgumentException("unknown instruction: " + bc);
                 yield instr;
             }
         };

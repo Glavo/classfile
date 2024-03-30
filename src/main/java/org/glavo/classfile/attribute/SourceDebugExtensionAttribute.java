@@ -29,9 +29,20 @@ import org.glavo.classfile.Attribute;
 import org.glavo.classfile.ClassElement;
 import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.UnboundAttribute;
+import org.glavo.classfile.ClassModel;
 
 /**
- * SourceDebugExtensionAttribute.
+ * Models the {@code SourceDebugExtension} attribute.
+ * Delivered as a {@link ClassElement} when traversing the elements of
+ * a {@link ClassModel}.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ * <p>
+ * The attribute was introduced in the Java SE Platform version 5.0.
+ *
+ * @since 22
  */
 public sealed interface SourceDebugExtensionAttribute
         extends Attribute<SourceDebugExtensionAttribute>, ClassElement

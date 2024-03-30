@@ -72,6 +72,10 @@ import org.glavo.classfile.impl.UnboundAttribute;
  * corresponding model type. Additionally, all attributes are accessible
  * directly from the corresponding model type through {@link
  * AttributedElement#findAttribute(AttributeMapper)}.
+ * @param <A> the attribute type
+ *
+ * @sealedGraph
+ * @since 22
  */
 public sealed interface Attribute<A extends Attribute<A>>
         extends WritableElement<A>
@@ -90,7 +94,7 @@ public sealed interface Attribute<A extends Attribute<A>>
                 RuntimeVisibleTypeAnnotationsAttribute, SignatureAttribute,
                 SourceDebugExtensionAttribute, SourceFileAttribute, SourceIDAttribute,
                 StackMapTableAttribute, SyntheticAttribute,
-                UnknownAttribute, BoundAttribute, UnboundAttribute {
+                UnknownAttribute, BoundAttribute, UnboundAttribute, CustomAttribute {
     /**
      * {@return the name of the attribute}
      */

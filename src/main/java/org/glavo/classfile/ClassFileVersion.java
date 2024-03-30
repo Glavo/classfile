@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,18 +22,36 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.glavo.classfile.impl;
+package org.glavo.classfile;
 
-import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.impl.ClassFileVersionImpl;
 
-/*
- * Implementation of {@code ModuleDesc}
- * @param name must have been validated
+/**
+ * Models the classfile version information for a class.  Delivered as a {@link
+ * ClassElement} when traversing the elements of a {@link
+ * ClassModel}.
+ *
+ * @since 22
  */
-public record ModuleDescImpl(String name) implements ModuleDesc {
+public sealed interface ClassFileVersion
+        extends ClassElement
+        permits ClassFileVersionImpl {
+    /**
+     * {@return the major classfile version}
+     */
+    int majorVersion();
 
-    @Override
-    public String toString() {
-        return String.format("ModuleDesc[%s]", name());
+    /**
+     * {@return the minor classfile version}
+     */
+    int minorVersion();
+
+    /**
+     * {@return a {@link ClassFileVersion} element}
+     * @param majorVersion the major classfile version
+     * @param minorVersion the minor classfile version
+     */
+    static ClassFileVersion of(int majorVersion, int minorVersion) {
+        return new ClassFileVersionImpl(majorVersion, minorVersion);
     }
 }

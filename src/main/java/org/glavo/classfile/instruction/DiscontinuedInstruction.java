@@ -36,6 +36,8 @@ import org.glavo.classfile.impl.Util;
  * Models instruction discontinued from the {@code code} array of a {@code Code}
  * attribute. Delivered as a {@link CodeElement} when traversing the elements of
  * a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface DiscontinuedInstruction extends Instruction {
 
@@ -45,10 +47,12 @@ public sealed interface DiscontinuedInstruction extends Instruction {
      * Corresponding opcodes will have a {@code kind} of
      * {@link Opcode.Kind#DISCONTINUED_JSR}.  Delivered as a {@link CodeElement}
      * when traversing the elements of a {@link CodeModel}.
+     *
+     * @since 22
      */
-    sealed interface JsrInstruction extends DiscontinuedInstruction
+        sealed interface JsrInstruction extends DiscontinuedInstruction
             permits AbstractInstruction.BoundJsrInstruction,
-            AbstractInstruction.UnboundJsrInstruction {
+                    AbstractInstruction.UnboundJsrInstruction {
 
         /**
          * {@return the target of the JSR instruction}
@@ -83,10 +87,12 @@ public sealed interface DiscontinuedInstruction extends Instruction {
      * Corresponding opcodes will have a {@code kind} of
      * {@link Opcode.Kind#DISCONTINUED_RET}.  Delivered as a {@link CodeElement}
      * when traversing the elements of a {@link CodeModel}.
+     *
+     * @since 22
      */
-    sealed interface RetInstruction extends DiscontinuedInstruction
+        sealed interface RetInstruction extends DiscontinuedInstruction
             permits AbstractInstruction.BoundRetInstruction,
-            AbstractInstruction.UnboundRetInstruction {
+                    AbstractInstruction.UnboundRetInstruction {
 
         /**
          * {@return the local variable slot with return address}

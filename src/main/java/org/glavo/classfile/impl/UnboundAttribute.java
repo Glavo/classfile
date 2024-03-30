@@ -28,7 +28,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.glavo.classfile.*;
+import org.glavo.classfile.Annotation;
+import org.glavo.classfile.AnnotationElement;
+import org.glavo.classfile.AnnotationValue;
+import org.glavo.classfile.Attribute;
+import org.glavo.classfile.AttributeMapper;
+import org.glavo.classfile.Attributes;
+import org.glavo.classfile.BootstrapMethodEntry;
+import org.glavo.classfile.BufWriter;
 import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.Label;
 import org.glavo.classfile.TypeAnnotation;
@@ -768,33 +775,33 @@ public abstract sealed class UnboundAttribute<T extends Attribute<T>>
             buf.writeU1(targetInfo.targetType().targetTypeValue());
 
             // target_info
-            switch (targetInfo) {
-                case TypeParameterTarget tpt -> buf.writeU1(tpt.typeParameterIndex());
-                case SupertypeTarget st -> buf.writeU2(st.supertypeIndex());
-                case TypeParameterBoundTarget tpbt -> {
-                    buf.writeU1(tpbt.typeParameterIndex());
-                    buf.writeU1(tpbt.boundIndex());
+            if (targetInfo instanceof TypeParameterTarget tpt) {
+                buf.writeU1(tpt.typeParameterIndex());
+            } else if (targetInfo instanceof SupertypeTarget st) {
+                buf.writeU2(st.supertypeIndex());
+            } else if (targetInfo instanceof TypeParameterBoundTarget tpbt) {
+                buf.writeU1(tpbt.typeParameterIndex());
+                buf.writeU1(tpbt.boundIndex());
+            } else if (targetInfo instanceof EmptyTarget) {// nothing to write
+            } else if (targetInfo instanceof FormalParameterTarget fpt) {
+                buf.writeU1(fpt.formalParameterIndex());
+            } else if (targetInfo instanceof ThrowsTarget tt) {
+                buf.writeU2(tt.throwsTargetIndex());
+            } else if (targetInfo instanceof LocalVarTarget lvt) {
+                buf.writeU2(lvt.table().size());
+                for (var e : lvt.table()) {
+                    int startPc = labelToBci(lr, e.startLabel());
+                    buf.writeU2(startPc);
+                    buf.writeU2(labelToBci(lr, e.endLabel()) - startPc);
+                    buf.writeU2(e.index());
                 }
-                case EmptyTarget et -> {
-                    // nothing to write
-                }
-                case FormalParameterTarget fpt -> buf.writeU1(fpt.formalParameterIndex());
-                case ThrowsTarget tt -> buf.writeU2(tt.throwsTargetIndex());
-                case LocalVarTarget lvt -> {
-                    buf.writeU2(lvt.table().size());
-                    for (var e : lvt.table()) {
-                        int startPc = labelToBci(lr, e.startLabel());
-                        buf.writeU2(startPc);
-                        buf.writeU2(labelToBci(lr, e.endLabel()) - startPc);
-                        buf.writeU2(e.index());
-                    }
-                }
-                case CatchTarget ct -> buf.writeU2(ct.exceptionTableIndex());
-                case OffsetTarget ot -> buf.writeU2(labelToBci(lr, ot.target()));
-                case TypeArgumentTarget tat -> {
-                    buf.writeU2(labelToBci(lr, tat.target()));
-                    buf.writeU1(tat.typeArgumentIndex());
-                }
+            } else if (targetInfo instanceof CatchTarget ct) {
+                buf.writeU2(ct.exceptionTableIndex());
+            } else if (targetInfo instanceof OffsetTarget ot) {
+                buf.writeU2(labelToBci(lr, ot.target()));
+            } else if (targetInfo instanceof TypeArgumentTarget tat) {
+                buf.writeU2(labelToBci(lr, tat.target()));
+                buf.writeU1(tat.typeArgumentIndex());
             }
 
             // target_path
@@ -890,7 +897,7 @@ public abstract sealed class UnboundAttribute<T extends Attribute<T>>
         }
     }
 
-    public static abstract non-sealed class AdHocAttribute<T extends Attribute<T>>
+    public abstract static non-sealed class AdHocAttribute<T extends Attribute<T>>
             extends UnboundAttribute<T> {
 
         public AdHocAttribute(AttributeMapper<T> mapper) {
@@ -925,15 +932,6 @@ public abstract sealed class UnboundAttribute<T extends Attribute<T>>
         @Override
         public List<BootstrapMethodEntry> bootstrapMethods() {
             return List.of();
-        }
-    }
-
-    public static abstract sealed class CustomAttribute<T extends CustomAttribute<T>>
-            extends UnboundAttribute<T>
-            permits org.glavo.classfile.CustomAttribute {
-
-        public CustomAttribute(AttributeMapper<T> mapper) {
-            super(mapper);
         }
     }
 }

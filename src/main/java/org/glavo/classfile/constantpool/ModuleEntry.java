@@ -24,12 +24,15 @@
  */
 package org.glavo.classfile.constantpool;
 
-import org.glavo.classfile.impl.AbstractPoolEntry;
 import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.impl.AbstractPoolEntry;
 
 /**
  * Models a {@code CONSTANT_Module_info} constant in the constant pool of a
  * classfile.
+ * @jvms 4.4.11 The CONSTANT_Module_info Structure
+ *
+ * @since 22
  */
 public sealed interface ModuleEntry extends PoolEntry
         permits AbstractPoolEntry.ModuleEntryImpl {

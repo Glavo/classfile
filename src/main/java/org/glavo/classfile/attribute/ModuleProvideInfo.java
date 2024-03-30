@@ -35,6 +35,8 @@ import org.glavo.classfile.impl.Util;
 
 /**
  * Models a single "provides" declaration in the {@link ModuleAttribute}.
+ *
+ * @since 22
  */
 public sealed interface ModuleProvideInfo
         permits UnboundAttribute.UnboundModuleProvideInfo {
@@ -73,6 +75,7 @@ public sealed interface ModuleProvideInfo
      * {@return a service provision description}
      * @param provides the service class interface
      * @param providesWith the service class implementations
+     * @throws IllegalArgumentException if {@code provides} represents a primitive type
      */
     static ModuleProvideInfo of(ClassDesc provides,
                                        List<ClassDesc> providesWith) {
@@ -83,6 +86,7 @@ public sealed interface ModuleProvideInfo
      * {@return a service provision description}
      * @param provides the service class interface
      * @param providesWith the service class implementations
+     * @throws IllegalArgumentException if {@code provides} or any of {@code providesWith} represents a primitive type
      */
     static ModuleProvideInfo of(ClassDesc provides,
                                        ClassDesc... providesWith) {

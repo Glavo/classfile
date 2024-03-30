@@ -39,6 +39,14 @@ import org.glavo.classfile.impl.UnboundAttribute;
  * appear on classes that represent module descriptors.
  * Delivered as a {@link ClassElement} when
  * traversing the elements of a {@link ClassModel}.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ * <p>
+ * The attribute was introduced in the Java SE Platform version 9.
+ *
+ * @since 22
  */
 public sealed interface ModuleMainClassAttribute
         extends Attribute<ModuleMainClassAttribute>, ClassElement
@@ -60,6 +68,7 @@ public sealed interface ModuleMainClassAttribute
     /**
      * {@return a {@code ModuleMainClass} attribute}
      * @param mainClass the main class
+     * @throws IllegalArgumentException if {@code mainClass} represents a primitive type
      */
     static ModuleMainClassAttribute of(ClassDesc mainClass) {
         return new UnboundAttribute.UnboundModuleMainClassAttribute(TemporaryConstantPool.INSTANCE.classEntry(mainClass));

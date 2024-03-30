@@ -33,6 +33,8 @@ import org.glavo.classfile.impl.AbstractInstruction;
  *
  * @see LookupSwitchInstruction
  * @see TableSwitchInstruction
+ *
+ * @since 22
  */
 public sealed interface SwitchCase
         permits AbstractInstruction.SwitchCaseImpl {

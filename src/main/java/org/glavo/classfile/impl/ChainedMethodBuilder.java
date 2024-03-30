@@ -24,6 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -42,12 +43,16 @@ public final class ChainedMethodBuilder implements MethodBuilder {
 
     public ChainedMethodBuilder(MethodBuilder downstream,
                                 Consumer<MethodElement> consumer) {
+        Objects.requireNonNull(downstream);
         this.downstream = downstream;
         this.consumer = consumer;
-        this.terminal = switch (downstream) {
-            case ChainedMethodBuilder cb -> cb.terminal;
-            case TerminalMethodBuilder tb -> tb;
-        };
+        if (downstream instanceof ChainedMethodBuilder cb) {
+            this.terminal = cb.terminal;
+        } else if (downstream instanceof TerminalMethodBuilder tb) {
+            this.terminal = tb;
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override

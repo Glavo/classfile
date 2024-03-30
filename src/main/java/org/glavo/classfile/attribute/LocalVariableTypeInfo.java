@@ -30,6 +30,8 @@ import org.glavo.classfile.impl.UnboundAttribute;
 
 /**
  * Models a single local variable in the {@link LocalVariableTypeTableAttribute}.
+ *
+ * @since 22
  */
 public sealed interface LocalVariableTypeInfo
         permits UnboundAttribute.UnboundLocalVariableTypeInfo, BoundLocalVariableType {

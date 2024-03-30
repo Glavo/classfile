@@ -24,21 +24,23 @@
  */
 package org.glavo.classfile.instruction;
 
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.Label;
 import org.glavo.classfile.PseudoInstruction;
-import org.glavo.classfile.attribute.CharacterRangeInfo;
 import org.glavo.classfile.attribute.CharacterRangeTableAttribute;
 import org.glavo.classfile.impl.AbstractPseudoInstruction;
 import org.glavo.classfile.impl.BoundCharacterRange;
+import org.glavo.classfile.attribute.CharacterRangeInfo;
 
 /**
  * A pseudo-instruction which models a single entry in the
  * {@link CharacterRangeTableAttribute}.  Delivered as a {@link CodeElement}
  * during traversal of the elements of a {@link CodeModel}, according to
- * the setting of the {@link Classfile.Option#processDebug(boolean)} option.
+ * the setting of the {@link ClassFile.DebugElementsOption} option.
+ *
+ * @since 22
  */
 public sealed interface CharacterRange extends PseudoInstruction
         permits AbstractPseudoInstruction.UnboundCharacterRange, BoundCharacterRange {
@@ -70,16 +72,18 @@ public sealed interface CharacterRange extends PseudoInstruction
 
     /**
      * A flags word, indicating the kind of range.  Multiple flag bits
-     * may be set.  Valid flags include
-     * {@link Classfile#CRT_STATEMENT},
-     * {@link Classfile#CRT_BLOCK},
-     * {@link Classfile#CRT_ASSIGNMENT},
-     * {@link Classfile#CRT_FLOW_CONTROLLER},
-     * {@link Classfile#CRT_FLOW_TARGET},
-     * {@link Classfile#CRT_INVOKE},
-     * {@link Classfile#CRT_CREATE},
-     * {@link Classfile#CRT_BRANCH_TRUE},
-     * {@link Classfile#CRT_BRANCH_FALSE}.
+     * may be set.  Valid flags include:
+     * <ul>
+     * <li>{@link ClassFile#CRT_STATEMENT}
+     * <li>{@link ClassFile#CRT_BLOCK}
+     * <li>{@link ClassFile#CRT_ASSIGNMENT}
+     * <li>{@link ClassFile#CRT_FLOW_CONTROLLER}
+     * <li>{@link ClassFile#CRT_FLOW_TARGET}
+     * <li>{@link ClassFile#CRT_INVOKE}
+     * <li>{@link ClassFile#CRT_CREATE}
+     * <li>{@link ClassFile#CRT_BRANCH_TRUE}
+     * <li>{@link ClassFile#CRT_BRANCH_FALSE}
+     * </ul>
      *
      * @see CharacterRangeInfo#flags()
      *

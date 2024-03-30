@@ -30,11 +30,13 @@ import org.glavo.classfile.Attribute;
 
 public class AbstractDirectBuilder<M> {
     protected final SplitConstantPool constantPool;
+    protected final ClassFileImpl context;
     protected final AttributeHolder attributes = new AttributeHolder();
     protected M original;
 
-    public AbstractDirectBuilder(SplitConstantPool constantPool) {
+    public AbstractDirectBuilder(SplitConstantPool constantPool, ClassFileImpl context) {
         this.constantPool = constantPool;
+        this.context = context;
     }
 
     public SplitConstantPool constantPool() {
@@ -50,6 +52,8 @@ public class AbstractDirectBuilder<M> {
     }
 
     public void writeAttribute(Attribute<?> a) {
-        attributes.withAttribute(a);
+        if (Util.isAttributeAllowed(a, context.attributesProcessingOption())) {
+            attributes.withAttribute(a);
+        }
     }
 }

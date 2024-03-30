@@ -30,10 +30,10 @@ import java.util.stream.Stream;
 
 import org.glavo.classfile.Attribute;
 import org.glavo.classfile.AttributedElement;
-import org.glavo.classfile.ClassfileElement;
+import org.glavo.classfile.ClassFileElement;
 import org.glavo.classfile.CompoundElement;
 
-public abstract sealed class AbstractUnboundModel<E extends ClassfileElement>
+public abstract sealed class AbstractUnboundModel<E extends ClassFileElement>
         extends AbstractElement
         implements CompoundElement<E>, AttributedElement
         permits BufferedCodeBuilder.Model, BufferedFieldBuilder.Model, BufferedMethodBuilder.Model {

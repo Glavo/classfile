@@ -29,6 +29,8 @@ import java.lang.invoke.TypeDescriptor;
 
 /**
  * Describes the types that can be part of a field or method descriptor.
+ *
+ * @since 22
  */
 public enum TypeKind {
     /** the primitive type byte */

@@ -24,6 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.glavo.classfile.CodeBuilder;
@@ -38,11 +39,13 @@ public abstract sealed class NonterminalCodeBuilder implements CodeBuilder
 
     public NonterminalCodeBuilder(CodeBuilder parent) {
         this.parent = parent;
-        this.terminal = switch (parent) {
-            case NonterminalCodeBuilder cb -> cb.terminal;
-            case TerminalCodeBuilder cb -> cb;
-            default -> throw new AssertionError();
-        };
+        if (Objects.requireNonNull(parent) instanceof NonterminalCodeBuilder cb) {
+            this.terminal = cb.terminal;
+        } else if (parent instanceof TerminalCodeBuilder cb) {
+            this.terminal = cb;
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override

@@ -16,4 +16,7 @@ public final class ClassDescUtils {
         validateInternalClassName(Objects.requireNonNull(name));
         return ClassDesc.ofDescriptor("L" + name + ";");
     }
+
+    private ClassDescUtils() {
+    }
 }

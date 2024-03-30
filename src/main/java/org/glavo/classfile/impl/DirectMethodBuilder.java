@@ -29,10 +29,11 @@ import java.lang.constant.MethodTypeDesc;
 import java.util.function.Consumer;
 
 import org.glavo.classfile.BufWriter;
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.CodeTransform;
+import org.glavo.classfile.CustomAttribute;
 import org.glavo.classfile.MethodBuilder;
 import org.glavo.classfile.MethodElement;
 import org.glavo.classfile.MethodModel;
@@ -50,11 +51,12 @@ public final class DirectMethodBuilder
     MethodTypeDesc mDesc;
 
     public DirectMethodBuilder(SplitConstantPool constantPool,
+                               ClassFileImpl context,
                                Utf8Entry nameInfo,
                                Utf8Entry typeInfo,
                                int flags,
                                MethodModel original) {
-        super(constantPool);
+        super(constantPool, context);
         setOriginal(original);
         this.name = nameInfo;
         this.desc = typeInfo;
@@ -62,8 +64,8 @@ public final class DirectMethodBuilder
     }
 
     void setFlags(int flags) {
-        boolean wasStatic = (this.flags & Classfile.ACC_STATIC) != 0;
-        boolean isStatic = (flags & Classfile.ACC_STATIC) != 0;
+        boolean wasStatic = (this.flags & ClassFile.ACC_STATIC) != 0;
+        boolean isStatic = (flags & ClassFile.ACC_STATIC) != 0;
         if (wasStatic != isStatic)
             throw new IllegalArgumentException("Cannot change ACC_STATIC flag of method");
         this.flags = flags;
@@ -105,18 +107,22 @@ public final class DirectMethodBuilder
 
     @Override
     public BufferedCodeBuilder bufferedCodeBuilder(CodeModel original) {
-        return new BufferedCodeBuilder(this, constantPool, original);
+        return new BufferedCodeBuilder(this, constantPool, context, original);
     }
 
     @Override
     public MethodBuilder with(MethodElement element) {
-        ((AbstractElement) element).writeTo(this);
+        if (element instanceof AbstractElement ae) {
+            ae.writeTo(this);
+        } else {
+            writeAttribute((CustomAttribute)element);
+        }
         return this;
     }
 
     private MethodBuilder withCode(CodeModel original,
                                   Consumer<? super CodeBuilder> handler) {
-        var cb = DirectCodeBuilder.build(this, handler, constantPool, original);
+        var cb = DirectCodeBuilder.build(this, handler, constantPool, context, original);
         writeAttribute(cb);
         return this;
     }

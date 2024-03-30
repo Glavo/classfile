@@ -24,8 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.BootstrapMethodEntry;
-import org.glavo.classfile.BufWriter;
+import org.glavo.classfile.*;
 import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.constantpool.ConstantDynamicEntry;
 import org.glavo.classfile.constantpool.ConstantPool;
@@ -167,7 +166,7 @@ public final class TemporaryConstantPool implements ConstantPoolBuilder {
     }
 
     @Override
-    public int entryCount() {
+    public int size() {
         throw new UnsupportedOperationException();
     }
 

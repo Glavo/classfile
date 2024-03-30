@@ -43,6 +43,8 @@ import org.glavo.classfile.impl.Util;
  * Models an {@code invokedynamic} instruction in the {@code code} array of a
  * {@code Code} attribute.  Delivered as a {@link CodeElement} when traversing
  * the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface InvokeDynamicInstruction extends Instruction
         permits AbstractInstruction.BoundInvokeDynamicInstruction, AbstractInstruction.UnboundInvokeDynamicInstruction {
@@ -69,7 +71,7 @@ public sealed interface InvokeDynamicInstruction extends Instruction
      * {@return the invocation type of the call site, as a symbolic descriptor}
      */
     default MethodTypeDesc typeSymbol() {
-        return Util.methodTypeSymbol(invokedynamic().nameAndType());
+        return invokedynamic().typeSymbol();
     }
 
     /**

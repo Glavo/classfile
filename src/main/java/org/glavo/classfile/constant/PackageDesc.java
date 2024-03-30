@@ -24,8 +24,6 @@
  */
 package org.glavo.classfile.constant;
 
-import org.glavo.classfile.impl.PackageDescImpl;
-
 import static java.util.Objects.requireNonNull;
 
 /**

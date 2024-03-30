@@ -35,6 +35,8 @@ import org.glavo.classfile.impl.AbstractInstruction;
  * {@code Code} attribute.  Corresponding opcodes will have a {@code kind} of
  * {@link Opcode.Kind#INCREMENT}.  Delivered as a {@link CodeElement} when
  * traversing the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface IncrementInstruction extends Instruction
         permits AbstractInstruction.BoundIncrementInstruction,

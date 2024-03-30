@@ -31,7 +31,7 @@ import org.glavo.classfile.instruction.LocalVariableType;
 public final class BoundLocalVariableType
         extends AbstractBoundLocalVariable
         implements LocalVariableTypeInfo,
-        LocalVariableType {
+                   LocalVariableType {
 
     public BoundLocalVariableType(CodeImpl code, int offset) {
         super(code, offset);

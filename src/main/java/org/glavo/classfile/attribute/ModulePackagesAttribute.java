@@ -26,14 +26,14 @@ package org.glavo.classfile.attribute;
 
 import org.glavo.classfile.Attribute;
 import org.glavo.classfile.ClassElement;
-import org.glavo.classfile.ClassModel;
+import org.glavo.classfile.constant.PackageDesc;
 import org.glavo.classfile.impl.BoundAttribute;
 
 import java.util.Arrays;
 import java.util.List;
 
+import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.constantpool.PackageEntry;
-import org.glavo.classfile.constant.PackageDesc;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 
@@ -42,6 +42,14 @@ import org.glavo.classfile.impl.UnboundAttribute;
  * appear on classes that represent module descriptors.
  * Delivered as a {@link ClassElement} when
  * traversing the elements of a {@link ClassModel}.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ * <p>
+ * The attribute was introduced in the Java SE Platform version 9.
+ *
+ * @since 22
  */
 public sealed interface ModulePackagesAttribute
         extends Attribute<ModulePackagesAttribute>, ClassElement

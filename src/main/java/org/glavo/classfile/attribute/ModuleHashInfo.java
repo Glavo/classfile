@@ -24,13 +24,15 @@
  */
 package org.glavo.classfile.attribute;
 
-import org.glavo.classfile.constantpool.ModuleEntry;
 import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.constantpool.ModuleEntry;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 
 /**
  * Models hash information for a single module in the {@link ModuleHashesAttribute}.
+ *
+ * @since 22
  */
 public sealed interface ModuleHashInfo
         permits UnboundAttribute.UnboundModuleHashInfo {

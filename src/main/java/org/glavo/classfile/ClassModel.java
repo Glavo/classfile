@@ -27,17 +27,17 @@ package org.glavo.classfile;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.constantpool.ConstantPool;
 import org.glavo.classfile.impl.ClassImpl;
-import org.glavo.classfile.impl.verifier.VerifierImpl;
 
 /**
  * Models a classfile.  The contents of the classfile can be traversed via
  * a streaming view (e.g., {@link #elements()}), or via random access (e.g.,
  * {@link #flags()}), or by freely mixing the two.
+ *
+ * @since 22
  */
 public sealed interface ClassModel
         extends CompoundElement<ClassElement>, AttributedElement
@@ -72,50 +72,6 @@ public sealed interface ClassModel
     /** {@return the interfaces implemented by this class} */
     List<ClassEntry> interfaces();
 
-    /**
-     * Transform this classfile into a new classfile with the aid of a
-     * {@link ClassTransform}.  The transform will receive each element of
-     * this class, as well as a {@link ClassBuilder} for building the new class.
-     * The transform is free to preserve, remove, or replace elements as it
-     * sees fit.
-     *
-     * @implNote
-     * <p>This method behaves as if:
-     * {@snippet lang=java :
-     *     Classfile.build(thisClass(), ConstantPoolBuilder.of(this),
-     *                     b -> b.transform(this, transform));
-     * }
-     *
-     * @param transform the transform
-     * @return the bytes of the new class
-     */
-    byte[] transform(ClassTransform transform);
-
     /** {@return whether this class is a module descriptor} */
     boolean isModuleInfo();
-
-    /**
-     * Verify this classfile.  Any verification errors found will be returned.
-     *
-     * @param debugOutput handler to receive debug information
-     * @return a list of verification errors, or an empty list if no errors are
-     * found
-     */
-    default List<VerifyError> verify(Consumer<String> debugOutput) {
-        return VerifierImpl.verify(this, debugOutput);
-    }
-
-    /**
-     * Verify this classfile.  Any verification errors found will be returned.
-     *
-     * @param debugOutput handler to receive debug information
-     * @param classHierarchyResolver class hierarchy resolver to provide
-     *                               additional information about the class hiearchy
-     * @return a list of verification errors, or an empty list if no errors are
-     * found
-     */
-    default List<VerifyError> verify(ClassHierarchyResolver classHierarchyResolver,
-                                     Consumer<String> debugOutput) {
-        return VerifierImpl.verify(this, classHierarchyResolver, debugOutput);
-    }
 }

@@ -6,6 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 
 public final class CollectionUtils {
+
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> listFromTrustedArray(Object[] arr) {
+        return (List<T>) List.of(arr);
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> List<T> listFromTrustedArrayNullsAllowed(Object[] arr) {
         //noinspection Java9CollectionFactory
@@ -20,5 +26,9 @@ public final class CollectionUtils {
 
     public static <K, V> HashMap<K, V> newHashMap(int numMappings) {
         return new HashMap<>(calculateHashMapCapacity(numMappings));
+    }
+
+    private CollectionUtils() {
+
     }
 }

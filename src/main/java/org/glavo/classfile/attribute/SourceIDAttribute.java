@@ -34,9 +34,15 @@ import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 
 /**
- * Models the {@code SourceFile} attribute (@@@ reference needed), which can
+ * Models the {@code SourceID} attribute, which can
  * appear on classes. Delivered as a {@link ClassElement} when
  * traversing a {@link ClassModel}.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ *
+ * @since 22
  */
 public sealed interface SourceIDAttribute
         extends Attribute<SourceIDAttribute>, ClassElement

@@ -36,12 +36,16 @@ import org.glavo.classfile.impl.UnboundAttribute;
  * classes, methods, and fields.  Delivered as a  {@link ClassElement},
  * {@link MethodElement}, or  {@link FieldElement} when traversing the elements
  * of a corresponding model.
+ * <p>
+ * The attribute permits multiple instances in a given location.
+ *
+ * @since 22
  */
 public sealed interface DeprecatedAttribute
         extends Attribute<DeprecatedAttribute>,
                 ClassElement, MethodElement, FieldElement
         permits BoundAttribute.BoundDeprecatedAttribute,
-        UnboundAttribute.UnboundDeprecatedAttribute {
+                UnboundAttribute.UnboundDeprecatedAttribute {
 
     /**
      * {@return a {@code Deprecated} attribute}

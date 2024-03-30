@@ -25,7 +25,7 @@
 package org.glavo.classfile.instruction;
 
 import org.glavo.classfile.BufWriter;
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.Label;
@@ -41,7 +41,9 @@ import org.glavo.classfile.impl.TemporaryConstantPool;
  * A pseudo-instruction which models a single entry in the {@link
  * LocalVariableTypeTableAttribute}.  Delivered as a {@link CodeElement} during
  * traversal of the elements of a {@link CodeModel}, according to the setting of
- * the {@link Classfile.Option#processDebug(boolean)} option.
+ * the {@link ClassFile.DebugElementsOption} option.
+ *
+ * @since 22
  */
 public sealed interface LocalVariableType extends PseudoInstruction
         permits AbstractPseudoInstruction.UnboundLocalVariableType, BoundLocalVariableType {
@@ -77,6 +79,12 @@ public sealed interface LocalVariableType extends PseudoInstruction
      */
     Label endScope();
 
+    /**
+     * Writes the local variable to the specified writer
+     *
+     * @param buf the writer
+     * @return true if the variable has been written
+     */
     boolean writeTo(BufWriter buf);
 
     /**

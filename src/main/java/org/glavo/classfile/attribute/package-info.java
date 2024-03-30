@@ -22,18 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.glavo.classfile.impl;
 
-import org.glavo.classfile.constant.PackageDesc;
-
-/*
- * Implementation of {@code PackageDesc}
- * @param internalName must have been validated
+/**
+ * <h2>Provides interfaces describing classfile attributes for the {@link java.lang.classfile} library.</h2>
+ *
+ * The {@code java.lang.classfile.attribute} package contains interfaces describing classfile attributes.
+ *
+ * @since 22
  */
-public record PackageDescImpl(String internalName) implements PackageDesc {
+package org.glavo.classfile.attribute;
 
-    @Override
-    public String toString() {
-        return String.format("PackageDesc[%s]", name());
-    }
-}

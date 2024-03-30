@@ -36,6 +36,8 @@ import org.glavo.classfile.impl.MethodImpl;
  * Models a method.  The contents of the method can be traversed via
  * a streaming view (e.g., {@link #elements()}), or via random access (e.g.,
  * {@link #flags()}), or by freely mixing the two.
+ *
+ * @since 22
  */
 public sealed interface MethodModel
         extends WritableElement<MethodModel>, CompoundElement<MethodElement>, AttributedElement, ClassElement

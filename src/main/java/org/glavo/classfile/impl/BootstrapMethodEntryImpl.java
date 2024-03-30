@@ -32,16 +32,18 @@ import org.glavo.classfile.BufWriter;
 import org.glavo.classfile.constantpool.LoadableConstantEntry;
 import org.glavo.classfile.constantpool.MethodHandleEntry;
 
+import static org.glavo.classfile.impl.AbstractPoolEntry.MethodHandleEntryImpl;
+
 public final class BootstrapMethodEntryImpl implements BootstrapMethodEntry {
 
     final int index;
     final int hash;
     private final ConstantPool constantPool;
-    private final AbstractPoolEntry.MethodHandleEntryImpl handle;
+    private final MethodHandleEntryImpl handle;
     private final List<LoadableConstantEntry> arguments;
 
     BootstrapMethodEntryImpl(ConstantPool constantPool, int bsmIndex, int hash,
-                                 AbstractPoolEntry.MethodHandleEntryImpl handle,
+                                 MethodHandleEntryImpl handle,
                                  List<LoadableConstantEntry> arguments) {
         this.index = bsmIndex;
         this.hash = hash;
@@ -72,7 +74,7 @@ public final class BootstrapMethodEntryImpl implements BootstrapMethodEntry {
                 && e.arguments().equals(arguments);
     }
 
-    static int computeHashCode(AbstractPoolEntry.MethodHandleEntryImpl handle,
+    static int computeHashCode(MethodHandleEntryImpl handle,
                                List<? extends LoadableConstantEntry> arguments) {
         int hash = handle.hashCode();
         hash = 31 * hash + arguments.hashCode();

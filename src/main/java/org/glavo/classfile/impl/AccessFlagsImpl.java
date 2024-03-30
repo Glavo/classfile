@@ -25,8 +25,9 @@
 package org.glavo.classfile.impl;
 
 import java.util.Set;
-import org.glavo.classfile.AccessFlags;
+
 import org.glavo.classfile.AccessFlag;
+import org.glavo.classfile.AccessFlags;
 
 public final class AccessFlagsImpl extends AbstractElement
         implements AccessFlags {

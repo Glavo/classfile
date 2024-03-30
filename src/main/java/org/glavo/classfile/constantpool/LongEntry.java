@@ -30,6 +30,9 @@ import org.glavo.classfile.impl.AbstractPoolEntry;
 /**
  * Models a {@code CONSTANT_Long_info} constant in the constant pool of a
  * classfile.
+ * @jvms 4.4.5 The CONSTANT_Long_info and CONSTANT_Double_info Structures
+ *
+ * @since 22
  */
 public sealed interface LongEntry
         extends AnnotationConstantValueEntry, ConstantValueEntry

@@ -38,9 +38,15 @@ import org.glavo.classfile.impl.Util;
  * {@code Code} attribute.  Corresponding opcodes will have a {@code kind} of
  * {@link Opcode.Kind#RETURN}.  Delivered as a {@link CodeElement} when
  * traversing the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface ReturnInstruction extends Instruction
         permits AbstractInstruction.UnboundReturnInstruction {
+
+    /**
+     * {@return the type of the return instruction}
+     */
     TypeKind typeKind();
 
     /**

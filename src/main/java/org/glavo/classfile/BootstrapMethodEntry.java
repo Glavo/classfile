@@ -37,6 +37,8 @@ import org.glavo.classfile.impl.BootstrapMethodEntryImpl;
  * is stored in the {@code BootstrapMethods} attribute, but is modeled by
  * the {@link ConstantPool}, since the bootstrap method table is logically
  * part of the constant pool.
+ *
+ * @since 22
  */
 public sealed interface BootstrapMethodEntry
         extends WritableElement<BootstrapMethodEntry>

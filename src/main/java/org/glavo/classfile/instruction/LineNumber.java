@@ -24,7 +24,7 @@
  */
 package org.glavo.classfile.instruction;
 
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.PseudoInstruction;
@@ -35,9 +35,11 @@ import org.glavo.classfile.impl.LineNumberImpl;
  * A pseudo-instruction which models a single entry in the
  * {@link LineNumberTableAttribute}.  Delivered as a {@link CodeElement}
  * during traversal of the elements of a {@link CodeModel}, according to
- * the setting of the {@link Classfile.Option#processLineNumbers(boolean)} option.
+ * the setting of the {@link ClassFile.LineNumbersOption} option.
  *
  * @see PseudoInstruction
+ *
+ * @since 22
  */
 public sealed interface LineNumber extends PseudoInstruction
         permits LineNumberImpl {

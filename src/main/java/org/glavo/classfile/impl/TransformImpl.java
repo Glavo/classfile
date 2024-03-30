@@ -31,8 +31,8 @@ import java.util.function.Supplier;
 import org.glavo.classfile.ClassBuilder;
 import org.glavo.classfile.ClassElement;
 import org.glavo.classfile.ClassTransform;
-import org.glavo.classfile.ClassfileElement;
-import org.glavo.classfile.ClassfileTransform;
+import org.glavo.classfile.ClassFileElement;
+import org.glavo.classfile.ClassFileTransform;
 import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.CodeModel;
@@ -75,10 +75,10 @@ public class TransformImpl {
         }
     }
 
-    public record ResolvedTransformImpl<E extends ClassfileElement>(Consumer<E> consumer,
+    public record ResolvedTransformImpl<E extends ClassFileElement>(Consumer<E> consumer,
                                      Runnable endHandler,
                                      Runnable startHandler)
-            implements ClassfileTransform.ResolvedTransform<E> {
+            implements ClassFileTransform.ResolvedTransform<E> {
 
         public ResolvedTransformImpl(Consumer<E> consumer) {
             this(consumer, NOTHING, NOTHING);

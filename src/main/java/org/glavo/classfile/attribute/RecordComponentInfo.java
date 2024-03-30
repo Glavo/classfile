@@ -36,6 +36,8 @@ import org.glavo.classfile.impl.UnboundAttribute;
 
 /**
  * Models a single record component in the {@link RecordAttribute}.
+ *
+ * @since 22
  */
 public sealed interface RecordComponentInfo
         extends AttributedElement

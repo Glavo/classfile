@@ -25,13 +25,13 @@
 package org.glavo.classfile.attribute;
 
 import org.glavo.classfile.Attribute;
-import org.glavo.classfile.Classfile;
-import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.UnboundAttribute;
-import org.glavo.classfile.instruction.LocalVariable;
 
 import java.util.List;
+import org.glavo.classfile.ClassFile;
+import org.glavo.classfile.CodeModel;
+import org.glavo.classfile.instruction.LocalVariable;
 
 /**
  * Models the {@code LocalVariableTable} attribute {@jvms 4.7.13}, which can appear
@@ -39,7 +39,11 @@ import java.util.List;
  * variables.
  * Delivered as a {@link LocalVariable} when traversing the
  * elements of a {@link CodeModel}, according to the setting of the
- * {@link Classfile.Option#processDebug(boolean)} option.
+ * {@link ClassFile.DebugElementsOption} option.
+ * <p>
+ * The attribute permits multiple instances in a given location.
+ *
+ * @since 22
  */
 public sealed interface LocalVariableTableAttribute
         extends Attribute<LocalVariableTableAttribute>

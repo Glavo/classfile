@@ -38,11 +38,17 @@ import org.glavo.classfile.impl.UnboundAttribute;
  * appear on classes and records the compilation time of the class.  Delivered
  * as a {@link ClassElement} when traversing the elements of
  * a {@link ClassModel}.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ *
+ * @since 22
  */
 public sealed interface CompilationIDAttribute
         extends Attribute<CompilationIDAttribute>, ClassElement
         permits BoundAttribute.BoundCompilationIDAttribute,
-        UnboundAttribute.UnboundCompilationIDAttribute {
+                UnboundAttribute.UnboundCompilationIDAttribute {
 
     /**
      * {@return the compilation ID}  The compilation ID is the value of

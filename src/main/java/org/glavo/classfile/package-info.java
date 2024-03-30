@@ -24,19 +24,18 @@
  */
 
 /**
- * <h2>Classfile parsing, generation, and transformation</h2>
- * The {@code org.glavo.classfile} package contains classes for reading, writing, and
- * modifying Java class files, as specified in Chapter 4 of the <a
- * href="https://docs.oracle.com/javase/specs/jvms/se17/html/index.html">Java
- * Java Virtual Machine Specification</a>.
+ * <h2>Provides classfile parsing, generation, and transformation library.</h2>
+ * The {@code java.lang.classfile} package contains classes for reading, writing, and
+ * modifying Java class files, as specified in Chapter {@jvms 4} of the <cite>Java
+ * Java Virtual Machine Specification</cite>.
  *
  * <h2>Reading classfiles</h2>
  * The main class for reading classfiles is {@link org.glavo.classfile.ClassModel}; we
  * convert bytes into a {@link org.glavo.classfile.ClassModel} with {@link
- * org.glavo.classfile.Classfile#parse(byte[], Classfile.Option[])}:
+ * org.glavo.classfile.ClassFile#parse(byte[])}:
  * <p>
  * {@snippet lang=java :
- * ClassModel cm = Classfile.parse(bytes);
+ * ClassModel cm = ClassFile.of().parse(bytes);
  * }
  * <p>
  * There are several additional overloads of {@code parse} that let you specify
@@ -51,7 +50,7 @@
  * not parsed until they are actually needed.
  * <p>
  * We can enumerate the names of the fields and methods in a class by:
- * {@snippet lang="java" class="RootPackageSnippets" region="enumerateFieldsMethods1"}
+ * {@snippet lang="java" class="PackageSnippets" region="enumerateFieldsMethods1"}
  * <p>
  * When we enumerate the methods, we get a {@link org.glavo.classfile.MethodModel} for each method; like a
  * {@code ClassModel}, it gives us access to method metadata and
@@ -68,7 +67,7 @@
  * series of class <em>elements</em>, which may include methods, fields, attributes,
  * and more, and which can be distinguished with pattern matching.  We could
  * rewrite the above example as:
- * {@snippet lang="java" class="RootPackageSnippets" region="enumerateFieldsMethods2"}
+ * {@snippet lang="java" class="PackageSnippets" region="enumerateFieldsMethods2"}
  * <p>
  * The models returned as elements from traversing {@code ClassModel} can in
  * turn be sources of elements.  If we wanted to
@@ -77,11 +76,11 @@
  * in turn pick out the method elements that describe the code attribute, and
  * finally pick out the code elements that describe field access and invocation
  * instructions:
- * {@snippet lang="java" class="RootPackageSnippets" region="gatherDependencies1"}
+ * {@snippet lang="java" class="PackageSnippets" region="gatherDependencies1"}
  * <p>
  * This same query could alternately be processed as a stream pipeline over
  * class elements:
- * {@snippet lang="java" class="RootPackageSnippets" region="gatherDependencies2"}
+ * {@snippet lang="java" class="PackageSnippets" region="gatherDependencies2"}
  *
  * <h3>Models and elements</h3>
  * The view of classfiles presented by this API is framed in terms of
@@ -132,7 +131,7 @@
  * org.glavo.classfile.MethodElement}, is also a model in its own right ({@link
  * org.glavo.classfile.CodeModel}) due to its complex structure.
  * <p>
- * Each standard attribute has an interface (in {@code org.glavo.classfile.attribute})
+ * Each standard attribute has an interface (in {@code java.lang.classfile.attribute})
  * which exposes the contents of the attribute and provides factories to
  * construct the attribute.  For example, the {@code Signature} attribute is
  * defined by the {@link org.glavo.classfile.attribute.SignatureAttribute} class, and
@@ -164,31 +163,30 @@
  * <p>
  * For nonstandard attributes, user-provided attribute mappers can be specified
  * through the use of the {@link
- * org.glavo.classfile.Classfile.Option#attributeMapper(java.util.function.Function)}}
+ * org.glavo.classfile.ClassFile.AttributeMapperOption#of(java.util.function.Function)}}
  * classfile option.  Implementations of custom attributes should extend {@link
  * org.glavo.classfile.CustomAttribute}.
  *
  * <h3>Options</h3>
  * <p>
- * {@link org.glavo.classfile.Classfile#parse(byte[], Classfile.Option[])}
- * accepts a list of options.  {@link org.glavo.classfile.Classfile.Option} exports some
- * static boolean options, as well as factories for more complex options,
+ * {@link org.glavo.classfile.ClassFile#of(ClassFile.Option[])}
+ * accepts a list of options.  {@link org.glavo.classfile.ClassFile.Option} is a base interface
+ * for some statically enumerated options, as well as factories for more complex options,
  * including:
  * <ul>
- *   <li>{@link org.glavo.classfile.Classfile.Option#generateStackmap(boolean)}
- * -- generate stackmaps (default is true)</li>
- *   <li>{@link org.glavo.classfile.Classfile.Option#processDebug(boolean)}
- * -- processing of debug information, such as local variable metadata (default is true) </li>
- *   <li>{@link org.glavo.classfile.Classfile.Option#processLineNumbers(boolean)}
- * -- processing of line numbers (default is true) </li>
- *   <li>{@link org.glavo.classfile.Classfile.Option#processUnknownAttributes(boolean)}
- * -- processing of unrecognized attributes (default is true)</li>
- *   <li>{@link org.glavo.classfile.Classfile.Option#constantPoolSharing(boolean)}}
- * -- share constant pool when transforming (default is true)</li>
- *   <li>{@link org.glavo.classfile.Classfile.Option#classHierarchyResolver(ClassHierarchyResolver)}
- * -- specify a custom class hierarchy
- * resolver used by stack map generation</li>
- *   <li>{@link org.glavo.classfile.Classfile.Option#attributeMapper(java.util.function.Function)}
+ *   <li>{@link org.glavo.classfile.ClassFile.StackMapsOption}
+ * -- generate stackmaps (default is {@code STACK_MAPS_WHEN_REQUIRED})</li>
+ *   <li>{@link org.glavo.classfile.ClassFile.DebugElementsOption}
+ * -- processing of debug information, such as local variable metadata (default is {@code PASS_DEBUG}) </li>
+ *   <li>{@link org.glavo.classfile.ClassFile.LineNumbersOption}
+ * -- processing of line numbers (default is {@code PASS_LINE_NUMBERS}) </li>
+ *   <li>{@link org.glavo.classfile.ClassFile.AttributesProcessingOption}
+ * -- unrecognized or problematic original attributes (default is {@code PASS_ALL_ATTRIBUTES})</li>
+ *   <li>{@link org.glavo.classfile.ClassFile.ConstantPoolSharingOption}}
+ * -- share constant pool when transforming (default is {@code SHARED_POOL})</li>
+ *   <li>{@link org.glavo.classfile.ClassFile.ClassHierarchyResolverOption#of(ClassHierarchyResolver)}
+ * -- specify a custom class hierarchy resolver used by stack map generation</li>
+ *   <li>{@link org.glavo.classfile.ClassFile.AttributeMapperOption#of(java.util.function.Function)}
  * -- specify format of custom attributes</li>
  * </ul>
  * <p>
@@ -201,7 +199,7 @@
  * can suppress it with options to gain some performance.
  *
  * <h2>Writing classfiles</h2>
- * Classfile generation is accomplished through <em>builders</em>.  For each
+ * ClassFile generation is accomplished through <em>builders</em>.  For each
  * entity type that has a model, there is also a corresponding builder type;
  * classes are built through {@link org.glavo.classfile.ClassBuilder}, methods through
  * {@link org.glavo.classfile.MethodBuilder}, etc.
@@ -212,7 +210,12 @@
  * builders for the constructor and {@code main} method, and in turn use the
  * method builders to create a {@code Code} attribute and use the code builders
  * to generate the instructions:
- * {@snippet lang="java" class="RootPackageSnippets" region="helloWorld"}
+ * {@snippet lang="java" class="PackageSnippets" region="helloWorld1"}
+ * <p>
+ * The convenience methods {@code ClassBuilder.buildMethodBody} allows us to ask
+ * {@link ClassBuilder} to create code builders to build method bodies directly,
+ * skipping the method builder custom lambda:
+ * {@snippet lang="java" class="PackageSnippets" region="helloWorld2"}
  * <p>
  * Builders often support multiple ways of expressing the same entity at
  * different levels of abstraction.  For example, the {@code invokevirtual}
@@ -222,7 +225,7 @@
  * org.glavo.classfile.CodeBuilder#invokeInstruction(Opcode,
  * java.lang.constant.ClassDesc, java.lang.String, java.lang.constant.MethodTypeDesc,
  * boolean) CodeBuilder.invokeInstruction}, or {@link
- * org.glavo.classfile.CodeBuilder#with(ClassfileElement)
+ * org.glavo.classfile.CodeBuilder#with(ClassFileElement)
  * CodeBuilder.with}.
  * <p>
  * The convenience method {@code CodeBuilder.invokevirtual} behaves as if it calls
@@ -245,8 +248,40 @@
  * symbolic information, one accepting nominal descriptors, and the other
  * accepting constant pool entries.
  *
+ * <h3>Consistency checks, syntax checks and verification</h3>
+ * No consistency checks are performed while building or transforming classfiles
+ * (except for null arguments checks). All builders and classfile elements factory
+ * methods accepts the provided information without implicit validation.
+ * However, fatal inconsistencies (like for example invalid code sequence or
+ * unresolved labels) affects internal tools and may cause exceptions later in
+ * the classfile building process.
+ * <p>
+ * Using nominal descriptors assures the right serial form is applied by the
+ * ClassFile API library based on the actual context. Also these nominal
+ * descriptors are validated during their construction, so it is not possible to
+ * create them with invalid content by mistake. Following example pass class
+ * name to the {@link java.lang.constant.ClassDesc#of} method for validation
+ * and the library performs automatic conversion to the right internal form of
+ * the class name when serialized in the constant pool as a class entry.
+ * {@snippet lang=java :
+ * var validClassEntry = constantPoolBuilder.classEntry(ClassDesc.of("mypackage.MyClass"));
+ * }
+ * <p>
+ * On the other hand it is possible to use builders methods and factories accepting
+ * constant pool entries directly. Constant pool entries can be constructed also
+ * directly from raw values, with no additional conversions or validations.
+ * Following example uses intentionally wrong class name form and it is applied
+ * without any validation or conversion.
+ * {@snippet lang=java :
+ * var invalidClassEntry = constantPoolBuilder.classEntry(
+ *                             constantPoolBuilder.utf8Entry("mypackage.MyClass"));
+ * }
+ * <p>
+ * More complex verification of a classfile can be achieved by invocation of
+ * {@link org.glavo.classfile.ClassFile#verify}.
+ *
  * <h2>Transforming classfiles</h2>
- * Classfile Processing APIs are most frequently used to combine reading and
+ * ClassFile Processing APIs are most frequently used to combine reading and
  * writing into transformation, where a classfile is read, localized changes are
  * made, but much of the classfile is passed through unchanged.  For each kind
  * of builder, {@code XxxBuilder} has a method {@code with(XxxElement)} so that
@@ -258,7 +293,7 @@
  * provides a {@link org.glavo.classfile.ClassBuilder}, iterate the elements of the
  * original {@link org.glavo.classfile.ClassModel}, and pass through all of them to
  * the builder except the methods we want to drop:
- * {@snippet lang="java" class="RootPackageSnippets" region="stripDebugMethods1"}
+ * {@snippet lang="java" class="PackageSnippets" region="stripDebugMethods1"}
  * <p>
  * This hands every class element, except for those corresponding to methods
  * whose names start with {@code debug}, back to the builder.  Transformations
@@ -276,16 +311,20 @@
  * its child models.  A transform is simply a functional interface that takes a
  * builder and an element, and an implementation "flatMap"s elements
  * into the builder.  We could express the above as:
- * {@snippet lang="java" class="RootPackageSnippets" region="stripDebugMethods2"}
+ * {@snippet lang="java" class="PackageSnippets" region="stripDebugMethods2"}
+ * <p>
+ * {@code ClassTransform.dropping} convenience method allow us to simplify the same
+ * transformation construction and express the above as:
+ * {@snippet lang="java" class="PackageSnippets" region="stripDebugMethods3"}
  *
  * <h3>Lifting transforms</h3>
- * While the second example is only slightly shorter than the first, the
+ * While the example using transformations are only slightly shorter, the
  * advantage of expressing transformation in this way is that the transform
  * operations can be more easily combined.  Suppose we want to redirect
  * invocations of static methods on {@code Foo} to the corresponding method on
  * {@code Bar} instead.  We could express this as a transformation on {@link
  * org.glavo.classfile.CodeElement}:
- * {@snippet lang="java" class="RootPackageSnippets" region="fooToBarTransform"}
+ * {@snippet lang="java" class="PackageSnippets" region="fooToBarTransform"}
  * <p>
  * We can then <em>lift</em> this transformation on code elements into a
  * transformation on method elements.  This intercepts method elements that
@@ -302,30 +341,37 @@
  * ClassTransform ct = ClassTransform.transformingMethods(mt);
  * }
  * <p>
+ * or lift the code transform into the class transform directly:
+ * {@snippet lang=java :
+ * ClassTransform ct = ClassTransform.transformingMethodBodiess(fooToBar);
+ * }
+ * <p>
  * and then transform the classfile:
  * {@snippet lang=java :
- * byte[] newBytes = Classfile.parse(bytes).transform(ct);
+ * var cc = ClassFile.of();
+ * byte[] newBytes = cc.transform(cc.parse(bytes), ct);
  * }
  * <p>
  * This is much more concise (and less error-prone) than the equivalent
  * expressed by traversing the classfile structure directly:
- * {@snippet lang="java" class="RootPackageSnippets" region="fooToBarUnrolled"}
+ * {@snippet lang="java" class="PackageSnippets" region="fooToBarUnrolled"}
  *
  * <h3>Composing transforms</h3>
  * Transforms on the same type of element can be composed in sequence, where the
  * output of the first is fed to the input of the second.  Suppose we want to
  * instrument all method calls, where we print the name of a method before
  * calling it:
- * {@snippet lang="java" class="RootPackageSnippets" region="instrumentCallsTransform"}
+ * {@snippet lang="java" class="PackageSnippets" region="instrumentCallsTransform"}
  * <p>
  * Then we can compose {@code fooToBar} and {@code instrumentCalls} with {@link
  * org.glavo.classfile.CodeTransform#andThen(CodeTransform)}:
  * <p>
  * {@snippet lang=java :
- * byte[] newBytes = Classfile.parse(bytes)
- *                             .transform(ClassTransform.transformingMethods(
- *                                 MethodTransform.transformingCode(
- *                                     fooToBar.andThen(instrumentCalls))));
+ * var cc = ClassFile.of();
+ * byte[] newBytes = cc.transform(cc.parse(bytes),
+ *                                ClassTransform.transformingMethods(
+ *                                    MethodTransform.transformingCode(
+ *                                        fooToBar.andThen(instrumentCalls))));
  * }
  *
  * Transform {@code instrumentCalls} will receive all code elements produced by
@@ -341,9 +387,27 @@
  * attributes that are not transformed can be processed by bulk-copying their
  * bytes, rather than parsing them and regenerating their contents.)  If
  * constant pool sharing is not desired it can be suppressed
- * with the {@link org.glavo.classfile.Classfile.Option#constantPoolSharing(boolean)} option.
+ * with the {@link org.glavo.classfile.ClassFile.ConstantPoolSharingOption} option.
  * Such suppression may be beneficial when transformation removes many elements,
  * resulting in many unreferenced constant pool entries.
+ *
+ * <h3>Transformation handling of unknown classfile elements</h3>
+ * Custom classfile transformations might be unaware of classfile elements
+ * introduced by future JDK releases. To achieve deterministic stability,
+ * classfile transforms interested in consuming all classfile elements should be
+ * implemented strictly to throw exceptions if running on a newer JDK, if the
+ * transformed class file is a newer version, or if a new and unknown classfile
+ * element appears. As for example in the following strict compatibility-checking
+ * transformation snippets:
+ * {@snippet lang="java" class="PackageSnippets" region="strictTransform1"}
+ * {@snippet lang="java" class="PackageSnippets" region="strictTransform2"}
+ * {@snippet lang="java" class="PackageSnippets" region="strictTransform3"}
+ * <p>
+ * Conversely, classfile transforms that are only interested in consuming a portion
+ * of classfile elements do not need to concern with new and unknown classfile
+ * elements and may pass them through. Following example shows such future-proof
+ * code transformation:
+ * {@snippet lang="java" class="PackageSnippets" region="benevolentTransform"}
  *
  * <h2>API conventions</h2>
  * <p>
@@ -469,6 +533,8 @@
  *     | LocalVariableType(int slot, Utf8Entry name, Utf8Entry type, Label startScope, Label endScope)
  *     | CharacterRange(int rangeStart, int rangeEnd, int flags, Label startScope, Label endScope)
  * }
+ *
+ * @since 22
  */
 package org.glavo.classfile;
 

@@ -4,9 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -25,12 +23,12 @@
 
 /*
  * @test
- * @summary Testing Classfile massive class adaptation.
+ * @summary Testing ClassFile massive class adaptation.
  * @run junit MassAdaptCopyPrimitiveMatchCodeTest
  */
 import helpers.InstructionModelToCodeBuilder;
 import org.glavo.classfile.AccessFlag;
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.attribute.CodeAttribute;
 import org.glavo.classfile.Attributes;
 import org.glavo.classfile.ClassModel;
@@ -96,11 +94,12 @@ class MassAdaptCopyPrimitiveMatchCodeTest {
 
     void copy(String name, byte[] bytes) throws Exception {
         //System.err.printf("MassAdaptCopyPrimitiveMatchCodeTest - %s%n", name);
-        ClassModel cm =(Classfile.parse(bytes));
+        var cc = ClassFile.of();
+        ClassModel cm =cc.parse(bytes);
         Map<String, byte[]> m2b = new HashMap<>();
         Map<String, CodeAttribute> m2c = new HashMap<>();
         byte[] resultBytes =
-                cm.transform((cb, e) -> {
+                cc.transform(cm, (cb, e) -> {
                     if (e instanceof MethodModel mm) {
                         Optional<CodeModel> code = mm.code();
                         if (code.isPresent()) {
@@ -125,7 +124,7 @@ class MassAdaptCopyPrimitiveMatchCodeTest {
             System.err.printf("MassAdaptCopyPrimitiveMatchCodeTest: Ignored because it is a record%n         - %s%n", name);
             return;
         }
-        ClassModel rcm = Classfile.parse(resultBytes);
+        ClassModel rcm = cc.parse(resultBytes);
         for (MethodModel rmm : rcm.methods()) {
             Optional<CodeModel> code = rmm.code();
             if (code.isPresent()) {

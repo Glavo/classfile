@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,17 +22,13 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.glavo.classfile;
 
 /**
- * Immutable model for a portion of (or the entirety of) a classfile.  Elements
- * that model parts of the classfile that have attributes will implement {@link
- * AttributedElement}; elements that model complex parts of the classfile that
- * themselves contain their own child elements will implement {@link
- * CompoundElement}.  Elements specific to various locations in the classfile
- * will implement {@link ClassElement}, {@link MethodElement}, etc.
+ * <h2>Provides interfaces describing classfile constant pool entries for the {@link java.lang.classfile} library.</h2>
+ *
+ * The {@code java.lang.classfile.constantpool} package contains interfaces describing classfile constant pool entries.
+ *
+ * @since 22
  */
-public sealed interface ClassfileElement
-        permits AttributedElement, CompoundElement, WritableElement,
-                ClassElement, CodeElement, FieldElement, MethodElement {
-}
+package org.glavo.classfile.constantpool;
+

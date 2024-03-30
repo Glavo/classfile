@@ -27,7 +27,7 @@ package org.glavo.classfile.impl;
 import java.lang.constant.MethodTypeDesc;
 import org.glavo.classfile.constantpool.Utf8Entry;
 
-import static org.glavo.classfile.Classfile.ACC_STATIC;
+import static org.glavo.classfile.ClassFile.ACC_STATIC;
 
 public interface MethodInfo {
     Utf8Entry methodName();

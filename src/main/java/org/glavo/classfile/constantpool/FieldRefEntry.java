@@ -25,12 +25,23 @@
 package org.glavo.classfile.constantpool;
 
 import org.glavo.classfile.impl.AbstractPoolEntry;
+import org.glavo.classfile.impl.Util;
+import java.lang.constant.ClassDesc;
 
 /**
  * Models a {@code CONSTANT_Fieldref_info} constant in the constant pool of a
  * classfile.
+ * @jvms 4.4.2 The CONSTANT_Fieldref_info, CONSTANT_Methodref_info, and CONSTANT_InterfaceMethodref_info Structures
+ *
+ * @since 22
  */
 public sealed interface FieldRefEntry extends MemberRefEntry
         permits AbstractPoolEntry.FieldRefEntryImpl {
 
+    /**
+     * {@return a symbolic descriptor for the field's type}
+     */
+    default ClassDesc typeSymbol() {
+        return Util.fieldTypeSymbol(nameAndType());
+    }
 }

@@ -30,12 +30,21 @@ import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.UnboundAttribute;
 
 import java.util.List;
+import org.glavo.classfile.*;
 
 /**
  * Models the {@code RuntimeInvisibleAnnotations} attribute {@jvms 4.7.17}, which
  * can appear on classes, methods, and fields. Delivered as a
  * {@link ClassElement}, {@link FieldElement}, or
  * {@link MethodElement} when traversing the corresponding model type.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ * <p>
+ * The attribute was introduced in the Java SE Platform version 5.0.
+ *
+ * @since 22
  */
 public sealed interface RuntimeInvisibleAnnotationsAttribute
         extends Attribute<RuntimeInvisibleAnnotationsAttribute>,

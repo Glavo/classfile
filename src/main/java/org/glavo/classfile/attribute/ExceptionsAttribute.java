@@ -41,11 +41,17 @@ import org.glavo.classfile.impl.Util;
  * methods, and records the exceptions declared to be thrown by this method.
  * Delivered as a {@link MethodElement} when traversing the elements of a
  * {@link MethodModel}.
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ *
+ * @since 22
  */
 public sealed interface ExceptionsAttribute
         extends Attribute<ExceptionsAttribute>, MethodElement
         permits BoundAttribute.BoundExceptionsAttribute,
-        UnboundAttribute.UnboundExceptionsAttribute {
+                UnboundAttribute.UnboundExceptionsAttribute {
 
     /**
      * {@return the exceptions declared to be thrown by this method}

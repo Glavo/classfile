@@ -26,7 +26,6 @@ package org.glavo.classfile.impl;
 
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.DirectMethodHandleDesc;
-import org.glavo.classfile.AccessFlag;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,6 +42,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.glavo.classfile.Annotation;
 
+import org.glavo.classfile.AccessFlag;
 import org.glavo.classfile.AnnotationElement;
 import org.glavo.classfile.AnnotationValue;
 import org.glavo.classfile.AnnotationValue.*;
@@ -58,7 +58,7 @@ import org.glavo.classfile.attribute.StackMapFrameInfo.*;
 import org.glavo.classfile.constantpool.*;
 import org.glavo.classfile.instruction.*;
 
-import static org.glavo.classfile.Classfile.*;
+import static org.glavo.classfile.ClassFile.*;
 import org.glavo.classfile.CompoundElement;
 import org.glavo.classfile.FieldModel;
 import static org.glavo.classfile.impl.ClassPrinterImpl.Style.*;
@@ -257,53 +257,50 @@ public final class ClassPrinterImpl {
     }
 
     private static void toYaml(int indent, boolean skipFirstIndent, Node node, Consumer<String> out) {
-        switch (node) {
-            case LeafNode leaf -> {
-                out.accept(quoteAndEscapeYaml(leaf.value()));
-            }
-            case ListNodeImpl list -> {
-                switch (list.style()) {
-                    case FLOW -> {
-                        out.accept("[");
-                        boolean first = true;
-                        for (var n : list) {
-                            if (first) first = false;
-                            else out.accept(", ");
-                            toYaml(0, false, n, out);
-                        }
-                        out.accept("]");
+        Objects.requireNonNull(node);
+        if (node instanceof LeafNode leaf) {
+            out.accept(quoteAndEscapeYaml(leaf.value()));
+        } else if (node instanceof ListNodeImpl list) {
+            switch (list.style()) {
+                case FLOW -> {
+                    out.accept("[");
+                    boolean first = true;
+                    for (var n : list) {
+                        if (first) first = false;
+                        else out.accept(", ");
+                        toYaml(0, false, n, out);
                     }
-                    case BLOCK -> {
-                        for (var n : list) {
-                            out.accept(NL + "    ".repeat(indent) + "  - ");
-                            toYaml(indent + 1, true, n, out);
-                        }
+                    out.accept("]");
+                }
+                case BLOCK -> {
+                    for (var n : list) {
+                        out.accept(NL + "    ".repeat(indent) + "  - ");
+                        toYaml(indent + 1, true, n, out);
                     }
                 }
             }
-            case MapNodeImpl map -> {
-                switch (map.style()) {
-                    case FLOW -> {
-                        out.accept("{");
-                        boolean first = true;
-                        for (var n : map.values()) {
-                            if (first) first = false;
-                            else out.accept(", ");
-                            out.accept(quoteAndEscapeYaml(n.name()) + ": ");
-                            toYaml(0, false, n, out);
-                        }
-                        out.accept("}");
+        } else if (node instanceof MapNodeImpl map) {
+            switch (map.style()) {
+                case FLOW -> {
+                    out.accept("{");
+                    boolean first = true;
+                    for (var n : map.values()) {
+                        if (first) first = false;
+                        else out.accept(", ");
+                        out.accept(quoteAndEscapeYaml(n.name()) + ": ");
+                        toYaml(0, false, n, out);
                     }
-                    case BLOCK -> {
-                        for (var n : map.values()) {
-                            if (skipFirstIndent) {
-                                skipFirstIndent = false;
-                            } else {
-                                out.accept(NL + "    ".repeat(indent));
-                            }
-                            out.accept(quoteAndEscapeYaml(n.name()) + ": ");
-                            toYaml(n instanceof ListNodeImpl pl && pl.style() == BLOCK ? indent : indent + 1, false, n, out);
+                    out.accept("}");
+                }
+                case BLOCK -> {
+                    for (var n : map.values()) {
+                        if (skipFirstIndent) {
+                            skipFirstIndent = false;
+                        } else {
+                            out.accept(NL + "    ".repeat(indent));
                         }
+                        out.accept(quoteAndEscapeYaml(n.name()) + ": ");
+                        toYaml(n instanceof ListNodeImpl pl && pl.style() == BLOCK ? indent : indent + 1, false, n, out);
                     }
                 }
             }
@@ -341,60 +338,57 @@ public final class ClassPrinterImpl {
     }
 
     private static void toJson(int indent, boolean skipFirstIndent, Node node, Consumer<String> out) {
-        switch (node) {
-            case LeafNode leaf -> {
-                out.accept(quoteAndEscapeJson(leaf.value()));
-            }
-            case ListNodeImpl list -> {
-                out.accept("[");
-                boolean first = true;
-                switch (list.style()) {
-                    case FLOW -> {
-                        for (var n : list) {
-                            if (first) first = false;
-                            else out.accept(", ");
-                            toJson(0, false, n, out);
-                        }
-                    }
-                    case BLOCK -> {
-                        for (var n : list) {
-                            if (first) first = false;
-                            else out.accept(",");
-                            out.accept(NL + "    ".repeat(indent));
-                            toJson(indent + 1, true, n, out);
-                        }
+        Objects.requireNonNull(node);
+        if (node instanceof LeafNode leaf) {
+            out.accept(quoteAndEscapeJson(leaf.value()));
+        } else if (node instanceof ListNodeImpl list) {
+            out.accept("[");
+            boolean first = true;
+            switch (list.style()) {
+                case FLOW -> {
+                    for (var n : list) {
+                        if (first) first = false;
+                        else out.accept(", ");
+                        toJson(0, false, n, out);
                     }
                 }
-                out.accept("]");
-            }
-            case MapNodeImpl map -> {
-                switch (map.style()) {
-                    case FLOW -> {
-                        out.accept("{");
-                        boolean first = true;
-                        for (var n : map.values()) {
-                            if (first) first = false;
-                            else out.accept(", ");
-                            out.accept(quoteAndEscapeJson(n.name().toString()) + ": ");
-                            toJson(0, false, n, out);
-                        }
-                    }
-                    case BLOCK -> {
-                        if (skipFirstIndent) out.accept("  { ");
-                        else out.accept("{");
-                        boolean first = true;
-                        for (var n : map.values()) {
-                            if (first) first = false;
-                            else out.accept(",");
-                            if (skipFirstIndent) skipFirstIndent = false;
-                            else out.accept(NL + "    ".repeat(indent));
-                            out.accept(quoteAndEscapeJson(n.name().toString()) + ": ");
-                            toJson(indent + 1, false, n, out);
-                        }
+                case BLOCK -> {
+                    for (var n : list) {
+                        if (first) first = false;
+                        else out.accept(",");
+                        out.accept(NL + "    ".repeat(indent));
+                        toJson(indent + 1, true, n, out);
                     }
                 }
-                out.accept("}");
             }
+            out.accept("]");
+        } else if (node instanceof MapNodeImpl map) {
+            switch (map.style()) {
+                case FLOW -> {
+                    out.accept("{");
+                    boolean first = true;
+                    for (var n : map.values()) {
+                        if (first) first = false;
+                        else out.accept(", ");
+                        out.accept(quoteAndEscapeJson(n.name().toString()) + ": ");
+                        toJson(0, false, n, out);
+                    }
+                }
+                case BLOCK -> {
+                    if (skipFirstIndent) out.accept("  { ");
+                    else out.accept("{");
+                    boolean first = true;
+                    for (var n : map.values()) {
+                        if (first) first = false;
+                        else out.accept(",");
+                        if (skipFirstIndent) skipFirstIndent = false;
+                        else out.accept(NL + "    ".repeat(indent));
+                        out.accept(quoteAndEscapeJson(n.name().toString()) + ": ");
+                        toJson(indent + 1, false, n, out);
+                    }
+                }
+            }
+            out.accept("}");
         }
     }
 
@@ -416,46 +410,42 @@ public final class ClassPrinterImpl {
 
     private static void toXml(int indent, boolean skipFirstIndent, Node node, Consumer<String> out) {
         var name = toXmlName(node.name().toString());
-        switch (node) {
-            case LeafNode leaf -> {
-                out.accept("<" + name + ">");
-                out.accept(xmlEscape(leaf.value()));
-            }
-            case ListNodeImpl list -> {
-                switch (list.style()) {
-                    case FLOW -> {
-                        out.accept("<" + name + ">");
-                        for (var n : list) {
-                            toXml(0, false, n, out);
-                        }
+        if (node instanceof LeafNode leaf) {
+            out.accept("<" + name + ">");
+            out.accept(xmlEscape(leaf.value()));
+        } else if (node instanceof ListNodeImpl list) {
+            switch (list.style()) {
+                case FLOW -> {
+                    out.accept("<" + name + ">");
+                    for (var n : list) {
+                        toXml(0, false, n, out);
                     }
-                    case BLOCK -> {
-                        if (!skipFirstIndent)
-                            out.accept(NL + "    ".repeat(indent));
-                        out.accept("<" + name + ">");
-                        for (var n : list) {
-                            out.accept(NL + "    ".repeat(indent + 1));
-                            toXml(indent + 1, true, n, out);
-                        }
+                }
+                case BLOCK -> {
+                    if (!skipFirstIndent)
+                        out.accept(NL + "    ".repeat(indent));
+                    out.accept("<" + name + ">");
+                    for (var n : list) {
+                        out.accept(NL + "    ".repeat(indent + 1));
+                        toXml(indent + 1, true, n, out);
                     }
                 }
             }
-            case MapNodeImpl map -> {
-                switch (map.style()) {
-                    case FLOW -> {
-                        out.accept("<" + name + ">");
-                        for (var n : map.values()) {
-                            toXml(0, false, n, out);
-                        }
+        } else if (node instanceof MapNodeImpl map) {
+            switch (map.style()) {
+                case FLOW -> {
+                    out.accept("<" + name + ">");
+                    for (var n : map.values()) {
+                        toXml(0, false, n, out);
                     }
-                    case BLOCK -> {
-                        if (!skipFirstIndent)
-                            out.accept(NL + "    ".repeat(indent));
-                        out.accept("<" + name + ">");
-                        for (var n : map.values()) {
-                            out.accept(NL + "    ".repeat(indent + 1));
-                            toXml(indent + 1, true, n, out);
-                        }
+                }
+                case BLOCK -> {
+                    if (!skipFirstIndent)
+                        out.accept(NL + "    ".repeat(indent));
+                    out.accept("<" + name + ">");
+                    for (var n : map.values()) {
+                        out.accept(NL + "    ".repeat(indent + 1));
+                        toXml(indent + 1, true, n, out);
                     }
                 }
             }
@@ -467,14 +457,14 @@ public final class ClassPrinterImpl {
         var s = String.valueOf(value);
         var sb = new StringBuilder(s.length() << 1);
         s.chars().forEach(c -> {
-            switch (c) {
-                case '<'  -> sb.append("&lt;");
-                case '>'  -> sb.append("&gt;");
-                case '"'  -> sb.append("&quot;");
-                case '&'  -> sb.append("&amp;");
-                case '\''  -> sb.append("&apos;");
-                default -> escape(c, sb);
-            }});
+        switch (c) {
+            case '<'  -> sb.append("&lt;");
+            case '>'  -> sb.append("&gt;");
+            case '"'  -> sb.append("&quot;");
+            case '&'  -> sb.append("&amp;");
+            case '\''  -> sb.append("&apos;");
+            default -> escape(c, sb);
+        }});
         return sb.toString();
     }
 
@@ -485,24 +475,37 @@ public final class ClassPrinterImpl {
     }
 
     private static Node[] elementValueToTree(AnnotationValue v) {
-        return switch (v) {
-            case OfString cv -> leafs("string", String.valueOf(cv.constantValue()));
-            case OfDouble cv -> leafs("double", String.valueOf(cv.constantValue()));
-            case OfFloat cv -> leafs("float", String.valueOf(cv.constantValue()));
-            case OfLong cv -> leafs("long", String.valueOf(cv.constantValue()));
-            case OfInteger cv -> leafs("int", String.valueOf(cv.constantValue()));
-            case OfShort cv -> leafs("short", String.valueOf(cv.constantValue()));
-            case OfCharacter cv -> leafs("char", String.valueOf(cv.constantValue()));
-            case OfByte cv -> leafs("byte", String.valueOf(cv.constantValue()));
-            case OfBoolean cv -> leafs("boolean", String.valueOf((int)cv.constantValue() != 0));
-            case OfClass clv -> leafs("class", clv.className().stringValue());
-            case OfEnum ev -> leafs("enum class", ev.className().stringValue(),
-                    "contant name", ev.constantName().stringValue());
-            case OfAnnotation av -> leafs("annotation class", av.annotation().className().stringValue());
-            case OfArray av -> new Node[]{new ListNodeImpl(FLOW, "array", av.values().stream().map(
+        Objects.requireNonNull(v);
+        if (v instanceof OfString cv) {
+            return leafs("string", String.valueOf(cv.constantValue()));
+        } else if (v instanceof OfDouble cv) {
+            return leafs("double", String.valueOf(cv.constantValue()));
+        } else if (v instanceof OfFloat cv) {
+            return leafs("float", String.valueOf(cv.constantValue()));
+        } else if (v instanceof OfLong cv) {
+            return leafs("long", String.valueOf(cv.constantValue()));
+        } else if (v instanceof OfInteger cv) {
+            return leafs("int", String.valueOf(cv.constantValue()));
+        } else if (v instanceof OfShort cv) {
+            return leafs("short", String.valueOf(cv.constantValue()));
+        } else if (v instanceof OfCharacter cv) {
+            return leafs("char", String.valueOf(cv.constantValue()));
+        } else if (v instanceof OfByte cv) {
+            return leafs("byte", String.valueOf(cv.constantValue()));
+        } else if (v instanceof OfBoolean cv) {
+            return leafs("boolean", String.valueOf((int) cv.constantValue() != 0));
+        } else if (v instanceof OfClass clv) {
+            return leafs("class", clv.className().stringValue());
+        } else if (v instanceof OfEnum ev) {
+            return leafs("enum class", ev.className().stringValue(),
+                    "constant name", ev.constantName().stringValue());
+        } else if (v instanceof OfAnnotation av) {
+            return leafs("annotation class", av.annotation().className().stringValue());
+        } else if (v instanceof OfArray av) {
+            return new Node[]{new ListNodeImpl(FLOW, "array", av.values().stream().map(
                     ev -> new MapNodeImpl(FLOW, "value").with(elementValueToTree(ev))))};
-            default -> throw new AssertionError();
-        };
+        }
+        throw new IllegalArgumentException();
     }
 
     private static Node elementValuePairsToTree(List<AnnotationElement> evps) {
@@ -513,30 +516,27 @@ public final class ClassPrinterImpl {
 
     private static Stream<ConstantDesc> convertVTIs(CodeAttribute lr, List<VerificationTypeInfo> vtis) {
         return vtis.stream().mapMulti((vti, ret) -> {
-            switch (vti) {
-                case SimpleVerificationTypeInfo s -> {
-                    switch (s) {
-                        case ITEM_DOUBLE -> {
-                            ret.accept("double");
-                            ret.accept("double2");
-                        }
-                        case ITEM_FLOAT ->
-                                ret.accept("float");
-                        case ITEM_INTEGER ->
-                                ret.accept("int");
-                        case ITEM_LONG ->  {
-                            ret.accept("long");
-                            ret.accept("long2");
-                        }
-                        case ITEM_NULL -> ret.accept("null");
-                        case ITEM_TOP -> ret.accept("?");
-                        case ITEM_UNINITIALIZED_THIS -> ret.accept("THIS");
+            Objects.requireNonNull(vti);
+            if (vti instanceof SimpleVerificationTypeInfo s) {
+                switch (s) {
+                    case ITEM_DOUBLE -> {
+                        ret.accept("double");
+                        ret.accept("double2");
                     }
+                    case ITEM_FLOAT -> ret.accept("float");
+                    case ITEM_INTEGER -> ret.accept("int");
+                    case ITEM_LONG -> {
+                        ret.accept("long");
+                        ret.accept("long2");
+                    }
+                    case ITEM_NULL -> ret.accept("null");
+                    case ITEM_TOP -> ret.accept("?");
+                    case ITEM_UNINITIALIZED_THIS -> ret.accept("THIS");
                 }
-                case ObjectVerificationTypeInfo o ->
-                        ret.accept(o.className().name().stringValue());
-                case UninitializedVerificationTypeInfo u ->
-                        ret.accept("UNITIALIZED @" + lr.labelToBci(u.newTarget()));
+            } else if (vti instanceof ObjectVerificationTypeInfo o) {
+                ret.accept(o.className().name().stringValue());
+            } else if (vti instanceof UninitializedVerificationTypeInfo u) {
+                ret.accept("UNINITIALIZED @" + lr.labelToBci(u.newTarget()));
             }
         });
     }
@@ -544,37 +544,40 @@ public final class ClassPrinterImpl {
     private record ExceptionHandler(int start, int end, int handler, String catchType) {}
 
     public static MapNode modelToTree(CompoundElement<?> model, Verbosity verbosity) {
-        return switch(model) {
-            case ClassModel cm -> classToTree(cm, verbosity);
-            case FieldModel fm -> fieldToTree(fm, verbosity);
-            case MethodModel mm -> methodToTree(mm, verbosity);
-            case CodeModel com -> codeToTree((CodeAttribute)com, verbosity);
-            default -> throw new AssertionError();
-        };
+        Objects.requireNonNull(model);
+        if (model instanceof ClassModel cm) {
+            return classToTree(cm, verbosity);
+        } else if (model instanceof FieldModel fm) {
+            return fieldToTree(fm, verbosity);
+        } else if (model instanceof MethodModel mm) {
+            return methodToTree(mm, verbosity);
+        } else if (model instanceof CodeModel com) {
+            return codeToTree((CodeAttribute) com, verbosity);
+        }
+        throw new IllegalArgumentException();
     }
 
     private static MapNode classToTree(ClassModel clm, Verbosity verbosity) {
         return new MapNodeImpl(BLOCK, "class")
                 .with(leaf("class name", clm.thisClass().asInternalName()),
-                        leaf("version", clm.majorVersion() + "." + clm.minorVersion()),
-                        list("flags", "flag", clm.flags().flags().stream().map(AccessFlag::name)),
-                        leaf("superclass", clm.superclass().map(ClassEntry::asInternalName).orElse("")),
-                        list("interfaces", "interface", clm.interfaces().stream().map(ClassEntry::asInternalName)),
-                        list("attributes", "attribute", clm.attributes().stream().map(Attribute::attributeName)))
+                      leaf("version", clm.majorVersion() + "." + clm.minorVersion()),
+                      list("flags", "flag", clm.flags().flags().stream().map(AccessFlag::name)),
+                      leaf("superclass", clm.superclass().map(ClassEntry::asInternalName).orElse("")),
+                      list("interfaces", "interface", clm.interfaces().stream().map(ClassEntry::asInternalName)),
+                      list("attributes", "attribute", clm.attributes().stream().map(Attribute::attributeName)))
                 .with(constantPoolToTree(clm.constantPool(), verbosity))
                 .with(attributesToTree(clm.attributes(), verbosity))
                 .with(new ListNodeImpl(BLOCK, "fields", clm.fields().stream().map(f ->
-                        fieldToTree(f, verbosity))))
+                    fieldToTree(f, verbosity))))
                 .with(new ListNodeImpl(BLOCK, "methods", clm.methods().stream().map(mm ->
-                        methodToTree(mm, verbosity))));
+                    methodToTree(mm, verbosity))));
     }
 
     private static Node[] constantPoolToTree(ConstantPool cp, Verbosity verbosity) {
         if (verbosity == Verbosity.TRACE_ALL) {
             var cpNode = new MapNodeImpl(BLOCK, "constant pool");
-            for (int i = 1; i < cp.entryCount();) {
-                var e = cp.entryByIndex(i);
-                cpNode.with(new MapNodeImpl(FLOW, i)
+            for (PoolEntry e : cp) {
+                MapNodeImpl mapNode = new MapNodeImpl(FLOW, e.index())
                         .with(leaf("tag", switch (e.tag()) {
                             case TAG_UTF8 -> "Utf8";
                             case TAG_INTEGER -> "Integer";
@@ -594,53 +597,64 @@ public final class ClassPrinterImpl {
                             case TAG_MODULE -> "Module";
                             case TAG_PACKAGE -> "Package";
                             default -> throw new AssertionError("Unknown CP tag: " + e.tag());
-                        }))
-                        .with(switch (e) {
-                            case ClassEntry ce -> leafs(
-                                    "class name index", ce.name().index(),
-                                    "class internal name", ce.asInternalName());
-                            case ModuleEntry me -> leafs(
-                                    "module name index", me.name().index(),
-                                    "module name", me.name().stringValue());
-                            case PackageEntry pe -> leafs(
-                                    "package name index", pe.name().index(),
-                                    "package name", pe.name().stringValue());
-                            case StringEntry se -> leafs(
-                                    "value index", se.utf8().index(),
-                                    "value", se.stringValue());
-                            case MemberRefEntry mre -> leafs(
-                                    "owner index", mre.owner().index(),
-                                    "name and type index", mre.nameAndType().index(),
-                                    "owner", mre.owner().name().stringValue(),
-                                    "name", mre.name().stringValue(),
-                                    "type", mre.type().stringValue());
-                            case NameAndTypeEntry nte -> leafs(
-                                    "name index", nte.name().index(),
-                                    "type index", nte.type().index(),
-                                    "name", nte.name().stringValue(),
-                                    "type", nte.type().stringValue());
-                            case MethodHandleEntry mhe -> leafs(
-                                    "reference kind", DirectMethodHandleDesc.Kind.valueOf(mhe.kind()).name(),
-                                    "reference index", mhe.reference().index(),
-                                    "owner", mhe.reference().owner().asInternalName(),
-                                    "name", mhe.reference().name().stringValue(),
-                                    "type", mhe.reference().type().stringValue());
-                            case MethodTypeEntry mte -> leafs(
-                                    "descriptor index", mte.descriptor().index(),
-                                    "descriptor", mte.descriptor().stringValue());
-                            case DynamicConstantPoolEntry dcpe -> new Node[] {
-                                    leaf("bootstrap method handle index", dcpe.bootstrap().bootstrapMethod().index()),
-                                    list("bootstrap method arguments indexes",
-                                            "index", dcpe.bootstrap().arguments().stream().map(en -> en.index())),
-                                    leaf("name and type index", dcpe.nameAndType().index()),
-                                    leaf("name", dcpe.name().stringValue()),
-                                    leaf("type", dcpe.type().stringValue())};
-                            case AnnotationConstantValueEntry ve -> leafs(
-                                    "value", String.valueOf(ve.constantValue())
-                            );
-                            default -> throw new AssertionError();
                         }));
-                i += e.width();
+                Node[] nodes;
+                if (e instanceof ClassEntry ce) {
+                    nodes = leafs(
+                            "class name index", ce.name().index(),
+                            "class internal name", ce.asInternalName());
+                } else if (e instanceof ModuleEntry me) {
+                    nodes = leafs(
+                            "module name index", me.name().index(),
+                            "module name", me.name().stringValue());
+                } else if (e instanceof PackageEntry pe) {
+                    nodes = leafs(
+                            "package name index", pe.name().index(),
+                            "package name", pe.name().stringValue());
+                } else if (e instanceof StringEntry se) {
+                    nodes = leafs(
+                            "value index", se.utf8().index(),
+                            "value", se.stringValue());
+                } else if (e instanceof MemberRefEntry mre) {
+                    nodes = leafs(
+                            "owner index", mre.owner().index(),
+                            "name and type index", mre.nameAndType().index(),
+                            "owner", mre.owner().name().stringValue(),
+                            "name", mre.name().stringValue(),
+                            "type", mre.type().stringValue());
+                } else if (e instanceof NameAndTypeEntry nte) {
+                    nodes = leafs(
+                            "name index", nte.name().index(),
+                            "type index", nte.type().index(),
+                            "name", nte.name().stringValue(),
+                            "type", nte.type().stringValue());
+                } else if (e instanceof MethodHandleEntry mhe) {
+                    nodes = leafs(
+                            "reference kind", DirectMethodHandleDesc.Kind.valueOf(mhe.kind()).name(),
+                            "reference index", mhe.reference().index(),
+                            "owner", mhe.reference().owner().asInternalName(),
+                            "name", mhe.reference().name().stringValue(),
+                            "type", mhe.reference().type().stringValue());
+                } else if (e instanceof MethodTypeEntry mte) {
+                    nodes = leafs(
+                            "descriptor index", mte.descriptor().index(),
+                            "descriptor", mte.descriptor().stringValue());
+                } else if (e instanceof DynamicConstantPoolEntry dcpe) {
+                    nodes = new Node[]{
+                            leaf("bootstrap method handle index", dcpe.bootstrap().bootstrapMethod().index()),
+                            list("bootstrap method arguments indexes",
+                                    "index", dcpe.bootstrap().arguments().stream().map(en -> en.index())),
+                            leaf("name and type index", dcpe.nameAndType().index()),
+                            leaf("name", dcpe.name().stringValue()),
+                            leaf("type", dcpe.type().stringValue())};
+                } else if (e instanceof AnnotationConstantValueEntry ve) {
+                    nodes = leafs(
+                            "value", String.valueOf(ve.constantValue())
+                    );
+                } else {
+                    throw new IllegalArgumentException();
+                }
+                cpNode.with(mapNode.with(nodes));
             }
             return new Node[]{cpNode};
         } else {
@@ -656,23 +670,23 @@ public final class ClassPrinterImpl {
 
     private static MapNode fieldToTree(FieldModel f, Verbosity verbosity) {
         return new MapNodeImpl(BLOCK, "field")
-                .with(leaf("field name", f.fieldName().stringValue()),
-                        list("flags",
-                                "flag", f.flags().flags().stream().map(AccessFlag::name)),
-                        leaf("field type", f.fieldType().stringValue()),
-                        list("attributes",
-                                "attribute", f.attributes().stream().map(Attribute::attributeName)))
-                .with(attributesToTree(f.attributes(), verbosity));
+                            .with(leaf("field name", f.fieldName().stringValue()),
+                                  list("flags",
+                                          "flag", f.flags().flags().stream().map(AccessFlag::name)),
+                                  leaf("field type", f.fieldType().stringValue()),
+                                  list("attributes",
+                                          "attribute", f.attributes().stream().map(Attribute::attributeName)))
+                            .with(attributesToTree(f.attributes(), verbosity));
     }
 
     public static MapNode methodToTree(MethodModel m, Verbosity verbosity) {
         return new MapNodeImpl(BLOCK, "method")
                 .with(leaf("method name", m.methodName().stringValue()),
-                        list("flags",
-                                "flag", m.flags().flags().stream().map(AccessFlag::name)),
-                        leaf("method type", m.methodType().stringValue()),
-                        list("attributes",
-                                "attribute", m.attributes().stream().map(Attribute::attributeName)))
+                      list("flags",
+                              "flag", m.flags().flags().stream().map(AccessFlag::name)),
+                      leaf("method type", m.methodType().stringValue()),
+                      list("attributes",
+                              "attribute", m.attributes().stream().map(Attribute::attributeName)))
                 .with(attributesToTree(m.attributes(), verbosity))
                 .with(codeToTree((CodeAttribute)m.code().orElse(null), verbosity));
     }
@@ -694,8 +708,8 @@ public final class ClassPrinterImpl {
                     for (var smf : smta.entries()) {
                         stackMap.with(frameToTree(com.labelToBci(smf.target()), com, smf));
                     }
-                } else if (verbosity == Verbosity.TRACE_ALL && attr != null) switch (attr) {
-                    case LocalVariableTableAttribute lvta -> {
+                } else if (verbosity == Verbosity.TRACE_ALL && attr != null)
+                    if (attr instanceof LocalVariableTableAttribute lvta) {
                         locals = lvta.localVariables();
                         codeNode.with(new ListNodeImpl(BLOCK, "local variables",
                                 IntStream.range(0, locals.size()).mapToObj(i -> {
@@ -707,8 +721,7 @@ public final class ClassPrinterImpl {
                                             "name", lv.name().stringValue(),
                                             "type", lv.type().stringValue());
                                 })));
-                    }
-                    case LocalVariableTypeTableAttribute lvtta -> {
+                    } else if (attr instanceof LocalVariableTypeTableAttribute lvtta) {
                         codeNode.with(new ListNodeImpl(BLOCK, "local variable types",
                                 IntStream.range(0, lvtta.localVariableTypes().size()).mapToObj(i -> {
                                     var lvt = lvtta.localVariableTypes().get(i);
@@ -719,8 +732,7 @@ public final class ClassPrinterImpl {
                                             "name", lvt.name().stringValue(),
                                             "signature", lvt.signature().stringValue());
                                 })));
-                    }
-                    case LineNumberTableAttribute lnta -> {
+                    } else if (attr instanceof LineNumberTableAttribute lnta) {
                         codeNode.with(new ListNodeImpl(BLOCK, "line numbers",
                                 IntStream.range(0, lnta.lineNumbers().size()).mapToObj(i -> {
                                     var ln = lnta.lineNumbers().get(i);
@@ -728,8 +740,7 @@ public final class ClassPrinterImpl {
                                             "start", ln.startPc(),
                                             "line number", ln.lineNumber());
                                 })));
-                    }
-                    case CharacterRangeTableAttribute crta -> {
+                    } else if (attr instanceof CharacterRangeTableAttribute crta) {
                         codeNode.with(new ListNodeImpl(BLOCK, "character ranges",
                                 IntStream.range(0, crta.characterRangeTable().size()).mapToObj(i -> {
                                     var cr = crta.characterRangeTable().get(i);
@@ -740,21 +751,20 @@ public final class ClassPrinterImpl {
                                             "range end", cr.characterRangeEnd(),
                                             "flags", cr.flags());
                                 })));
+                    } else if (attr instanceof RuntimeVisibleTypeAnnotationsAttribute rvtaa) {
+                        rvtaa.annotations().forEach(a -> forEachOffset(a, com, (off, an) ->
+                                visibleTypeAnnos.computeIfAbsent(off, o -> new LinkedList<>()).add(an)));
+                    } else if (attr instanceof RuntimeInvisibleTypeAnnotationsAttribute ritaa) {
+                        ritaa.annotations().forEach(a -> forEachOffset(a, com, (off, an) ->
+                                invisibleTypeAnnos.computeIfAbsent(off, o -> new LinkedList<>()).add(an)));
+                    } else if (attr instanceof Object) {
                     }
-                    case RuntimeVisibleTypeAnnotationsAttribute rvtaa ->
-                            rvtaa.annotations().forEach(a -> forEachOffset(a, com, (off, an) ->
-                                    visibleTypeAnnos.computeIfAbsent(off, o -> new LinkedList<>()).add(an)));
-                    case RuntimeInvisibleTypeAnnotationsAttribute ritaa ->
-                            ritaa.annotations().forEach(a -> forEachOffset(a, com, (off, an) ->
-                                    invisibleTypeAnnos.computeIfAbsent(off, o -> new LinkedList<>()).add(an)));
-                    case Object o -> {}
-                }
             }
             codeNode.with(attributesToTree(com.attributes(), verbosity));
             if (!stackMap.containsKey(0)) {
                 codeNode.with(new MapNodeImpl(FLOW, "//stack map frame @0").with(
-                        list("locals", "item", convertVTIs(com, StackMapDecoder.initFrameLocals(com.parent().get()))),
-                        list("stack", "item", Stream.of())));
+                    list("locals", "item", convertVTIs(com, StackMapDecoder.initFrameLocals(com.parent().get()))),
+                    list("stack", "item", Stream.of())));
             }
             var excHandlers = com.exceptionHandlers().stream().map(exc -> new ExceptionHandler(
                     com.labelToBci(exc.tryStart()),
@@ -803,62 +813,77 @@ public final class ClassPrinterImpl {
                     }
                     var in = new MapNodeImpl(FLOW, bci).with(leaf("opcode", ins.opcode().name()));
                     codeNode.with(in);
-                    switch (coe) {
-                        case IncrementInstruction inc ->  in.with(leafs(
+                    if (coe instanceof IncrementInstruction inc) {
+                        in.with(leafs(
                                         "slot", inc.slot(),
                                         "const", inc.constant()))
                                 .with(localInfoToTree(locals, inc.slot(), bci));
-                        case LoadInstruction lv ->  in.with(leaf(
+                    } else if (coe instanceof LoadInstruction lv) {
+                        in.with(leaf(
                                         "slot", lv.slot()))
                                 .with(localInfoToTree(locals, lv.slot(), bci));
-                        case StoreInstruction lv ->  in.with(leaf(
+                    } else if (coe instanceof StoreInstruction lv) {
+                        in.with(leaf(
                                         "slot", lv.slot()))
                                 .with(localInfoToTree(locals, lv.slot(), bci));
-                        case FieldInstruction fa -> in.with(leafs(
+                    } else if (coe instanceof FieldInstruction fa) {
+                        in.with(leafs(
                                 "owner", fa.owner().name().stringValue(),
                                 "field name", fa.name().stringValue(),
                                 "field type", fa.type().stringValue()));
-                        case InvokeInstruction inv -> in.with(leafs(
+                    } else if (coe instanceof InvokeInstruction inv) {
+                        in.with(leafs(
                                 "owner", inv.owner().name().stringValue(),
                                 "method name", inv.name().stringValue(),
                                 "method type", inv.type().stringValue()));
-                        case InvokeDynamicInstruction invd -> in.with(leafs(
+                    } else if (coe instanceof InvokeDynamicInstruction invd) {
+                        in.with(leafs(
                                 "name", invd.name().stringValue(),
                                 "descriptor", invd.type().stringValue(),
                                 "kind", invd.bootstrapMethod().kind().name(),
                                 "owner", invd.bootstrapMethod().owner().descriptorString(),
                                 "method name", invd.bootstrapMethod().methodName(),
                                 "invocation type", invd.bootstrapMethod().invocationType().descriptorString()));
-                        case NewObjectInstruction newo -> in.with(leaf(
+                    } else if (coe instanceof NewObjectInstruction newo) {
+                        in.with(leaf(
                                 "type", newo.className().name().stringValue()));
-                        case NewPrimitiveArrayInstruction newa -> in.with(leafs(
+                    } else if (coe instanceof NewPrimitiveArrayInstruction newa) {
+                        in.with(leafs(
                                 "dimensions", 1,
                                 "descriptor", newa.typeKind().typeName()));
-                        case NewReferenceArrayInstruction newa -> in.with(leafs(
+                    } else if (coe instanceof NewReferenceArrayInstruction newa) {
+                        in.with(leafs(
                                 "dimensions", 1,
                                 "descriptor", newa.componentType().name().stringValue()));
-                        case NewMultiArrayInstruction newa -> in.with(leafs(
+                    } else if (coe instanceof NewMultiArrayInstruction newa) {
+                        in.with(leafs(
                                 "dimensions", newa.dimensions(),
                                 "descriptor", newa.arrayType().name().stringValue()));
-                        case TypeCheckInstruction tch -> in.with(leaf(
+                    } else if (coe instanceof TypeCheckInstruction tch) {
+                        in.with(leaf(
                                 "type", tch.type().name().stringValue()));
-                        case ConstantInstruction cons -> in.with(leaf(
+                    } else if (coe instanceof ConstantInstruction cons) {
+                        in.with(leaf(
                                 "constant value", cons.constantValue()));
-                        case BranchInstruction br -> in.with(leaf(
+                    } else if (coe instanceof BranchInstruction br) {
+                        in.with(leaf(
                                 "target", com.labelToBci(br.target())));
-                        case LookupSwitchInstruction si -> in.with(list(
+                    } else if (coe instanceof LookupSwitchInstruction si) {
+                        in.with(list(
                                 "targets", "target", Stream.concat(Stream.of(si.defaultTarget())
                                         .map(com::labelToBci), si.cases().stream()
                                         .map(sc -> com.labelToBci(sc.target())))));
-                        case TableSwitchInstruction si -> in.with(list(
+                    } else if (coe instanceof TableSwitchInstruction si) {
+                        in.with(list(
                                 "targets", "target", Stream.concat(Stream.of(si.defaultTarget())
                                         .map(com::labelToBci), si.cases().stream()
                                         .map(sc -> com.labelToBci(sc.target())))));
-                        case DiscontinuedInstruction.JsrInstruction jsr -> in.with(leaf(
+                    } else if (coe instanceof DiscontinuedInstruction.JsrInstruction jsr) {
+                        in.with(leaf(
                                 "target", com.labelToBci(jsr.target())));
-                        case DiscontinuedInstruction.RetInstruction ret ->  in.with(leaf(
+                    } else if (coe instanceof DiscontinuedInstruction.RetInstruction ret) {
+                        in.with(leaf(
                                 "slot", ret.slot()));
-                        default -> {}
                     }
                     bci += ins.sizeInBytes();
                 }
@@ -883,124 +908,120 @@ public final class ClassPrinterImpl {
     private static Node[] attributesToTree(List<Attribute<?>> attributes, Verbosity verbosity) {
         var nodes = new LinkedList<Node>();
         if (verbosity != Verbosity.MEMBERS_ONLY) for (var attr : attributes) {
-            switch (attr) {
-                case BootstrapMethodsAttribute bma ->
-                        nodes.add(new ListNodeImpl(BLOCK, "bootstrap methods", bma.bootstrapMethods().stream().map(
-                                bm -> {
-                                    var mh = bm.bootstrapMethod();
-                                    var mref = mh.reference();
-                                    return map("bm",
-                                            "kind", DirectMethodHandleDesc.Kind.valueOf(mh.kind(),
-                                                    mref instanceof InterfaceMethodRefEntry).name(),
-                                            "owner", mref.owner().name().stringValue(),
-                                            "name", mref.nameAndType().name().stringValue(),
-                                            "type", mref.nameAndType().type().stringValue());
-                                })));
-                case ConstantValueAttribute cva ->
-                        nodes.add(leaf("constant value", cva.constant().constantValue()));
-                case NestHostAttribute nha ->
-                        nodes.add(leaf("nest host", nha.nestHost().name().stringValue()));
-                case NestMembersAttribute nma ->
-                        nodes.add(list("nest members", "member", nma.nestMembers().stream()
-                                .map(mp -> mp.name().stringValue())));
-                case PermittedSubclassesAttribute psa ->
-                        nodes.add(list("permitted subclasses", "subclass", psa.permittedSubclasses().stream()
-                                .map(e -> e.name().stringValue())));
-                default -> {}
+            Objects.requireNonNull(attr);
+            if (attr instanceof BootstrapMethodsAttribute bma) {
+                nodes.add(new ListNodeImpl(BLOCK, "bootstrap methods", bma.bootstrapMethods().stream().map(
+                        bm -> {
+                            var mh = bm.bootstrapMethod();
+                            var mref = mh.reference();
+                            return map("bm",
+                                    "kind", DirectMethodHandleDesc.Kind.valueOf(mh.kind(),
+                                            mref instanceof InterfaceMethodRefEntry).name(),
+                                    "owner", mref.owner().name().stringValue(),
+                                    "name", mref.nameAndType().name().stringValue(),
+                                    "type", mref.nameAndType().type().stringValue());
+                        })));
+            } else if (attr instanceof ConstantValueAttribute cva) {
+                nodes.add(leaf("constant value", cva.constant().constantValue()));
+            } else if (attr instanceof NestHostAttribute nha) {
+                nodes.add(leaf("nest host", nha.nestHost().name().stringValue()));
+            } else if (attr instanceof NestMembersAttribute nma) {
+                nodes.add(list("nest members", "member", nma.nestMembers().stream()
+                        .map(mp -> mp.name().stringValue())));
+            } else if (attr instanceof PermittedSubclassesAttribute psa) {
+                nodes.add(list("permitted subclasses", "subclass", psa.permittedSubclasses().stream()
+                        .map(e -> e.name().stringValue())));
             }
-            if (verbosity == Verbosity.TRACE_ALL) switch (attr) {
-                case EnclosingMethodAttribute ema ->
-                        nodes.add(map("enclosing method",
-                                "class", ema.enclosingClass().name().stringValue(),
-                                "method name", ema.enclosingMethodName()
-                                        .map(Utf8Entry::stringValue).orElse("null"),
-                                "method type", ema.enclosingMethodType()
-                                        .map(Utf8Entry::stringValue).orElse("null")));
-                case ExceptionsAttribute exa ->
-                        nodes.add(list("excceptions", "exc", exa.exceptions().stream()
-                                .map(e -> e.name().stringValue())));
-                case InnerClassesAttribute ica ->
-                        nodes.add(new ListNodeImpl(BLOCK, "inner classes", ica.classes().stream()
-                                .map(ic -> new MapNodeImpl(FLOW, "cls").with(
-                                        leaf("inner class", ic.innerClass().name().stringValue()),
-                                        leaf("outer class", ic.outerClass()
-                                                .map(cle -> cle.name().stringValue()).orElse("null")),
-                                        leaf("inner name", ic.innerName().map(Utf8Entry::stringValue).orElse("null")),
-                                        list("flags", "flag", ic.flags().stream().map(AccessFlag::name))))));
-                case MethodParametersAttribute mpa -> {
-                    var n = new MapNodeImpl(BLOCK, "method parameters");
-                    for (int i = 0; i < mpa.parameters().size(); i++) {
-                        var p = mpa.parameters().get(i);
-                        n.with(new MapNodeImpl(FLOW, i + 1).with(
-                                leaf("name", p.name().map(Utf8Entry::stringValue).orElse("null")),
-                                list("flags", "flag", p.flags().stream().map(AccessFlag::name))));
-                    }
+            if (verbosity == Verbosity.TRACE_ALL) if (attr instanceof EnclosingMethodAttribute ema) {
+                nodes.add(map("enclosing method",
+                        "class", ema.enclosingClass().name().stringValue(),
+                        "method name", ema.enclosingMethodName()
+                                .map(Utf8Entry::stringValue).orElse("null"),
+                        "method type", ema.enclosingMethodType()
+                                .map(Utf8Entry::stringValue).orElse("null")));
+            } else if (attr instanceof ExceptionsAttribute exa) {
+                nodes.add(list("exceptions", "exc", exa.exceptions().stream()
+                        .map(e -> e.name().stringValue())));
+            } else if (attr instanceof InnerClassesAttribute ica) {
+                nodes.add(new ListNodeImpl(BLOCK, "inner classes", ica.classes().stream()
+                        .map(ic -> new MapNodeImpl(FLOW, "cls").with(
+                                leaf("inner class", ic.innerClass().name().stringValue()),
+                                leaf("outer class", ic.outerClass()
+                                        .map(cle -> cle.name().stringValue()).orElse("null")),
+                                leaf("inner name", ic.innerName().map(Utf8Entry::stringValue).orElse("null")),
+                                list("flags", "flag", ic.flags().stream().map(AccessFlag::name))))));
+            } else if (attr instanceof MethodParametersAttribute mpa) {
+                var n = new MapNodeImpl(BLOCK, "method parameters");
+                for (int i = 0; i < mpa.parameters().size(); i++) {
+                    var p = mpa.parameters().get(i);
+                    n.with(new MapNodeImpl(FLOW, i + 1).with(
+                            leaf("name", p.name().map(Utf8Entry::stringValue).orElse("null")),
+                            list("flags", "flag", p.flags().stream().map(AccessFlag::name))));
                 }
-                case ModuleAttribute ma ->
-                        nodes.add(new MapNodeImpl(BLOCK, "module")
-                                .with(leaf("name", ma.moduleName().name().stringValue()),
-                                        list("flags","flag", ma.moduleFlags().stream().map(AccessFlag::name)),
-                                        leaf("version", ma.moduleVersion().map(Utf8Entry::stringValue).orElse("null")),
-                                        list("uses", "class", ma.uses().stream().map(ce -> ce.name().stringValue())),
-                                        new ListNodeImpl(BLOCK, "requires", ma.requires().stream().map(req ->
-                                                new MapNodeImpl(FLOW, "req").with(
-                                                        leaf("name", req.requires().name().stringValue()),
-                                                        list("flags", "flag", req.requiresFlags().stream()
-                                                                .map(AccessFlag::name)),
-                                                        leaf("version", req.requiresVersion()
-                                                                .map(Utf8Entry::stringValue).orElse(null))))),
-                                        new ListNodeImpl(BLOCK, "exports", ma.exports().stream().map(exp ->
-                                                new MapNodeImpl(FLOW, "exp").with(
-                                                        leaf("package", exp.exportedPackage().asSymbol().name()),
-                                                        list("flags", "flag", exp.exportsFlags().stream()
-                                                                .map(AccessFlag::name)),
-                                                        list("to", "module", exp.exportsTo().stream()
-                                                                .map(me -> me.name().stringValue()))))),
-                                        new ListNodeImpl(BLOCK, "opens", ma.opens().stream().map(opn ->
-                                                new MapNodeImpl(FLOW, "opn").with(
-                                                        leaf("package", opn.openedPackage().asSymbol().name()),
-                                                        list("flags", "flag", opn.opensFlags().stream()
-                                                                .map(AccessFlag::name)),
-                                                        list("to", "module", opn.opensTo().stream()
-                                                                .map(me -> me.name().stringValue()))))),
-                                        new ListNodeImpl(BLOCK, "provides", ma.provides().stream()
-                                                .map(prov -> new MapNodeImpl(FLOW, "prov").with(
-                                                        leaf("class", prov.provides().name().stringValue()),
-                                                        list("with", "cls", prov.providesWith().stream()
-                                                                .map(ce -> ce.name().stringValue())))))));
-                case ModulePackagesAttribute mopa ->
-                        nodes.add(list("module packages", "subclass", mopa.packages().stream()
-                                .map(mp -> mp.asSymbol().name())));
-                case ModuleMainClassAttribute mmca ->
-                        nodes.add(leaf("module main class", mmca.mainClass().name().stringValue()));
-                case RecordAttribute ra ->
-                        nodes.add(new ListNodeImpl(BLOCK, "record components", ra.components().stream()
-                                .map(rc -> new MapNodeImpl(BLOCK, "record")
-                                        .with(leafs(
-                                                "name", rc.name().stringValue(),
-                                                "type", rc.descriptor().stringValue()))
-                                        .with(list("attributes", "attribute", rc.attributes().stream()
-                                                .map(Attribute::attributeName)))
-                                        .with(attributesToTree(rc.attributes(), verbosity)))));
-                case AnnotationDefaultAttribute ada ->
-                        nodes.add(new MapNodeImpl(FLOW, "annotation default").with(elementValueToTree(ada.defaultValue())));
-                case RuntimeInvisibleAnnotationsAttribute aa ->
-                        nodes.add(annotationsToTree("invisible annotations", aa.annotations()));
-                case RuntimeVisibleAnnotationsAttribute aa ->
-                        nodes.add(annotationsToTree("visible annotations", aa.annotations()));
-                case RuntimeInvisibleParameterAnnotationsAttribute aa ->
-                        nodes.add(parameterAnnotationsToTree("invisible parameter annotations", aa.parameterAnnotations()));
-                case RuntimeVisibleParameterAnnotationsAttribute aa ->
-                        nodes.add(parameterAnnotationsToTree("visible parameter annotations", aa.parameterAnnotations()));
-                case RuntimeInvisibleTypeAnnotationsAttribute aa ->
-                        nodes.add(typeAnnotationsToTree(BLOCK, "invisible type annotations", aa.annotations()));
-                case RuntimeVisibleTypeAnnotationsAttribute aa ->
-                        nodes.add(typeAnnotationsToTree(BLOCK, "visible type annotations", aa.annotations()));
-                case SignatureAttribute sa ->
-                        nodes.add(leaf("signature", sa.signature().stringValue()));
-                case SourceFileAttribute sfa ->
-                        nodes.add(leaf("source file", sfa.sourceFile().stringValue()));
-                default -> {}
+            } else if (attr instanceof ModuleAttribute ma) {
+                nodes.add(new MapNodeImpl(BLOCK, "module")
+                        .with(leaf("name", ma.moduleName().name().stringValue()),
+                                list("flags", "flag", ma.moduleFlags().stream().map(AccessFlag::name)),
+                                leaf("version", ma.moduleVersion().map(Utf8Entry::stringValue).orElse("null")),
+                                list("uses", "class", ma.uses().stream().map(ce -> ce.name().stringValue())),
+                                new ListNodeImpl(BLOCK, "requires", ma.requires().stream().map(req ->
+                                        new MapNodeImpl(FLOW, "req").with(
+                                                leaf("name", req.requires().name().stringValue()),
+                                                list("flags", "flag", req.requiresFlags().stream()
+                                                        .map(AccessFlag::name)),
+                                                leaf("version", req.requiresVersion()
+                                                        .map(Utf8Entry::stringValue).orElse(null))))),
+                                new ListNodeImpl(BLOCK, "exports", ma.exports().stream().map(exp ->
+                                        new MapNodeImpl(FLOW, "exp").with(
+                                                leaf("package", exp.exportedPackage().asSymbol().name()),
+                                                list("flags", "flag", exp.exportsFlags().stream()
+                                                        .map(AccessFlag::name)),
+                                                list("to", "module", exp.exportsTo().stream()
+                                                        .map(me -> me.name().stringValue()))))),
+                                new ListNodeImpl(BLOCK, "opens", ma.opens().stream().map(opn ->
+                                        new MapNodeImpl(FLOW, "opn").with(
+                                                leaf("package", opn.openedPackage().asSymbol().name()),
+                                                list("flags", "flag", opn.opensFlags().stream()
+                                                        .map(AccessFlag::name)),
+                                                list("to", "module", opn.opensTo().stream()
+                                                        .map(me -> me.name().stringValue()))))),
+                                new ListNodeImpl(BLOCK, "provides", ma.provides().stream()
+                                        .map(prov -> new MapNodeImpl(FLOW, "prov").with(
+                                                leaf("class", prov.provides().name().stringValue()),
+                                                list("with", "cls", prov.providesWith().stream()
+                                                        .map(ce -> ce.name().stringValue())))))));
+            } else if (attr instanceof ModulePackagesAttribute mopa) {
+                nodes.add(list("module packages", "subclass", mopa.packages().stream()
+                        .map(mp -> mp.asSymbol().name())));
+            } else if (attr instanceof ModuleMainClassAttribute mmca) {
+                nodes.add(leaf("module main class", mmca.mainClass().name().stringValue()));
+            } else if (attr instanceof RecordAttribute ra) {
+                nodes.add(new ListNodeImpl(BLOCK, "record components", ra.components().stream()
+                        .map(rc -> new MapNodeImpl(BLOCK, "record")
+                                .with(leafs(
+                                        "name", rc.name().stringValue(),
+                                        "type", rc.descriptor().stringValue()))
+                                .with(list("attributes", "attribute", rc.attributes().stream()
+                                        .map(Attribute::attributeName)))
+                                .with(attributesToTree(rc.attributes(), verbosity)))));
+            } else if (attr instanceof AnnotationDefaultAttribute ada) {
+                nodes.add(new MapNodeImpl(FLOW, "annotation default").with(elementValueToTree(ada.defaultValue())));
+            } else if (attr instanceof RuntimeInvisibleAnnotationsAttribute aa) {
+                nodes.add(annotationsToTree("invisible annotations", aa.annotations()));
+            } else if (attr instanceof RuntimeVisibleAnnotationsAttribute aa) {
+                nodes.add(annotationsToTree("visible annotations", aa.annotations()));
+            } else if (attr instanceof RuntimeInvisibleParameterAnnotationsAttribute aa) {
+                nodes.add(parameterAnnotationsToTree("invisible parameter annotations", aa.parameterAnnotations()));
+            } else if (attr instanceof RuntimeVisibleParameterAnnotationsAttribute aa) {
+                nodes.add(parameterAnnotationsToTree("visible parameter annotations", aa.parameterAnnotations()));
+            } else if (attr instanceof RuntimeInvisibleTypeAnnotationsAttribute aa) {
+                nodes.add(typeAnnotationsToTree(BLOCK, "invisible type annotations", aa.annotations()));
+            } else if (attr instanceof RuntimeVisibleTypeAnnotationsAttribute aa) {
+                nodes.add(typeAnnotationsToTree(BLOCK, "visible type annotations", aa.annotations()));
+            } else if (attr instanceof SignatureAttribute sa) {
+                nodes.add(leaf("signature", sa.signature().stringValue()));
+            } else if (attr instanceof SourceFileAttribute sfa) {
+                nodes.add(leaf("source file", sfa.sourceFile().stringValue()));
             }
         }
         return nodes.toArray(Node[]::new);
@@ -1018,7 +1039,7 @@ public final class ClassPrinterImpl {
         return new ListNodeImpl(style, name, annos.stream().map(a ->
                 new MapNodeImpl(FLOW, "anno")
                         .with(leaf("annotation class", a.className().stringValue()),
-                                leaf("target info", a.targetInfo().targetType().name()))
+                              leaf("target info", a.targetInfo().targetType().name()))
                         .with(elementValuePairsToTree(a.elements()))));
 
     }
@@ -1029,9 +1050,9 @@ public final class ClassPrinterImpl {
             var annos = paramAnnotations.get(i);
             if (!annos.isEmpty()) {
                 node.with(new ListNodeImpl(FLOW, "parameter " + (i + 1), annos.stream().map(a ->
-                        new MapNodeImpl(FLOW, "anno")
-                                .with(leaf("annotation class", a.className().stringValue()))
-                                .with(elementValuePairsToTree(a.elements())))));
+                                new MapNodeImpl(FLOW, "anno")
+                                        .with(leaf("annotation class", a.className().stringValue()))
+                                        .with(elementValuePairsToTree(a.elements())))));
             }
         }
         return node;
@@ -1042,7 +1063,7 @@ public final class ClassPrinterImpl {
             for (var l : locals) {
                 if (l.slot() == slot && l.startPc() <= bci && l.length() + l.startPc() >= bci) {
                     return leafs("type", l.type().stringValue(),
-                            "variable name", l.name().stringValue());
+                                 "variable name", l.name().stringValue());
                 }
             }
         }
@@ -1050,14 +1071,13 @@ public final class ClassPrinterImpl {
     }
 
     private static void forEachOffset(TypeAnnotation ta, CodeAttribute lr, BiConsumer<Integer, TypeAnnotation> consumer) {
-        switch (ta.targetInfo()) {
-            case TypeAnnotation.OffsetTarget ot ->
-                    consumer.accept(lr.labelToBci(ot.target()), ta);
-            case TypeAnnotation.TypeArgumentTarget tat ->
-                    consumer.accept(lr.labelToBci(tat.target()), ta);
-            case TypeAnnotation.LocalVarTarget lvt ->
-                    lvt.table().forEach(lvti -> consumer.accept(lr.labelToBci(lvti.startLabel()), ta));
-            default -> {}
+        TypeAnnotation.TargetInfo targetInfo = Objects.requireNonNull(ta.targetInfo());
+        if (targetInfo instanceof TypeAnnotation.OffsetTarget ot) {
+            consumer.accept(lr.labelToBci(ot.target()), ta);
+        } else if (targetInfo instanceof TypeAnnotation.TypeArgumentTarget tat) {
+            consumer.accept(lr.labelToBci(tat.target()), ta);
+        } else if (targetInfo instanceof TypeAnnotation.LocalVarTarget lvt) {
+            lvt.table().forEach(lvti -> consumer.accept(lr.labelToBci(lvti.startLabel()), ta));
         }
     }
 }

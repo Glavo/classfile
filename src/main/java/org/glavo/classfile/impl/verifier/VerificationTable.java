@@ -24,8 +24,6 @@
  */
 package org.glavo.classfile.impl.verifier;
 
-import static org.glavo.classfile.impl.verifier.VerificationType.*;
-
 /**
  * @see <a href="https://raw.githubusercontent.com/openjdk/jdk/master/src/hotspot/share/classfile/stackMapTable.hpp">hotspot/share/classfile/stackMapTable.hpp</a>
  * @see <a href="https://raw.githubusercontent.com/openjdk/jdk/master/src/hotspot/share/classfile/stackMapTable.cpp">hotspot/share/classfile/stackMapTable.cpp</a>
@@ -202,10 +200,10 @@ class VerificationTable {
 
         VerificationType parse_verification_type(int[] flags) {
             int tag = _stream.get_u1();
-            if (tag < ITEM_UninitializedThis) {
+            if (tag < VerificationType.ITEM_UninitializedThis) {
                 return VerificationType.from_tag(tag, _verifier);
             }
-            if (tag == ITEM_Object) {
+            if (tag == VerificationType.ITEM_Object) {
                 int class_index = _stream.get_u2();
                 int nconstants = _cp.entryCount();
                 if (class_index <= 0 || class_index >= nconstants || _cp.tagAt(class_index) != VerifierImpl.JVM_CONSTANT_Class) {
@@ -213,13 +211,13 @@ class VerificationTable {
                 }
                 return VerificationType.reference_type(_cp.classNameAt(class_index));
             }
-            if (tag == ITEM_UninitializedThis) {
+            if (tag == VerificationType.ITEM_UninitializedThis) {
                 if (flags != null) {
                     flags[0] |= VerificationFrame.FLAG_THIS_UNINIT;
                 }
                 return VerificationType.uninitialized_this_type;
             }
-            if (tag == ITEM_Uninitialized) {
+            if (tag == VerificationType.ITEM_Uninitialized) {
                 int offset = _stream.get_u2();
                 if (offset >= _code_length || _code_data[offset] != VerifierImpl.NEW_OFFSET) {
                     _verifier.classError("StackMapTable format error: bad offset for Uninitialized");

@@ -27,9 +27,9 @@ package org.glavo.classfile.attribute;
 
 import org.glavo.classfile.Attribute;
 import org.glavo.classfile.ClassElement;
-import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.UnboundAttribute;
+import org.glavo.classfile.ClassModel;
 
 /**
  * Models the {@code ModuleResolution} attribute, which can
@@ -57,6 +57,12 @@ import org.glavo.classfile.impl.UnboundAttribute;
  *   0x0008 (WARN_INCUBATING)
  *  }
  * } </pre>
+ * <p>
+ * The attribute does not permit multiple instances in a given location.
+ * Subsequent occurrence of the attribute takes precedence during the attributed
+ * element build or transformation.
+ *
+ * @since 22
  */
 public sealed interface ModuleResolutionAttribute
         extends Attribute<ModuleResolutionAttribute>, ClassElement
@@ -65,7 +71,7 @@ public sealed interface ModuleResolutionAttribute
     /**
      *  The value of the resolution_flags item is a mask of flags used to denote
      *  properties of module resolution. The flags are as follows:
-     *
+     * <pre> {@code
      *   // Optional
      *   0x0001 (DO_NOT_RESOLVE_BY_DEFAULT)
      *
@@ -73,12 +79,14 @@ public sealed interface ModuleResolutionAttribute
      *   0x0002 (WARN_DEPRECATED)
      *   0x0004 (WARN_DEPRECATED_FOR_REMOVAL)
      *   0x0008 (WARN_INCUBATING)
+     *  } </pre>
+     * @return the module resolution flags
      */
     int resolutionFlags();
 
     /**
      * {@return a {@code ModuleResolution} attribute}
-     * @param resolutionFlags the resolution falgs
+     * @param resolutionFlags the resolution flags
      */
     static ModuleResolutionAttribute of(int resolutionFlags) {
         return new UnboundAttribute.UnboundModuleResolutionAttribute(resolutionFlags);

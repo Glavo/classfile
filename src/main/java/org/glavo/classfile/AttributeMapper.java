@@ -24,6 +24,7 @@
  */
 package org.glavo.classfile;
 
+
 /**
  * Bidirectional mapper between the classfile representation of an attribute and
  * how that attribute is modeled in the API.  The attribute mapper is used
@@ -33,8 +34,48 @@ package org.glavo.classfile;
  * attributes, clients can define their own {@linkplain AttributeMapper}.
  * Classes that model nonstandard attributes should extend {@link
  * CustomAttribute}.
+ * @param <A> the attribute type
+ *
+ * @since 22
  */
 public interface AttributeMapper<A> {
+
+    /**
+     * Attribute stability indicator
+     *
+     * @since 22
+     */
+    enum AttributeStability {
+
+        /**
+         * The attribute contains only pure data, such as timestamps, and can always be bulk-copied.
+         */
+        STATELESS,
+
+        /**
+         * The attribute contains only pure data and CP refs, so can be bulk-copied when CP sharing is in effect,
+         * and need to be exploded and rewritten when CP sharing is not in effect.
+         */
+        CP_REFS,
+
+        /**
+         * The attribute may contain labels, so need to be exploded and rewritten when the Code array is perturbed.
+         */
+        LABELS,
+
+        /**
+         * The attribute may contain indexes into structured not managed by the library (type variable lists, etc)
+         * and so we consult the {@link ClassFile.AttributesProcessingOption} option to determine whether to preserve
+         * or drop it during transformation.
+         */
+        UNSTABLE,
+
+        /**
+         * The attribute is completely unknown and so we consult the {@link ClassFile.AttributesProcessingOption} option
+         * to determine whether to preserve or drop it during transformation.
+         */
+        UNKNOWN
+    }
 
     /**
      * {@return the name of the attribute}
@@ -61,17 +102,16 @@ public interface AttributeMapper<A> {
     void writeAttribute(BufWriter buf, A attr);
 
     /**
-     * {@return The earliest classfile version for which this attribute is
-     * applicable}
-     */
-    default int validSince() {
-        return Classfile.JAVA_1_VERSION;
-    }
-
-    /**
      * {@return whether this attribute may appear more than once in a given location}
+     *
+     * @implSpec The default implementation returns {@code false}
      */
     default boolean allowMultiple() {
         return false;
     }
+
+    /**
+     * {@return attribute stability indicator}
+     */
+    AttributeStability stability();
 }

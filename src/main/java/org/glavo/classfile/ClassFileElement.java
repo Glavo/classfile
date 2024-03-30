@@ -24,32 +24,19 @@
  */
 package org.glavo.classfile;
 
-import org.glavo.classfile.impl.ClassfileVersionImpl;
 
 /**
- * Models the classfile version information for a class.  Delivered as a {@link
- * ClassElement} when traversing the elements of a {@link
- * ClassModel}.
+ * Immutable model for a portion of (or the entirety of) a classfile.  Elements
+ * that model parts of the classfile that have attributes will implement {@link
+ * AttributedElement}; elements that model complex parts of the classfile that
+ * themselves contain their own child elements will implement {@link
+ * CompoundElement}.  Elements specific to various locations in the classfile
+ * will implement {@link ClassElement}, {@link MethodElement}, etc.
+ *
+ * @sealedGraph
+ * @since 22
  */
-public sealed interface ClassfileVersion
-        extends ClassElement
-        permits ClassfileVersionImpl {
-    /**
-     * {@return the major classfile version}
-     */
-    int majorVersion();
-
-    /**
-     * {@return the minor classfile version}
-     */
-    int minorVersion();
-
-    /**
-     * {@return a {@link ClassfileVersion} element}
-     * @param majorVersion the major classfile version
-     * @param minorVersion the minor classfile version
-     */
-    static ClassfileVersion of(int majorVersion, int minorVersion) {
-        return new ClassfileVersionImpl(majorVersion, minorVersion);
-    }
+public sealed interface ClassFileElement
+        permits AttributedElement, CompoundElement, WritableElement,
+                ClassElement, CodeElement, FieldElement, MethodElement {
 }

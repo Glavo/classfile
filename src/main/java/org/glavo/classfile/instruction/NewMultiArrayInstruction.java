@@ -34,6 +34,8 @@ import org.glavo.classfile.impl.AbstractInstruction;
  * Models a {@code multianewarray} invocation instruction in the {@code code}
  * array of a {@code Code} attribute.  Delivered as a {@link CodeElement}
  * when traversing the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface NewMultiArrayInstruction extends Instruction
         permits AbstractInstruction.BoundNewMultidimensionalArrayInstruction,
@@ -45,7 +47,7 @@ public sealed interface NewMultiArrayInstruction extends Instruction
     ClassEntry arrayType();
 
     /**
-     * {@return the number of dimensions of the aray}
+     * {@return the number of dimensions of the array}
      */
     int dimensions();
 

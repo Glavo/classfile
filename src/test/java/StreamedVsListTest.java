@@ -4,9 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -25,11 +23,11 @@
 
 /*
  * @test
- * @summary Testing Classfile streaming versus model.
+ * @summary Testing ClassFile streaming versus model.
  * @run junit StreamedVsListTest
  */
 import org.glavo.classfile.ClassModel;
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.Instruction;
 import org.glavo.classfile.MethodModel;
@@ -78,7 +76,7 @@ class StreamedVsListTest {
 
     private class Vs {
         boolean failed;
-        ClassModel cm = Classfile.parse(fileBytes);
+        ClassModel cm = ClassFile.of().parse(fileBytes);
         String meth;
         CodeElement iim;
         CodeElement mim;

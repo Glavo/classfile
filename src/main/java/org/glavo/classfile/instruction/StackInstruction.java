@@ -36,6 +36,8 @@ import org.glavo.classfile.impl.Util;
  * {@code Code} attribute.  Corresponding opcodes will have a {@code kind} of
  * {@link Opcode.Kind#STACK}.  Delivered as a {@link CodeElement} when
  * traversing the elements of a {@link CodeModel}.
+ *
+ * @since 22
  */
 public sealed interface StackInstruction extends Instruction
         permits AbstractInstruction.UnboundStackInstruction {

@@ -4,9 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -25,11 +23,11 @@
 
 /*
  * @test
- * @summary Testing Classfile CP Utf8Entry.
+ * @summary Testing ClassFile CP Utf8Entry.
  * @run junit Utf8EntryTest
  */
 import org.glavo.classfile.ClassModel;
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.constantpool.ConstantPool;
 import org.glavo.classfile.constantpool.PoolEntry;
 import org.glavo.classfile.constantpool.StringEntry;
@@ -81,9 +79,9 @@ class Utf8EntryTest {
         }
     )
     void testParse(String s) {
-        byte[] classfile = createClassfile(s);
+        byte[] classfile = createClassFile(s);
 
-        ClassModel cm = Classfile.parse(classfile);
+        ClassModel cm = ClassFile.of().parse(classfile);
         StringEntry se = obtainStringEntry(cm.constantPool());
 
         Utf8Entry utf8Entry = se.utf8();
@@ -160,10 +158,10 @@ class Utf8EntryTest {
     @MethodSource("malformedStringsProvider")
     void testMalformedInput(UnaryOperator<byte[]> f) {
         String marker = "XXXXXXXX";
-        byte[] classfile = createClassfile(marker);
+        byte[] classfile = createClassFile(marker);
         replace(classfile, marker, f);
 
-        ClassModel cm = Classfile.parse(classfile);
+        ClassModel cm = ClassFile.of().parse(classfile);
         StringEntry se = obtainStringEntry(cm.constantPool());
 
         assertThrows(RuntimeException.class, () -> {
@@ -187,8 +185,7 @@ class Utf8EntryTest {
     }
 
     static StringEntry obtainStringEntry(ConstantPool cp) {
-        for (int i = 1; i < cp.entryCount(); i++) {
-            PoolEntry entry = cp.entryByIndex(i);
+        for (PoolEntry entry : cp) {
             if (entry instanceof StringEntry se) {
                 return se;
             }
@@ -196,8 +193,8 @@ class Utf8EntryTest {
         throw new AssertionError();
     }
 
-    static byte[] createClassfile(String s) {
-        return Classfile.build(ClassDesc.of("C"),
+    static byte[] createClassFile(String s) {
+        return ClassFile.of().build(ClassDesc.of("C"),
                                clb -> clb.withMethod("m", MethodTypeDesc.of(CD_void), 0,
                                                      mb -> mb.withCode(cb -> cb.constantInstruction(s)
                                                                                .returnInstruction(VoidType))));

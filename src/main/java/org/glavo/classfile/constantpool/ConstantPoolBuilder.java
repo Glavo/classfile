@@ -30,24 +30,23 @@ import java.lang.constant.DirectMethodHandleDesc;
 import java.lang.constant.DynamicCallSiteDesc;
 import java.lang.constant.DynamicConstantDesc;
 import java.lang.constant.MethodTypeDesc;
-import java.util.Collection;
 import java.util.List;
 
 import org.glavo.classfile.BootstrapMethodEntry;
 import org.glavo.classfile.BufWriter;
 import org.glavo.classfile.ClassBuilder;
 import org.glavo.classfile.ClassModel;
-import org.glavo.classfile.Classfile;
-import org.glavo.classfile.impl.ClassReaderImpl;
-import org.glavo.classfile.impl.Options;
 import org.glavo.classfile.constant.ModuleDesc;
 import org.glavo.classfile.constant.PackageDesc;
+import org.glavo.classfile.impl.ClassReaderImpl;
 import org.glavo.classfile.WritableElement;
 import org.glavo.classfile.impl.AbstractPoolEntry.ClassEntryImpl;
 import org.glavo.classfile.impl.AbstractPoolEntry.NameAndTypeEntryImpl;
 import org.glavo.classfile.impl.SplitConstantPool;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.Util;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Builder for the constant pool of a classfile.  Provides read and write access
@@ -57,35 +56,30 @@ import org.glavo.classfile.impl.Util;
  * A {@linkplain ConstantPoolBuilder} is associated with a {@link ClassBuilder}.
  * The {@linkplain ConstantPoolBuilder} also provides access to some of the
  * state of the {@linkplain ClassBuilder}, such as classfile processing options.
+ *
+ * @since 22
  */
 public sealed interface ConstantPoolBuilder
         extends ConstantPool, WritableElement<ConstantPool>
         permits SplitConstantPool, TemporaryConstantPool {
 
     /**
-     * {@return a new constant pool builder}  The new constant pool builder
-     * will inherit the classfile processing options of the specified class.
-     * If the processing options include {@link Classfile.Option#constantPoolSharing(boolean)},
-     * (the default) the new constant pool builder will be also be pre-populated with the
-     * contents of the constant pool associated with the class reader.
+     * {@return a new constant pool builder}  The new constant pool builder will
+     * be pre-populated with the contents of the constant pool associated with
+     * the class reader.
      *
      * @param classModel the class to copy from
      */
     static ConstantPoolBuilder of(ClassModel classModel) {
-        ClassReaderImpl reader = (ClassReaderImpl) classModel.constantPool();
-        return reader.options().cpSharing
-          ? new SplitConstantPool(reader)
-          : new SplitConstantPool(reader.options());
+        return new SplitConstantPool((ClassReaderImpl) classModel.constantPool());
     }
 
     /**
      * {@return a new constant pool builder}  The new constant pool builder
-     * will be empty and have the specified classfile processing options.
-     *
-     * @param options the processing options
+     * will be empty.
      */
-    static ConstantPoolBuilder of(Collection<Classfile.Option> options) {
-        return new SplitConstantPool(new Options(options));
+    static ConstantPoolBuilder of() {
+        return new SplitConstantPool();
     }
 
     /**
@@ -157,9 +151,10 @@ public sealed interface ConstantPoolBuilder
      * returned.
      *
      * @param classDesc the symbolic descriptor for the class
+     * @throws IllegalArgumentException if {@code classDesc} represents a primitive type
      */
     default ClassEntry classEntry(ClassDesc classDesc) {
-        if (classDesc.isPrimitive()) {
+        if (requireNonNull(classDesc).isPrimitive()) {
             throw new IllegalArgumentException("Cannot be encoded as ClassEntry: " + classDesc.displayName());
         }
         ClassEntryImpl ret = (ClassEntryImpl)classEntry(utf8Entry(classDesc.isArray() ? classDesc.descriptorString() : Util.toInternalName(classDesc)));
@@ -181,7 +176,7 @@ public sealed interface ConstantPoolBuilder
 
     /**
      * {@return A {@link PackageEntry} describing the class described by
-     * provided {@linkplain PackageDesc }}
+     * provided {@linkplain PackageDesc}}
      * If a Package entry in the pool already describes this class,
      * it is returned; otherwise, a new entry is added and the new entry is
      * returned.
@@ -205,7 +200,7 @@ public sealed interface ConstantPoolBuilder
 
     /**
      * {@return A {@link ModuleEntry} describing the module described by
-     * provided {@linkplain ModuleDesc }}
+     * provided {@linkplain ModuleDesc}}
      * If a module entry in the pool already describes this class,
      * it is returned; otherwise, a new entry is added and the new entry is
      * returned.
@@ -277,6 +272,7 @@ public sealed interface ConstantPoolBuilder
      * @param owner the class the field is a member of
      * @param name the name of the field
      * @param type the type of the field
+     * @throws IllegalArgumentException if {@code owner} represents a primitive type
      */
     default FieldRefEntry fieldRefEntry(ClassDesc owner, String name, ClassDesc type) {
         return fieldRefEntry(classEntry(owner), nameAndTypeEntry(name, type));
@@ -302,6 +298,7 @@ public sealed interface ConstantPoolBuilder
      * @param owner the class the method is a member of
      * @param name the name of the method
      * @param type the type of the method
+     * @throws IllegalArgumentException if {@code owner} represents a primitive type
      */
     default MethodRefEntry methodRefEntry(ClassDesc owner, String name, MethodTypeDesc type) {
         return methodRefEntry(classEntry(owner), nameAndTypeEntry(name, type));
@@ -327,6 +324,7 @@ public sealed interface ConstantPoolBuilder
      * @param owner the class the method is a member of
      * @param name the name of the method
      * @param type the type of the method
+     * @throws IllegalArgumentException if {@code owner} represents a primitive type
      */
     default InterfaceMethodRefEntry interfaceMethodRefEntry(ClassDesc owner, String name, MethodTypeDesc type) {
         return interfaceMethodRefEntry(classEntry(owner), nameAndTypeEntry(name, type));

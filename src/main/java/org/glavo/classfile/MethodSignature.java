@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -32,6 +32,8 @@ import org.glavo.classfile.impl.Util;
 
 /**
  * Models the generic signature of a method, as defined by {@jvms 4.7.9}.
+ *
+ * @since 22
  */
 public sealed interface MethodSignature
         permits SignaturesImpl.MethodSignatureImpl {
@@ -52,7 +54,7 @@ public sealed interface MethodSignature
     String signatureString();
 
     /**
-     * @return method signature for a raw (no generic information) method descriptor
+     * {@return a method signature for a raw (no generic information) method descriptor}
      * @param methodDescriptor the method descriptor
      */
     public static MethodSignature of(MethodTypeDesc methodDescriptor) {
@@ -66,7 +68,7 @@ public sealed interface MethodSignature
     }
 
     /**
-     * @return method signature
+     * {@return a method signature}
      * @param result signature for the return type
      * @param arguments signatures for the method arguments
      */
@@ -80,9 +82,9 @@ public sealed interface MethodSignature
     }
 
     /**
-     * @return method signature
+     * {@return a method signature}
      * @param typeParameters signatures for the type parameters
-     * @param exceptions sigantures for the exceptions
+     * @param exceptions signatures for the exceptions
      * @param result signature for the return type
      * @param arguments signatures for the method arguments
      */
@@ -105,6 +107,6 @@ public sealed interface MethodSignature
      */
     public static MethodSignature parseFrom(String methodSignature) {
 
-        return new SignaturesImpl().parseMethodSignature(requireNonNull(methodSignature));
+        return new SignaturesImpl(methodSignature).parseMethodSignature();
     }
 }

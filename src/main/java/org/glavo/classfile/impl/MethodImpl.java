@@ -137,12 +137,12 @@ public final class MethodImpl
         }
         else {
             builder.withMethod(methodName(), methodType(), methodFlags(),
-                    new Consumer<>() {
-                        @Override
-                        public void accept(MethodBuilder mb) {
-                            MethodImpl.this.forEachElement(mb);
-                        }
-                    });
+                               new Consumer<>() {
+                @Override
+                public void accept(MethodBuilder mb) {
+                    MethodImpl.this.forEachElement(mb);
+                }
+            });
         }
     }
 

@@ -34,11 +34,14 @@ import org.glavo.classfile.impl.DirectMethodBuilder;
  * encoding expected by the classfile format.
  *
  * @param <T> the type of the entity
+ *
+ * @sealedGraph
+ * @since 22
  */
-public sealed interface WritableElement<T> extends ClassfileElement
+public sealed interface WritableElement<T> extends ClassFileElement
         permits Annotation, AnnotationElement, AnnotationValue, Attribute,
-                PoolEntry, BootstrapMethodEntry, FieldModel, MethodModel,
-                ConstantPoolBuilder, DirectFieldBuilder, DirectMethodBuilder {
+        PoolEntry, BootstrapMethodEntry, FieldModel, MethodModel,
+        ConstantPoolBuilder, DirectFieldBuilder, DirectMethodBuilder {
     /**
      * Writes the element to the specified writer
      *

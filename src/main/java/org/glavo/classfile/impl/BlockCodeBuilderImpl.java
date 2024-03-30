@@ -71,13 +71,19 @@ public final class BlockCodeBuilderImpl
     }
 
     private int topLocal(CodeBuilder parent) {
-        return switch (parent) {
-            case BlockCodeBuilderImpl b -> b.topLocal;
-            case ChainedCodeBuilder b -> topLocal(b.terminal);
-            case DirectCodeBuilder b -> b.curTopLocal();
-            case BufferedCodeBuilder b -> b.curTopLocal();
-            case TransformingCodeBuilder b -> topLocal(b.delegate);
-        };
+        Objects.requireNonNull(parent);
+        if (parent instanceof BlockCodeBuilderImpl b) {
+            return b.topLocal;
+        } else if (parent instanceof ChainedCodeBuilder b) {
+            return topLocal(b.terminal);
+        } else if (parent instanceof DirectCodeBuilder b) {
+            return b.curTopLocal();
+        } else if (parent instanceof BufferedCodeBuilder b) {
+            return b.curTopLocal();
+        } else if (parent instanceof TransformingCodeBuilder b) {
+            return topLocal(b.delegate);
+        }
+        throw new IllegalArgumentException();
     }
 
     @Override

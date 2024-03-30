@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,6 +35,9 @@ import org.glavo.classfile.jdk.ClassDescUtils;
 
 /**
  * Models generic Java type signatures, as defined in {@jvms 4.7.9.1}.
+ *
+ * @sealedGraph
+ * @since 22
  */
 public sealed interface Signature {
 
@@ -47,12 +50,12 @@ public sealed interface Signature {
      * @return Java type signature
      */
     public static Signature parseFrom(String javaTypeSignature) {
-        return new SignaturesImpl().parseSignature(requireNonNull(javaTypeSignature));
+        return new SignaturesImpl(javaTypeSignature).parseSignature();
     }
 
     /**
+     * {@return a Java type signature}
      * @param classDesc the symbolic description of the Java type
-     * @return Java type signature
      */
     public static Signature of(ClassDesc classDesc) {
         requireNonNull(classDesc);
@@ -65,8 +68,10 @@ public sealed interface Signature {
 
     /**
      * Models the signature of a primitive type or void
+     *
+     * @since 22
      */
-    public sealed interface BaseTypeSig extends Signature
+        public sealed interface BaseTypeSig extends Signature
             permits SignaturesImpl.BaseTypeSigImpl {
 
         /** {@return the single-letter descriptor for the base type} */
@@ -98,16 +103,21 @@ public sealed interface Signature {
     /**
      * Models the signature of a reference type, which may be a class, interface,
      * type variable, or array type.
+     *
+     * @sealedGraph
+     * @since 22
      */
-    public sealed interface RefTypeSig
+        public sealed interface RefTypeSig
             extends Signature
             permits ArrayTypeSig, ClassTypeSig, TypeVarSig {
     }
 
     /**
      * Models the signature of a possibly-parameterized class or interface type.
+     *
+     * @since 22
      */
-    public sealed interface ClassTypeSig
+        public sealed interface ClassTypeSig
             extends RefTypeSig, ThrowableSig
             permits SignaturesImpl.ClassTypeSigImpl {
 
@@ -119,7 +129,9 @@ public sealed interface Signature {
 
         /** {@return the class name, as a symbolic descriptor} */
         default ClassDesc classDesc() {
-            return ClassDescUtils.ofInternalName(className());
+            var outer = outerType();
+            return outer.isEmpty() ? ClassDescUtils.ofInternalName(className())
+                    : outer.get().classDesc().nested(className());
         }
 
         /** {@return the type arguments of the class} */
@@ -168,16 +180,39 @@ public sealed interface Signature {
 
     /**
      * Models the type argument.
+     *
+     * @since 22
      */
-    public sealed interface TypeArg
+        public sealed interface TypeArg
             permits SignaturesImpl.TypeArgImpl {
 
         /**
          * Indicator for whether a wildcard has default bound, no bound,
          * an upper bound, or a lower bound
+         *
+         * @since 22
          */
-        public enum WildcardIndicator {
-            DEFAULT, UNBOUNDED, EXTENDS, SUPER;
+                public enum WildcardIndicator {
+
+            /**
+             * default bound wildcard (empty)
+             */
+            DEFAULT,
+
+            /**
+             * unbounded indicator {@code *}
+             */
+            UNBOUNDED,
+
+            /**
+             * upper-bounded indicator {@code +}
+             */
+            EXTENDS,
+
+            /**
+             * lower-bounded indicator {@code -}
+             */
+            SUPER;
         }
 
         /** {@return the wildcard indicator} */
@@ -232,8 +267,10 @@ public sealed interface Signature {
 
     /**
      * Models the signature of a type variable.
+     *
+     * @since 22
      */
-    public sealed interface TypeVarSig
+        public sealed interface TypeVarSig
             extends RefTypeSig, ThrowableSig
             permits SignaturesImpl.TypeVarSigImpl {
 
@@ -251,8 +288,10 @@ public sealed interface Signature {
 
     /**
      * Models the signature of an array type.
+     *
+     * @since 22
      */
-    public sealed interface ArrayTypeSig
+        public sealed interface ArrayTypeSig
             extends RefTypeSig
             permits SignaturesImpl.ArrayTypeSigImpl {
 
@@ -284,8 +323,10 @@ public sealed interface Signature {
 
     /**
      * Models a signature for a type parameter of a generic class or method.
+     *
+     * @since 22
      */
-    public sealed interface TypeParam
+        public sealed interface TypeParam
             permits SignaturesImpl.TypeParamImpl {
 
         /** {@return the name of the type parameter} */
@@ -326,7 +367,10 @@ public sealed interface Signature {
 
     /**
      * Models a signature for a throwable type.
+     *
+     * @sealedGraph
+     * @since 22
      */
-    public sealed interface ThrowableSig extends Signature {
+        public sealed interface ThrowableSig extends Signature {
     }
 }

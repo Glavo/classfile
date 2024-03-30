@@ -28,6 +28,7 @@ package org.glavo.classfile.impl;
 import java.util.function.Consumer;
 
 import org.glavo.classfile.BufWriter;
+import org.glavo.classfile.CustomAttribute;
 import org.glavo.classfile.FieldBuilder;
 import org.glavo.classfile.FieldElement;
 import org.glavo.classfile.FieldModel;
@@ -42,10 +43,11 @@ public final class DirectFieldBuilder
     private int flags;
 
     public DirectFieldBuilder(SplitConstantPool constantPool,
+                              ClassFileImpl context,
                               Utf8Entry name,
                               Utf8Entry type,
                               FieldModel original) {
-        super(constantPool);
+        super(constantPool, context);
         setOriginal(original);
         this.name = name;
         this.desc = type;
@@ -54,7 +56,11 @@ public final class DirectFieldBuilder
 
     @Override
     public FieldBuilder with(FieldElement element) {
-        ((AbstractElement) element).writeTo(this);
+        if (element instanceof AbstractElement ae) {
+            ae.writeTo(this);
+        } else {
+            writeAttribute((CustomAttribute)element);
+        }
         return this;
     }
 

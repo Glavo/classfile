@@ -39,11 +39,14 @@ import org.glavo.classfile.attribute.SyntheticAttribute;
 import org.glavo.classfile.attribute.UnknownAttribute;
 
 /**
- * A {@link ClassfileElement} that can appear when traversing the elements
- * of a {@link MethodModel} or be presented to a {@link MethodBuilder}.
+ * A marker interface for elements that can appear when traversing
+ * a {@link MethodModel} or be presented to a {@link MethodBuilder}.
+ *
+ * @sealedGraph
+ * @since 22
  */
 public sealed interface MethodElement
-        extends ClassfileElement
+        extends ClassFileElement
         permits AccessFlags, CodeModel, CustomAttribute,
         AnnotationDefaultAttribute, DeprecatedAttribute,
         ExceptionsAttribute, MethodParametersAttribute,
