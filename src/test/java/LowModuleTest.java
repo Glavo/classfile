@@ -4,9 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -25,7 +23,7 @@
 
 /*
  * @test
- * @summary Testing Classfile low module attribute.
+ * @summary Testing ClassFile low module attribute.
  * @run junit LowModuleTest
  */
 import java.io.IOException;
@@ -36,7 +34,7 @@ import java.nio.file.Path;
 
 import org.glavo.classfile.Attribute;
 import org.glavo.classfile.ClassModel;
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.Attributes;
 import org.glavo.classfile.attribute.*;
 import org.glavo.classfile.constantpool.ClassEntry;
@@ -68,7 +66,7 @@ class LowModuleTest {
     void testRead(Path path, TestInfo test) throws Exception {
         try {
             printf("%nCHECK %s%n", test.getDisplayName());
-            ClassModel classLow = Classfile.parse(path);
+            ClassModel classLow = ClassFile.of().parse(path);
             testRead0(classLow);
         } catch(Exception ex) {
             System.err.printf("%nFAIL %s - %s%n", path, ex);

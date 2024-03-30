@@ -24,6 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -39,12 +40,16 @@ public final class ChainedClassBuilder
 
     public ChainedClassBuilder(ClassBuilder downstream,
                                Consumer<ClassElement> consumer) {
+        Objects.requireNonNull(downstream);
         this.downstream = downstream;
         this.consumer = consumer;
-        this.terminal = switch (downstream) {
-            case ChainedClassBuilder cb -> cb.terminal;
-            case DirectClassBuilder db -> db;
-        };
+        if (downstream instanceof ChainedClassBuilder cb) {
+            this.terminal = cb.terminal;
+        } else if (downstream instanceof DirectClassBuilder db) {
+            this.terminal = db;
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override

@@ -23,12 +23,12 @@
 
 /*
  * @test
- * @summary Testing Classfile builder blocks.
+ * @summary Testing ClassFile builder blocks.
  * @run junit BuilderTryCatchTest
  */
 
 import org.glavo.classfile.AccessFlags;
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CompoundElement;
 import org.glavo.classfile.Opcode;
@@ -171,7 +171,7 @@ class BuilderTryCatchTest {
     void testTryEmptyCatch() {
         byte[] bytes = generateTryCatchMethod(catchBuilder -> {});
 
-        boolean anyGotos = Classfile.parse(bytes).methods().stream()
+        boolean anyGotos = ClassFile.of().parse(bytes).methods().stream()
                 .flatMap(mm -> mm.code().stream())
                 .flatMap(CompoundElement::elementStream)
                 .anyMatch(codeElement ->
@@ -182,7 +182,7 @@ class BuilderTryCatchTest {
 
     @Test
     void testEmptyTry() {
-        byte[] bytes = Classfile.build(ClassDesc.of("C"), cb -> {
+        byte[] bytes = ClassFile.of().build(ClassDesc.of("C"), cb -> {
             cb.withMethod("main", MethodTypeDesc.of(CD_String, CD_String.arrayType()),
                     AccessFlags.ofMethod(AccessFlag.PUBLIC, AccessFlag.STATIC).flagsMask(), mb -> {
                         mb.withCode(xb -> {
@@ -190,7 +190,7 @@ class BuilderTryCatchTest {
                             xb.constantInstruction("S");
                             xb.astore(stringSlot);
 
-                            assertThrows(IllegalStateException.class, () -> {
+                            assertThrows(IllegalArgumentException.class, () -> {
                                 xb.trying(tb -> {
                                 }, catchBuilder -> {
                                     fail();
@@ -213,7 +213,7 @@ class BuilderTryCatchTest {
 
     @Test
     void testLocalAllocation() throws Throwable {
-        byte[] bytes = Classfile.build(ClassDesc.of("C"), cb -> {
+        byte[] bytes = ClassFile.of().build(ClassDesc.of("C"), cb -> {
             cb.withMethod("main", MethodTypeDesc.of(CD_String, CD_String.arrayType()),
                     AccessFlags.ofMethod(AccessFlag.PUBLIC, AccessFlag.STATIC).flagsMask(), mb -> {
                         mb.withCode(xb -> {
@@ -276,7 +276,7 @@ class BuilderTryCatchTest {
     }
 
     static byte[] generateTryCatchMethod(Consumer<CodeBuilder.CatchBuilder> c) {
-        byte[] bytes = Classfile.build(ClassDesc.of("C"), cb -> {
+        byte[] bytes = ClassFile.of().build(ClassDesc.of("C"), cb -> {
             cb.withMethod("main", MethodTypeDesc.of(CD_String, CD_String.arrayType()),
                     AccessFlags.ofMethod(AccessFlag.PUBLIC, AccessFlag.STATIC).flagsMask(), mb -> {
                         mb.withCode(xb -> {

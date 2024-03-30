@@ -775,33 +775,33 @@ public abstract sealed class UnboundAttribute<T extends Attribute<T>>
             buf.writeU1(targetInfo.targetType().targetTypeValue());
 
             // target_info
-            switch (targetInfo) {
-                case TypeParameterTarget tpt -> buf.writeU1(tpt.typeParameterIndex());
-                case SupertypeTarget st -> buf.writeU2(st.supertypeIndex());
-                case TypeParameterBoundTarget tpbt -> {
-                    buf.writeU1(tpbt.typeParameterIndex());
-                    buf.writeU1(tpbt.boundIndex());
+            if (targetInfo instanceof TypeParameterTarget tpt) {
+                buf.writeU1(tpt.typeParameterIndex());
+            } else if (targetInfo instanceof SupertypeTarget st) {
+                buf.writeU2(st.supertypeIndex());
+            } else if (targetInfo instanceof TypeParameterBoundTarget tpbt) {
+                buf.writeU1(tpbt.typeParameterIndex());
+                buf.writeU1(tpbt.boundIndex());
+            } else if (targetInfo instanceof EmptyTarget) {// nothing to write
+            } else if (targetInfo instanceof FormalParameterTarget fpt) {
+                buf.writeU1(fpt.formalParameterIndex());
+            } else if (targetInfo instanceof ThrowsTarget tt) {
+                buf.writeU2(tt.throwsTargetIndex());
+            } else if (targetInfo instanceof LocalVarTarget lvt) {
+                buf.writeU2(lvt.table().size());
+                for (var e : lvt.table()) {
+                    int startPc = labelToBci(lr, e.startLabel());
+                    buf.writeU2(startPc);
+                    buf.writeU2(labelToBci(lr, e.endLabel()) - startPc);
+                    buf.writeU2(e.index());
                 }
-                case EmptyTarget et -> {
-                    // nothing to write
-                }
-                case FormalParameterTarget fpt -> buf.writeU1(fpt.formalParameterIndex());
-                case ThrowsTarget tt -> buf.writeU2(tt.throwsTargetIndex());
-                case LocalVarTarget lvt -> {
-                    buf.writeU2(lvt.table().size());
-                    for (var e : lvt.table()) {
-                        int startPc = labelToBci(lr, e.startLabel());
-                        buf.writeU2(startPc);
-                        buf.writeU2(labelToBci(lr, e.endLabel()) - startPc);
-                        buf.writeU2(e.index());
-                    }
-                }
-                case CatchTarget ct -> buf.writeU2(ct.exceptionTableIndex());
-                case OffsetTarget ot -> buf.writeU2(labelToBci(lr, ot.target()));
-                case TypeArgumentTarget tat -> {
-                    buf.writeU2(labelToBci(lr, tat.target()));
-                    buf.writeU1(tat.typeArgumentIndex());
-                }
+            } else if (targetInfo instanceof CatchTarget ct) {
+                buf.writeU2(ct.exceptionTableIndex());
+            } else if (targetInfo instanceof OffsetTarget ot) {
+                buf.writeU2(labelToBci(lr, ot.target()));
+            } else if (targetInfo instanceof TypeArgumentTarget tat) {
+                buf.writeU2(labelToBci(lr, tat.target()));
+                buf.writeU1(tat.typeArgumentIndex());
             }
 
             // target_path

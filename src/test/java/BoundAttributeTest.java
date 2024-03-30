@@ -4,9 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -31,7 +29,7 @@
  */
 import org.glavo.classfile.Attributes;
 import org.glavo.classfile.ClassModel;
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.attribute.MethodParameterInfo;
 import org.glavo.classfile.attribute.MethodParametersAttribute;
@@ -51,16 +49,17 @@ class BoundAttributeTest {
 
     @Test
     void testReadMethodParametersAttributeWithoutParameterName() {
+        var cc = ClassFile.of();
         // build a simple method: void method(int)
         MethodTypeDesc methodTypeDesc = MethodTypeDesc.of(ConstantDescs.CD_void, ConstantDescs.CD_int);
-        byte[] raw = Classfile.build(ClassDesc.of("TestClass"), builder -> {
+        byte[] raw = cc.build(ClassDesc.of("TestClass"), builder -> {
             builder.withMethod("method", methodTypeDesc, 0, mb -> {
                 mb.withCode(CodeBuilder::return_);
                 // add a MethodParameters attribute without name for the parameter
                 mb.with(MethodParametersAttribute.of(MethodParameterInfo.ofParameter(Optional.empty(), 0)));
             });
         });
-        ClassModel model = Classfile.parse(raw);
+        ClassModel model = cc.parse(raw);
         MethodParametersAttribute methodParametersAttribute = model.methods().get(0)
                 .findAttribute(Attributes.METHOD_PARAMETERS)
                 .orElseThrow(() -> new AssertionFailedError("Attribute not present"));

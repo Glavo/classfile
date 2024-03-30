@@ -56,13 +56,7 @@ import org.glavo.classfile.instruction.TableSwitchInstruction;
 import org.glavo.classfile.instruction.ThrowInstruction;
 import org.glavo.classfile.instruction.TypeCheckInstruction;
 
-import java.util.AbstractCollection;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 public final class CodeStackTrackerImpl implements CodeStackTracker {
@@ -171,176 +165,199 @@ public final class CodeStackTrackerImpl implements CodeStackTracker {
 
     @Override
     public void accept(CodeBuilder cb, CodeElement el) {
+        Objects.requireNonNull(el);
         cb.with(el);
-        switch (el) {
-            case ArrayLoadInstruction i -> {
-                pop(2);push(i.typeKind());
+        if (el instanceof ArrayLoadInstruction i) {
+            pop(2);
+            push(i.typeKind());
+        } else if (el instanceof ArrayStoreInstruction) {
+            pop(3);
+        } else if (el instanceof BranchInstruction i) {
+            if (i.opcode() == Opcode.GOTO || i.opcode() == Opcode.GOTO_W) {
+                map.put(i.target(), stack);
+                stack = null;
+            } else {
+                pop(1);
+                map.put(i.target(), fork());
             }
-            case ArrayStoreInstruction i ->
-                pop(3);
-            case BranchInstruction i -> {
-                if (i.opcode() == Opcode.GOTO || i.opcode() == Opcode.GOTO_W) {
-                    map.put(i.target(), stack);
-                    stack = null;
-                } else {
+        } else if (el instanceof ConstantInstruction i) {
+            push(i.typeKind());
+        } else if (el instanceof ConvertInstruction i) {
+            pop(1);
+            push(i.toType());
+        } else if (el instanceof FieldInstruction i) {
+            switch (i.opcode()) {
+                case GETSTATIC -> push(TypeKind.fromDescriptor(i.type().stringValue()));
+                case GETFIELD -> {
                     pop(1);
-                    map.put(i.target(), fork());
+                    push(TypeKind.fromDescriptor(i.type().stringValue()));
                 }
+                case PUTSTATIC -> pop(1);
+                case PUTFIELD -> pop(2);
             }
-            case ConstantInstruction i ->
-                push(i.typeKind());
-            case ConvertInstruction i -> {
-                pop(1);push(i.toType());
+        } else if (el instanceof InvokeDynamicInstruction i) {
+            var type = i.typeSymbol();
+            pop(type.parameterCount());
+            push(TypeKind.from(type.returnType()));
+        } else if (el instanceof InvokeInstruction i) {
+            var type = i.typeSymbol();
+            pop(type.parameterCount());
+            if (i.opcode() != Opcode.INVOKESTATIC) pop(1);
+            push(TypeKind.from(type.returnType()));
+        } else if (el instanceof LoadInstruction i) {
+            push(i.typeKind());
+        } else if (el instanceof StoreInstruction) {
+            pop(1);
+        } else if (el instanceof LookupSwitchInstruction i) {
+            map.put(i.defaultTarget(), stack);
+            for (var c : i.cases()) map.put(c.target(), fork());
+            stack = null;
+        } else if (el instanceof MonitorInstruction) {
+            pop(1);
+        } else if (el instanceof NewMultiArrayInstruction i) {
+            pop(i.dimensions());
+            push(TypeKind.ReferenceType);
+        } else if (el instanceof NewObjectInstruction) {
+            push(TypeKind.ReferenceType);
+        } else if (el instanceof NewPrimitiveArrayInstruction) {
+            pop(1);
+            push(TypeKind.ReferenceType);
+        } else if (el instanceof NewReferenceArrayInstruction) {
+            pop(1);
+            push(TypeKind.ReferenceType);
+        } else if (el instanceof NopInstruction) {
+        } else if (el instanceof OperatorInstruction i) {
+            switch (i.opcode()) {
+                case ARRAYLENGTH, INEG, LNEG, FNEG, DNEG -> pop(1);
+                default -> pop(2);
             }
-            case FieldInstruction i -> {
-                switch (i.opcode()) {
-                    case GETSTATIC ->
-                        push(TypeKind.fromDescriptor(i.type().stringValue()));
-                    case GETFIELD -> {
-                        pop(1);push(TypeKind.fromDescriptor(i.type().stringValue()));
+            push(i.typeKind());
+        } else if (el instanceof ReturnInstruction) {
+            stack = null;
+        } else if (el instanceof StackInstruction i) {
+            switch (i.opcode()) {
+                case POP -> pop(1);
+                case POP2 -> withStack(s -> {
+                    if (s.pop().slotSize() == 1) s.pop();
+                });
+                case DUP -> withStack(s -> {
+                    var v = s.pop();
+                    s.push(v);
+                    s.push(v);
+                });
+                case DUP2 -> withStack(s -> {
+                    var v1 = s.pop();
+                    if (v1.slotSize() == 1) {
+                        var v2 = s.pop();
+                        s.push(v2);
+                        s.push(v1);
+                        s.push(v2);
+                        s.push(v1);
+                    } else {
+                        s.push(v1);
+                        s.push(v1);
                     }
-                    case PUTSTATIC ->
-                        pop(1);
-                    case PUTFIELD ->
-                        pop(2);
-                }
-            }
-            case InvokeDynamicInstruction i -> {
-                var type = i.typeSymbol();
-                pop(type.parameterCount());
-                push(TypeKind.from(type.returnType()));
-            }
-            case InvokeInstruction i -> {
-                var type = i.typeSymbol();
-                pop(type.parameterCount());
-                if (i.opcode() != Opcode.INVOKESTATIC) pop(1);
-                push(TypeKind.from(type.returnType()));
-            }
-            case LoadInstruction i ->
-                push(i.typeKind());
-            case StoreInstruction i ->
-                pop(1);
-            case LookupSwitchInstruction i -> {
-                map.put(i.defaultTarget(), stack);
-                for (var c : i.cases()) map.put(c.target(), fork());
-                stack = null;
-            }
-            case MonitorInstruction i ->
-                pop(1);
-            case NewMultiArrayInstruction i -> {
-                pop(i.dimensions());push(TypeKind.ReferenceType);
-            }
-            case NewObjectInstruction i ->
-                push(TypeKind.ReferenceType);
-            case NewPrimitiveArrayInstruction i -> {
-                pop(1);push(TypeKind.ReferenceType);
-            }
-            case NewReferenceArrayInstruction i -> {
-                pop(1);push(TypeKind.ReferenceType);
-            }
-            case NopInstruction i -> {}
-            case OperatorInstruction i -> {
-                switch (i.opcode()) {
-                    case ARRAYLENGTH, INEG, LNEG, FNEG, DNEG -> pop(1);
-                    default -> pop(2);
-                }
-                push(i.typeKind());
-            }
-            case ReturnInstruction i ->
-                stack = null;
-            case StackInstruction i -> {
-                switch (i.opcode()) {
-                    case POP -> pop(1);
-                    case POP2 -> withStack(s -> {
-                        if (s.pop().slotSize() == 1) s.pop();
-                    });
-                    case DUP ->  withStack(s -> {
-                        var v = s.pop();s.push(v);s.push(v);
-                    });
-                    case DUP2 -> withStack(s -> {
-                        var v1 = s.pop();
-                        if (v1.slotSize() == 1) {
-                            var v2 = s.pop();
-                            s.push(v2);s.push(v1);
-                            s.push(v2);s.push(v1);
+                });
+                case DUP_X1 -> withStack(s -> {
+                    var v1 = s.pop();
+                    var v2 = s.pop();
+                    s.push(v1);
+                    s.push(v2);
+                    s.push(v1);
+                });
+                case DUP_X2 -> withStack(s -> {
+                    var v1 = s.pop();
+                    var v2 = s.pop();
+                    if (v2.slotSize() == 1) {
+                        var v3 = s.pop();
+                        s.push(v1);
+                        s.push(v3);
+                        s.push(v2);
+                        s.push(v1);
+                    } else {
+                        s.push(v1);
+                        s.push(v2);
+                        s.push(v1);
+                    }
+                });
+                case DUP2_X1 -> withStack(s -> {
+                    var v1 = s.pop();
+                    var v2 = s.pop();
+                    if (v1.slotSize() == 1) {
+                        var v3 = s.pop();
+                        s.push(v2);
+                        s.push(v1);
+                        s.push(v3);
+                        s.push(v2);
+                        s.push(v1);
+                    } else {
+                        s.push(v1);
+                        s.push(v2);
+                        s.push(v1);
+                    }
+                });
+                case DUP2_X2 -> withStack(s -> {
+                    var v1 = s.pop();
+                    var v2 = s.pop();
+                    if (v1.slotSize() == 1) {
+                        var v3 = s.pop();
+                        if (v3.slotSize() == 1) {
+                            var v4 = s.pop();
+                            s.push(v2);
+                            s.push(v1);
+                            s.push(v4);
+                            s.push(v3);
+                            s.push(v2);
+                            s.push(v1);
                         } else {
-                            s.push(v1);s.push(v1);
+                            s.push(v2);
+                            s.push(v1);
+                            s.push(v3);
+                            s.push(v2);
+                            s.push(v1);
                         }
-                    });
-                    case DUP_X1 -> withStack(s -> {
-                        var v1 = s.pop();
-                        var v2 = s.pop();
-                        s.push(v1);s.push(v2);s.push(v1);
-                    });
-                    case DUP_X2 -> withStack(s -> {
-                        var v1 = s.pop();
-                        var v2 = s.pop();
+                    } else {
                         if (v2.slotSize() == 1) {
                             var v3 = s.pop();
-                            s.push(v1);s.push(v3);s.push(v2);s.push(v1);
+                            s.push(v1);
+                            s.push(v3);
+                            s.push(v2);
+                            s.push(v1);
                         } else {
-                            s.push(v1);s.push(v2);s.push(v1);
+                            s.push(v1);
+                            s.push(v2);
+                            s.push(v1);
                         }
-                    });
-                    case DUP2_X1 -> withStack(s -> {
-                        var v1 = s.pop();
-                        var v2 = s.pop();
-                        if (v1.slotSize() == 1) {
-                            var v3 = s.pop();
-                            s.push(v2);s.push(v1);s.push(v3);s.push(v2);s.push(v1);
-                        } else {
-                            s.push(v1);s.push(v2);s.push(v1);
-                        }
-                    });
-                    case DUP2_X2 -> withStack(s -> {
-                        var v1 = s.pop();
-                        var v2 = s.pop();
-                        if (v1.slotSize() == 1) {
-                            var v3 = s.pop();
-                            if (v3.slotSize() == 1) {
-                                var v4 = s.pop();
-                                s.push(v2);s.push(v1);s.push(v4);s.push(v3);s.push(v2);s.push(v1);
-                            } else {
-                                s.push(v2);s.push(v1);s.push(v3);s.push(v2);s.push(v1);
-                            }
-                        } else {
-                            if (v2.slotSize() == 1) {
-                                var v3 = s.pop();
-                                s.push(v1);s.push(v3);s.push(v2);s.push(v1);
-                            } else {
-                                s.push(v1);s.push(v2);s.push(v1);
-                            }
-                        }
-                    });
-                    case SWAP -> withStack(s -> {
-                        var v1 = s.pop();
-                        var v2 = s.pop();
-                        s.push(v1);s.push(v2);
-                    });
+                    }
+                });
+                case SWAP -> withStack(s -> {
+                    var v1 = s.pop();
+                    var v2 = s.pop();
+                    s.push(v1);
+                    s.push(v2);
+                });
+            }
+        } else if (el instanceof TableSwitchInstruction i) {
+            map.put(i.defaultTarget(), stack);
+            for (var c : i.cases()) map.put(c.target(), fork());
+            stack = null;
+        } else if (el instanceof ThrowInstruction) {
+            stack = null;
+        } else if (el instanceof TypeCheckInstruction i) {
+            switch (i.opcode()) {
+                case CHECKCAST -> {
+                    pop(1);
+                    push(TypeKind.ReferenceType);
+                }
+                case INSTANCEOF -> {
+                    pop(1);
+                    push(TypeKind.IntType);
                 }
             }
-            case TableSwitchInstruction i -> {
-                map.put(i.defaultTarget(), stack);
-                for (var c : i.cases()) map.put(c.target(), fork());
-                stack = null;
-            }
-            case ThrowInstruction i ->
-                stack = null;
-            case TypeCheckInstruction i -> {
-                switch (i.opcode()) {
-                    case CHECKCAST -> {
-                        pop(1);push(TypeKind.ReferenceType);
-                    }
-                    case INSTANCEOF -> {
-                        pop(1);push(TypeKind.IntType);
-                    }
-                }
-            }
-            case ExceptionCatch i ->
-                map.put(i.handler(), new Stack(new Item(TypeKind.ReferenceType, null), 1, 1));
-            case LabelTarget i ->
-                stack = map.getOrDefault(i.label(), stack);
-            default -> {}
+        } else if (el instanceof ExceptionCatch i) {
+            map.put(i.handler(), new Stack(new Item(TypeKind.ReferenceType, null), 1, 1));
+        } else if (el instanceof LabelTarget i) {
+            stack = map.getOrDefault(i.label(), stack);
         }
     }
 }

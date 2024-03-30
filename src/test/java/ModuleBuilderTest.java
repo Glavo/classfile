@@ -4,9 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -25,7 +23,7 @@
 
 /*
  * @test
- * @summary Testing Classfile building module.
+ * @summary Testing ClassFile building module.
  * @run junit ModuleBuilderTest
  */
 import org.glavo.classfile.*;
@@ -44,6 +42,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ClassDesc;
 import java.net.URI;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -63,7 +62,8 @@ class ModuleBuilderTest {
     private final ModuleAttribute attr;
 
     public ModuleBuilderTest() {
-        byte[] modInfo = Classfile.buildModule(
+        var cc = ClassFile.of();
+        byte[] modInfo = cc.buildModule(
                 ModuleAttribute.of(modName, mb -> mb
                         .moduleVersion(modVsn)
 
@@ -85,9 +85,9 @@ class ModuleBuilderTest {
 
                         .provides(ClassDesc.of("some.nice.Feature"), ClassDesc.of("impl"), ClassDesc.of("another.impl"))),
                 clb -> clb.with(ModuleMainClassAttribute.of(ClassDesc.of("main.Class")))
-                        .with(ModulePackagesAttribute.ofNames(PackageDesc.of("foo.bar.baz"), PackageDesc.of("quux")))
-                        .with(ModuleMainClassAttribute.of(ClassDesc.of("overwritten.main.Class"))));
-        moduleModel = Classfile.parse(modInfo);
+                          .with(ModulePackagesAttribute.ofNames(PackageDesc.of("foo.bar.baz"), PackageDesc.of("quux")))
+                          .with(ModuleMainClassAttribute.of(ClassDesc.of("overwritten.main.Class"))));
+        moduleModel = cc.parse(modInfo);
         attr = ((ModuleAttribute) moduleModel.attributes().stream()
                 .filter(a -> a.attributeMapper() == Attributes.MODULE)
                 .findFirst()
@@ -97,10 +97,11 @@ class ModuleBuilderTest {
     @Test
     void testCreateModuleInfo() {
         // Build the module-info.class bytes
-        byte[] modBytes = Classfile.buildModule(ModuleAttribute.of(modName, mb -> mb.moduleVersion(modVsn)));
+        var cc = ClassFile.of();
+        byte[] modBytes = cc.buildModule(ModuleAttribute.of(modName, mb -> mb.moduleVersion(modVsn)));
 
         // Verify
-        var cm = Classfile.parse(modBytes);
+        var cm = cc.parse(modBytes);
 
         var attr =cm.findAttribute(Attributes.MODULE).get();
         assertEquals(attr.moduleName().name().stringValue(), modName.name());
@@ -194,7 +195,7 @@ class ModuleBuilderTest {
     void verifyIsModuleInfo() throws Exception {
         assertTrue(moduleModel.isModuleInfo());
 
-        ClassModel m = Classfile.parse(Paths.get(URI.create(ModuleBuilderTest.class.getResource("ModuleBuilderTest.class").toString())));
+        ClassModel m = ClassFile.of().parse(Paths.get(URI.create(ModuleBuilderTest.class.getResource("ModuleBuilderTest.class").toString())));
         assertFalse(m.isModuleInfo());
     }
 }

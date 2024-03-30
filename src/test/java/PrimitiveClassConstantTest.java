@@ -4,9 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -35,7 +33,7 @@ import java.lang.constant.MethodTypeDesc;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.function.Supplier;
-import org.glavo.classfile.Classfile;
+import org.glavo.classfile.ClassFile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -43,8 +41,9 @@ import static java.lang.constant.ConstantDescs.CD_Class;
 import static java.lang.constant.ConstantDescs.CD_Object;
 import static java.lang.constant.ConstantDescs.CD_int;
 import static java.lang.constant.ConstantDescs.CD_long;
-import static java.lang.constant.ConstantDescs.CD_void;
-import static org.glavo.classfile.Classfile.ACC_PUBLIC;
+import static java.lang.constant.ConstantDescs.INIT_NAME;
+import static java.lang.constant.ConstantDescs.MTD_void;
+import static org.glavo.classfile.ClassFile.ACC_PUBLIC;
 
 public final class PrimitiveClassConstantTest {
 
@@ -52,12 +51,12 @@ public final class PrimitiveClassConstantTest {
     public void test() throws Throwable {
         ClassDesc ape = ClassDesc.of("Ape");
         var lookup = MethodHandles.lookup();
-        Class<?> a = lookup.defineClass(Classfile.build(ape, clb -> {
+        Class<?> a = lookup.defineClass(ClassFile.of().build(ape, clb -> {
             clb.withSuperclass(CD_Object);
             clb.withInterfaceSymbols(Supplier.class.describeConstable().orElseThrow());
-            clb.withMethodBody("<init>", MethodTypeDesc.of(CD_void), ACC_PUBLIC, cob -> {
+            clb.withMethodBody(INIT_NAME, MTD_void, ACC_PUBLIC, cob -> {
                 cob.aload(0);
-                cob.invokespecial(CD_Object, "<init>", MethodTypeDesc.of(CD_void));
+                cob.invokespecial(CD_Object, INIT_NAME, MTD_void);
                 cob.return_();
             });
             clb.withMethodBody("get", MethodTypeDesc.of(CD_Object), ACC_PUBLIC, cob -> {

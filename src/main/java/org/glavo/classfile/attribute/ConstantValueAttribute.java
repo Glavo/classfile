@@ -25,6 +25,8 @@
 package org.glavo.classfile.attribute;
 
 import java.lang.constant.ConstantDesc;
+import java.util.Objects;
+
 import org.glavo.classfile.Attribute;
 import org.glavo.classfile.FieldElement;
 import org.glavo.classfile.FieldModel;
@@ -68,13 +70,21 @@ public sealed interface ConstantValueAttribute
      * @param value the constant value
      */
     static ConstantValueAttribute of(ConstantDesc value) {
-        return of(switch(value) {
-            case Integer i -> TemporaryConstantPool.INSTANCE.intEntry(i);
-            case Float f -> TemporaryConstantPool.INSTANCE.floatEntry(f);
-            case Long l -> TemporaryConstantPool.INSTANCE.longEntry(l);
-            case Double d -> TemporaryConstantPool.INSTANCE.doubleEntry(d);
-            case String s -> TemporaryConstantPool.INSTANCE.stringEntry(s);
-            default -> throw new IllegalArgumentException("Invalid ConstantValueAttribute value: " + value);
-        });
+        Objects.requireNonNull(value);
+        ConstantValueEntry entry;
+        if (value instanceof Integer i) {
+            entry = TemporaryConstantPool.INSTANCE.intEntry(i);
+        } else if (value instanceof Float f) {
+            entry = TemporaryConstantPool.INSTANCE.floatEntry(f);
+        } else if (value instanceof Long l) {
+            entry = TemporaryConstantPool.INSTANCE.longEntry(l);
+        } else if (value instanceof Double d) {
+            entry = TemporaryConstantPool.INSTANCE.doubleEntry(d);
+        } else if (value instanceof String s) {
+            entry = TemporaryConstantPool.INSTANCE.stringEntry(s);
+        } else {
+            throw new IllegalArgumentException("Invalid ConstantValueAttribute value: " + value);
+        }
+        return of(entry);
     }
 }

@@ -18,6 +18,10 @@ group = "org.glavo"
 version = "0.5.0" + "-SNAPSHOT"
 description = "Java 21 Classfile API"
 
+val sourceToolchainVersion = 17
+val javadocToolchainVersion = 21
+val testToolchainVersion = 21
+
 sourceSets {
     test {
         java {
@@ -27,14 +31,15 @@ sourceSets {
 }
 
 tasks.withType<JavaCompile> {
+    options.forkOptions.jvmArgs = listOf("-Duser.language=en")
+}
+
+tasks.compileJava {
     javaCompiler.set(javaToolchains.compilerFor {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(sourceToolchainVersion))
     })
 
-    options.forkOptions.jvmArgs = listOf("-Duser.language=en")
-
-    options.release.set(17)
-    options.compilerArgs.add("--enable-preview")
+    options.release.set(sourceToolchainVersion)
 
     val root = destinationDirectory.asFile.get()
     doLast {
@@ -51,9 +56,18 @@ tasks.withType<JavaCompile> {
     }
 }
 
+tasks.compileTestJava {
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(testToolchainVersion))
+    })
+    options.compilerArgs.add("--enable-preview")
+
+    options.release.set(testToolchainVersion)
+}
+
 tasks.javadoc {
     javadocTool.set(javaToolchains.javadocToolFor {
-        languageVersion.set(JavaLanguageVersion.of(20))
+        languageVersion.set(JavaLanguageVersion.of(javadocToolchainVersion))
     })
 
     val options = this.options as StandardJavadocDocletOptions
@@ -85,10 +99,12 @@ repositories {
 }
 
 dependencies {
-    val junitVersion = "5.9.2"
-    val asmVersion = "9.4"
+    // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+    val junitVersion = "5.10.2"
 
     // https://mvnrepository.com/artifact/org.ow2.asm/asm
+    val asmVersion = "9.7"
+
     testImplementation("org.ow2.asm:asm:$asmVersion")
     testImplementation("org.ow2.asm:asm-tree:$asmVersion")
 
@@ -99,6 +115,10 @@ dependencies {
 }
 
 tasks.test {
+    javaLauncher.set(javaToolchains.launcherFor() {
+        languageVersion.set(JavaLanguageVersion.of(testToolchainVersion))
+    })
+
     useJUnitPlatform()
 }
 

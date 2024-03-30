@@ -26,6 +26,7 @@
 package org.glavo.classfile.impl;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Consumer;
 
@@ -83,17 +84,27 @@ public record ClassFileImpl(StackMapsOption stackMapsOption,
         var chro = classHierarchyResolverOption;
         var amo = attributeMapperOption;
         for (var o : options) {
-            switch (o) {
-                case StackMapsOption oo -> smo = oo;
-                case DebugElementsOption oo -> deo = oo;
-                case LineNumbersOption oo -> lno = oo;
-                case AttributesProcessingOption oo -> apo = oo;
-                case ConstantPoolSharingOption oo -> cpso = oo;
-                case ShortJumpsOption oo -> sjo = oo;
-                case DeadCodeOption oo -> dco = oo;
-                case DeadLabelsOption oo -> dlo = oo;
-                case ClassHierarchyResolverOption oo -> chro = oo;
-                case AttributeMapperOption oo -> amo = oo;
+            Objects.requireNonNull(o);
+            if (o instanceof StackMapsOption oo) {
+                smo = oo;
+            } else if (o instanceof DebugElementsOption oo) {
+                deo = oo;
+            } else if (o instanceof LineNumbersOption oo) {
+                lno = oo;
+            } else if (o instanceof AttributesProcessingOption oo) {
+                apo = oo;
+            } else if (o instanceof ConstantPoolSharingOption oo) {
+                cpso = oo;
+            } else if (o instanceof ShortJumpsOption oo) {
+                sjo = oo;
+            } else if (o instanceof DeadCodeOption oo) {
+                dco = oo;
+            } else if (o instanceof DeadLabelsOption oo) {
+                dlo = oo;
+            } else if (o instanceof ClassHierarchyResolverOption oo) {
+                chro = oo;
+            } else if (o instanceof AttributeMapperOption oo) {
+                amo = oo;
             }
         }
         return new ClassFileImpl(smo, deo, lno, apo, cpso, sjo, dco, dlo, chro, amo);

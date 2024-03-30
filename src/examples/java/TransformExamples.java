@@ -4,9 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -25,9 +23,10 @@
 
 /*
  * @test
- * @summary Testing Classfile TransformExamples compilation.
+ * @summary Testing ClassFile TransformExamples compilation.
  * @compile TransformExamples.java
  */
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.ClassTransform;
 import org.glavo.classfile.FieldModel;
@@ -39,33 +38,33 @@ import org.glavo.classfile.Attribute;
  */
 public class TransformExamples {
     public byte[] noop(ClassModel cm) {
-        return cm.transform(ClassTransform.ACCEPT_ALL);
+        return ClassFile.of().transform(cm, ClassTransform.ACCEPT_ALL);
     }
 
     public byte[] deleteAllMethods(ClassModel cm) {
-        return cm.transform((b, e) -> {
+        return ClassFile.of().transform(cm, (b, e) -> {
             if (!(e instanceof MethodModel))
                 b.with(e);
         });
     }
 
     public byte[] deleteFieldsWithDollarInName(ClassModel cm) {
-        return cm.transform((b, e) ->
-        {
-            if (!(e instanceof FieldModel fm && fm.fieldName().stringValue().contains("$")))
-                b.with(e);
-        });
+        return ClassFile.of().transform(cm, (b, e) ->
+                        {
+                            if (!(e instanceof FieldModel fm && fm.fieldName().stringValue().contains("$")))
+                                b.with(e);
+                        });
     }
 
     public byte[] deleteAttributes(ClassModel cm) {
-        return cm.transform((b, e) -> {
+        return ClassFile.of().transform(cm, (b, e) -> {
             if (!(e instanceof Attribute))
                 b.with(e);
         });
     }
 
     public byte[] keepMethodsAndFields(ClassModel cm) {
-        return cm.transform((b, e) -> {
+        return ClassFile.of().transform(cm, (b, e) -> {
             if (e instanceof MethodModel || e instanceof FieldModel)
                 b.with(e);
         });

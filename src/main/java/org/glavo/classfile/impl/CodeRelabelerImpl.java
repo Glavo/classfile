@@ -38,6 +38,7 @@ import org.glavo.classfile.instruction.LookupSwitchInstruction;
 import org.glavo.classfile.instruction.SwitchCase;
 import org.glavo.classfile.instruction.TableSwitchInstruction;
 
+import java.util.Objects;
 import java.util.function.BiFunction;
 
 public record CodeRelabelerImpl(BiFunction<Label, CodeBuilder, Label> mapFunction) implements CodeRelabeler {
@@ -49,59 +50,59 @@ public record CodeRelabelerImpl(BiFunction<Label, CodeBuilder, Label> mapFunctio
 
     @Override
     public void accept(CodeBuilder cob, CodeElement coe) {
-        switch (coe) {
-            case BranchInstruction bi ->
-                cob.branchInstruction(
-                        bi.opcode(),
-                        relabel(bi.target(), cob));
-            case LookupSwitchInstruction lsi ->
-                cob.lookupSwitchInstruction(
-                        relabel(lsi.defaultTarget(), cob),
-                        lsi.cases().stream().map(c ->
-                                SwitchCase.of(
-                                        c.caseValue(),
-                                        relabel(c.target(), cob))).toList());
-            case TableSwitchInstruction tsi ->
-                cob.tableSwitchInstruction(
-                        tsi.lowValue(),
-                        tsi.highValue(),
-                        relabel(tsi.defaultTarget(), cob),
-                        tsi.cases().stream().map(c ->
-                                SwitchCase.of(
-                                        c.caseValue(),
-                                        relabel(c.target(), cob))).toList());
-            case LabelTarget lt ->
-                cob.labelBinding(
-                        relabel(lt.label(), cob));
-            case ExceptionCatch ec ->
-                cob.exceptionCatch(
-                        relabel(ec.tryStart(), cob),
-                        relabel(ec.tryEnd(), cob),
-                        relabel(ec.handler(), cob),
-                        ec.catchType());
-            case LocalVariable lv ->
-                cob.localVariable(
-                        lv.slot(),
-                        lv.name().stringValue(),
-                        lv.typeSymbol(),
-                        relabel(lv.startScope(), cob),
-                        relabel(lv.endScope(), cob));
-            case LocalVariableType lvt ->
-                cob.localVariableType(
-                        lvt.slot(),
-                        lvt.name().stringValue(),
-                        lvt.signatureSymbol(),
-                        relabel(lvt.startScope(), cob),
-                        relabel(lvt.endScope(), cob));
-            case CharacterRange chr ->
-                cob.characterRange(
-                        relabel(chr.startScope(), cob),
-                        relabel(chr.endScope(), cob),
-                        chr.characterRangeStart(),
-                        chr.characterRangeEnd(),
-                        chr.flags());
-            default ->
-                cob.with(coe);
+        Objects.requireNonNull(coe);
+        if (coe instanceof BranchInstruction bi) {
+            cob.branchInstruction(
+                    bi.opcode(),
+                    relabel(bi.target(), cob));
+        } else if (coe instanceof LookupSwitchInstruction lsi) {
+            cob.lookupSwitchInstruction(
+                    relabel(lsi.defaultTarget(), cob),
+                    lsi.cases().stream().map(c ->
+                            SwitchCase.of(
+                                    c.caseValue(),
+                                    relabel(c.target(), cob))).toList());
+        } else if (coe instanceof TableSwitchInstruction tsi) {
+            cob.tableSwitchInstruction(
+                    tsi.lowValue(),
+                    tsi.highValue(),
+                    relabel(tsi.defaultTarget(), cob),
+                    tsi.cases().stream().map(c ->
+                            SwitchCase.of(
+                                    c.caseValue(),
+                                    relabel(c.target(), cob))).toList());
+        } else if (coe instanceof LabelTarget lt) {
+            cob.labelBinding(
+                    relabel(lt.label(), cob));
+        } else if (coe instanceof ExceptionCatch ec) {
+            cob.exceptionCatch(
+                    relabel(ec.tryStart(), cob),
+                    relabel(ec.tryEnd(), cob),
+                    relabel(ec.handler(), cob),
+                    ec.catchType());
+        } else if (coe instanceof LocalVariable lv) {
+            cob.localVariable(
+                    lv.slot(),
+                    lv.name().stringValue(),
+                    lv.typeSymbol(),
+                    relabel(lv.startScope(), cob),
+                    relabel(lv.endScope(), cob));
+        } else if (coe instanceof LocalVariableType lvt) {
+            cob.localVariableType(
+                    lvt.slot(),
+                    lvt.name().stringValue(),
+                    lvt.signatureSymbol(),
+                    relabel(lvt.startScope(), cob),
+                    relabel(lvt.endScope(), cob));
+        } else if (coe instanceof CharacterRange chr) {
+            cob.characterRange(
+                    relabel(chr.startScope(), cob),
+                    relabel(chr.endScope(), cob),
+                    chr.characterRangeStart(),
+                    chr.characterRangeEnd(),
+                    chr.flags());
+        } else {
+            cob.with(coe);
         }
     }
 

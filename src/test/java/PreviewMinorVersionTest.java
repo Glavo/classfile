@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -20,42 +20,38 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+import org.glavo.classfile.ClassFile;
+import org.junit.jupiter.api.Test;
+
+import java.lang.constant.ClassDesc;
+
+import static java.lang.constant.ConstantDescs.*;
+import static org.glavo.classfile.ClassFile.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /*
  * @test
- * @summary Testing ClassFile annotation model.
- * @run junit AnnotationModelTest
+ * @bug 8311172
+ * @run junit PreviewMinorVersionTest
+ * @summary Ensures ClassFile.PREVIEW_MINOR_VERSION equals that of classes with
+ *          preview minor version from ClassModel::minorVersion
  */
-import org.glavo.classfile.ClassFile;
-import org.glavo.classfile.Attributes;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-class AnnotationModelTest {
-    private static final FileSystem JRT = FileSystems.getFileSystem(URI.create("jrt:/"));
-    private static final String testClass = "modules/java.base/java/lang/annotation/Target.class";
-    static byte[] fileBytes;
-
-    static {
-        try {
-            fileBytes = Files.readAllBytes(JRT.getPath(testClass));
-        } catch (IOException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
+public class PreviewMinorVersionTest {
 
     @Test
-    void readAnnos() {
-        var model = ClassFile.of().parse(fileBytes);
-        var annotations = model.findAttribute(Attributes.RUNTIME_VISIBLE_ANNOTATIONS).get().annotations();
+    public void testMinorVersionMatches() {
+        // compile a class with --enable-preview
+        // uses Record feature to trigger forcePreview
+        var cf = ClassFile.of();
+        var cd = ClassDesc.of("Test");
+        var bytes = cf.build(cd, cb -> cb
+                .withSuperclass(CD_Object)
+                // old preview minor version,
+                // with all bits set to 1
+                .withVersion(JAVA_17_VERSION, -1)
+        );
 
-        assertEquals(annotations.size(), 3);
+        var cm = ClassFile.of().parse(bytes);
+        assertEquals(ClassFile.PREVIEW_MINOR_VERSION, cm.minorVersion());
     }
 }

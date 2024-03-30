@@ -4,9 +4,7 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -41,13 +39,13 @@ class RebuildingTransformation {
     static private Random pathSwitch = new Random(1234);
 
     static byte[] transform(ClassModel clm) {
-        return Classfile.build(clm.thisClass().asSymbol(), List.of(Classfile.Option.generateStackmap(false)), clb -> {
+        return ClassFile.of(ClassFile.StackMapsOption.DROP_STACK_MAPS).build(clm.thisClass().asSymbol(), clb -> {
             for (var cle : clm) {
                 switch (cle) {
                     case AccessFlags af -> clb.withFlags(af.flagsMask());
                     case Superclass sc -> clb.withSuperclass(sc.superclassEntry().asSymbol());
                     case Interfaces i -> clb.withInterfaceSymbols(i.interfaces().stream().map(ClassEntry::asSymbol).toArray(ClassDesc[]::new));
-                    case ClassfileVersion v -> clb.withVersion(v.majorVersion(), v.minorVersion());
+                    case ClassFileVersion v -> clb.withVersion(v.majorVersion(), v.minorVersion());
                     case FieldModel fm ->
                         clb.withField(fm.fieldName().stringValue(), fm.fieldTypeSymbol(), fb -> {
                             for (var fe : fm) {
@@ -201,9 +199,9 @@ class RebuildingTransformation {
                                                     }
                                                 }
                                                 case DiscontinuedInstruction.JsrInstruction i ->
-                                                        cob.with(DiscontinuedInstruction.JsrInstruction.of(i.opcode(), labels.computeIfAbsent(i.target(), l -> cob.newLabel())));
+                                                    cob.with(DiscontinuedInstruction.JsrInstruction.of(i.opcode(), labels.computeIfAbsent(i.target(), l -> cob.newLabel())));
                                                 case DiscontinuedInstruction.RetInstruction i ->
-                                                        cob.with(DiscontinuedInstruction.RetInstruction.of(i.opcode(), i.slot()));
+                                                    cob.with(DiscontinuedInstruction.RetInstruction.of(i.opcode(), i.slot()));
                                                 case FieldInstruction i -> {
                                                     if (pathSwitch.nextBoolean()) {
                                                         switch (i.opcode()) {
@@ -451,7 +449,6 @@ class RebuildingTransformation {
                                                     throw new AssertionError("Unexpected StackMapTableAttribute here");
                                                 case CustomAttribute a ->
                                                     throw new AssertionError("Unexpected custom attribute: " + a.attributeName());
-                                                default -> throw new AssertionError();
                                             }
                                         }
                                         com.findAttribute(Attributes.STACK_MAP_TABLE).ifPresent(smta ->
@@ -554,7 +551,6 @@ class RebuildingTransformation {
             case AnnotationValue.OfBoolean v -> AnnotationValue.of(v.booleanValue());
             case AnnotationValue.OfClass oc -> AnnotationValue.of(oc.classSymbol());
             case AnnotationValue.OfEnum oe -> AnnotationValue.ofEnum(oe.classSymbol(), oe.constantName().stringValue());
-            default -> throw new AssertionError();
         };
     }
 

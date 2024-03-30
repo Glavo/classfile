@@ -36,6 +36,7 @@ import org.glavo.classfile.instruction.LocalVariableType;
 import org.glavo.classfile.instruction.StoreInstruction;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public final class CodeLocalsShifterImpl implements CodeLocalsShifter {
 
@@ -48,37 +49,38 @@ public final class CodeLocalsShifterImpl implements CodeLocalsShifter {
 
     @Override
     public void accept(CodeBuilder cob, CodeElement coe) {
-        switch (coe) {
-            case LoadInstruction li ->
-                cob.loadInstruction(
-                        li.typeKind(),
-                        shift(cob, li.slot(), li.typeKind()));
-            case StoreInstruction si ->
-                cob.storeInstruction(
-                        si.typeKind(),
-                        shift(cob, si.slot(), si.typeKind()));
-            case IncrementInstruction ii ->
-                cob.incrementInstruction(
-                        shift(cob, ii.slot(), TypeKind.IntType),
-                        ii.constant());
-            case LocalVariable lv ->
-                cob.localVariable(
-                        shift(cob, lv.slot(), TypeKind.fromDescriptor(lv.type().stringValue())),
-                        lv.name(),
-                        lv.type(),
-                        lv.startScope(),
-                        lv.endScope());
-            case LocalVariableType lvt ->
-                cob.localVariableType(
-                        shift(cob, lvt.slot(),
-                                (lvt.signatureSymbol() instanceof Signature.BaseTypeSig bsig)
-                                        ? TypeKind.fromDescriptor(bsig.signatureString())
-                                        : TypeKind.ReferenceType),
-                        lvt.name(),
-                        lvt.signature(),
-                        lvt.startScope(),
-                        lvt.endScope());
-            default -> cob.with(coe);
+        Objects.requireNonNull(coe);
+        if (coe instanceof LoadInstruction li) {
+            cob.loadInstruction(
+                    li.typeKind(),
+                    shift(cob, li.slot(), li.typeKind()));
+        } else if (coe instanceof StoreInstruction si) {
+            cob.storeInstruction(
+                    si.typeKind(),
+                    shift(cob, si.slot(), si.typeKind()));
+        } else if (coe instanceof IncrementInstruction ii) {
+            cob.incrementInstruction(
+                    shift(cob, ii.slot(), TypeKind.IntType),
+                    ii.constant());
+        } else if (coe instanceof LocalVariable lv) {
+            cob.localVariable(
+                    shift(cob, lv.slot(), TypeKind.fromDescriptor(lv.type().stringValue())),
+                    lv.name(),
+                    lv.type(),
+                    lv.startScope(),
+                    lv.endScope());
+        } else if (coe instanceof LocalVariableType lvt) {
+            cob.localVariableType(
+                    shift(cob, lvt.slot(),
+                            (lvt.signatureSymbol() instanceof Signature.BaseTypeSig bsig)
+                                    ? TypeKind.fromDescriptor(bsig.signatureString())
+                                    : TypeKind.ReferenceType),
+                    lvt.name(),
+                    lvt.signature(),
+                    lvt.startScope(),
+                    lvt.endScope());
+        } else {
+            cob.with(coe);
         }
     }
 
