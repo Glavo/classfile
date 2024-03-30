@@ -28,7 +28,6 @@ package org.glavo.classfile;
 import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.impl.ChainedFieldBuilder;
 import org.glavo.classfile.impl.TerminalFieldBuilder;
-import java.lang.reflect.AccessFlag;
 
 import java.util.Optional;
 import java.util.function.Consumer;

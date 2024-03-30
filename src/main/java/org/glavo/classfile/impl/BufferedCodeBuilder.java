@@ -24,18 +24,18 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.BufWriter;
-import java.lang.classfile.CodeBuilder;
-import java.lang.classfile.CodeElement;
-import java.lang.classfile.CodeModel;
-import java.lang.classfile.TypeKind;
-import java.lang.classfile.constantpool.ConstantPoolBuilder;
-import java.lang.classfile.Label;
-import java.lang.classfile.MethodModel;
-import java.lang.classfile.instruction.ExceptionCatch;
-import java.lang.classfile.instruction.IncrementInstruction;
-import java.lang.classfile.instruction.LoadInstruction;
-import java.lang.classfile.instruction.StoreInstruction;
+import org.glavo.classfile.BufWriter;
+import org.glavo.classfile.CodeBuilder;
+import org.glavo.classfile.CodeElement;
+import org.glavo.classfile.CodeModel;
+import org.glavo.classfile.TypeKind;
+import org.glavo.classfile.constantpool.ConstantPoolBuilder;
+import org.glavo.classfile.Label;
+import org.glavo.classfile.MethodModel;
+import org.glavo.classfile.instruction.ExceptionCatch;
+import org.glavo.classfile.instruction.IncrementInstruction;
+import org.glavo.classfile.instruction.LoadInstruction;
+import org.glavo.classfile.instruction.StoreInstruction;
 
 import java.util.ArrayList;
 import java.util.List;

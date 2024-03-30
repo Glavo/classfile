@@ -28,12 +28,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.glavo.classfile.AccessFlag;
 import org.glavo.classfile.ClassFile;
+import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.constant.PackageDesc;
 import org.glavo.classfile.constantpool.ModuleEntry;
 import org.glavo.classfile.constantpool.PackageEntry;
-import java.lang.constant.ModuleDesc;
-import java.lang.constant.PackageDesc;
-import java.lang.reflect.AccessFlag;
 
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;

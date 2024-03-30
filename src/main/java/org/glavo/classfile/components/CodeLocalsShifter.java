@@ -25,7 +25,8 @@
 package org.glavo.classfile.components;
 
 import java.lang.constant.MethodTypeDesc;
-import java.lang.reflect.AccessFlag;
+
+import org.glavo.classfile.AccessFlag;
 import org.glavo.classfile.AccessFlags;
 import org.glavo.classfile.CodeTransform;
 import org.glavo.classfile.TypeKind;

@@ -24,21 +24,18 @@
  */
 package org.glavo.classfile.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
-import java.lang.classfile.*;
-import java.lang.classfile.attribute.CodeAttribute;
-import java.lang.classfile.attribute.RuntimeInvisibleTypeAnnotationsAttribute;
-import java.lang.classfile.attribute.RuntimeVisibleTypeAnnotationsAttribute;
-import java.lang.classfile.attribute.StackMapTableAttribute;
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.classfile.instruction.*;
+import org.glavo.classfile.*;
+import org.glavo.classfile.attribute.CodeAttribute;
+import org.glavo.classfile.attribute.RuntimeInvisibleTypeAnnotationsAttribute;
+import org.glavo.classfile.attribute.RuntimeVisibleTypeAnnotationsAttribute;
+import org.glavo.classfile.attribute.StackMapTableAttribute;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.instruction.*;
 
-import static java.lang.classfile.ClassFile.*;
+import static org.glavo.classfile.ClassFile.*;
 
 public final class CodeImpl
         extends BoundAttribute.BoundCodeAttribute
@@ -251,10 +248,10 @@ public final class CodeImpl
                 //fallback to jump targets inflation without StackMapTableAttribute
                 for (int pos=codeStart; pos<codeEnd; ) {
                     var i = bcToInstruction(classReader.readU1(pos), pos);
-                    switch (i) {
-                        case BranchInstruction br -> br.target();
-                        case DiscontinuedInstruction.JsrInstruction jsr -> jsr.target();
-                        default -> {}
+                    if (i instanceof BranchInstruction br) {
+                        br.target();
+                    } else if (i instanceof DiscontinuedInstruction.JsrInstruction jsr) {
+                        jsr.target();
                     }
                     pos += i.sizeInBytes();
                 }

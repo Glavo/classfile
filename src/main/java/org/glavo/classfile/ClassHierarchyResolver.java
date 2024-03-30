@@ -233,7 +233,7 @@ public interface ClassHierarchyResolver {
             @Override
             public Class<?> apply(ClassDesc cd) {
                 try {
-                    return cd.resolveConstantDesc(lookup);
+                    return (Class<?>) cd.resolveConstantDesc(lookup);
                 } catch (IllegalAccessException ex) {
                     throw new IllegalArgumentException(ex);
                 } catch (ReflectiveOperationException ex) {

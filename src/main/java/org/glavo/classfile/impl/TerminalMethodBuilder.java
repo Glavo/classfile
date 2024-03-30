@@ -24,8 +24,8 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.CodeModel;
-import java.lang.classfile.MethodBuilder;
+import org.glavo.classfile.CodeModel;
+import org.glavo.classfile.MethodBuilder;
 
 public sealed interface TerminalMethodBuilder
         extends MethodBuilder

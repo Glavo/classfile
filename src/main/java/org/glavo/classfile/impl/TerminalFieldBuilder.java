@@ -24,7 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.FieldBuilder;
+import org.glavo.classfile.FieldBuilder;
 
 public sealed interface TerminalFieldBuilder
         extends FieldBuilder

@@ -36,10 +36,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import java.lang.classfile.ClassHierarchyResolver;
+import org.glavo.classfile.ClassHierarchyResolver;
+import org.glavo.classfile.jdk.ClassDescUtils;
+import org.glavo.classfile.jdk.CollectionUtils;
 
 import static java.lang.constant.ConstantDescs.CD_Object;
-import static java.lang.classfile.ClassFile.*;
+import static org.glavo.classfile.ClassFile.*;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -187,7 +189,7 @@ public final class ClassHierarchyImpl {
                 boolean isInterface = (in.readUnsignedShort() & ACC_INTERFACE) != 0;
                 in.skipBytes(2);
                 int superIndex = in.readUnsignedShort();
-                var superClass = superIndex > 0 ? ClassDesc.ofInternalName(cpStrings[cpClasses[superIndex]]) : null;
+                var superClass = superIndex > 0 ? ClassDescUtils.ofInternalName(cpStrings[cpClasses[superIndex]]) : null;
                 return new ClassHierarchyInfoImpl(superClass, isInterface);
             } catch (IOException ioe) {
                 throw new UncheckedIOException(ioe);
@@ -200,7 +202,7 @@ public final class ClassHierarchyImpl {
         private final Map<ClassDesc, ClassHierarchyInfo> map;
 
         public StaticClassHierarchyResolver(Collection<ClassDesc> interfaceNames, Map<ClassDesc, ClassDesc> classToSuperClass) {
-            map = HashMap.newHashMap(interfaceNames.size() + classToSuperClass.size() + 1);
+            map = CollectionUtils.newHashMap(interfaceNames.size() + classToSuperClass.size() + 1);
             map.put(CD_Object, ClassHierarchyInfoImpl.OBJECT_INFO);
             for (var e : classToSuperClass.entrySet())
                 map.put(e.getKey(), ClassHierarchyInfo.ofClass(e.getValue()));

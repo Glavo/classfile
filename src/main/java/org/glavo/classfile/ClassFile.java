@@ -37,7 +37,6 @@ import org.glavo.classfile.constantpool.ConstantPoolBuilder;
 import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.impl.ClassFileImpl;
 import org.glavo.classfile.impl.TemporaryConstantPool;
-import java.lang.reflect.AccessFlag;
 import org.glavo.classfile.attribute.CharacterRangeInfo;
 import org.glavo.classfile.attribute.LocalVariableInfo;
 import org.glavo.classfile.attribute.LocalVariableTypeInfo;

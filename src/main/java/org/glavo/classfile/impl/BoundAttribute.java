@@ -31,17 +31,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import java.lang.classfile.*;
-import java.lang.classfile.attribute.*;
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.classfile.constantpool.ConstantPool;
-import java.lang.classfile.constantpool.ConstantValueEntry;
-import java.lang.classfile.constantpool.LoadableConstantEntry;
-import java.lang.classfile.constantpool.ModuleEntry;
-import java.lang.classfile.constantpool.NameAndTypeEntry;
-import java.lang.classfile.constantpool.PackageEntry;
-import java.lang.classfile.constantpool.Utf8Entry;
-import jdk.internal.access.SharedSecrets;
+import org.glavo.classfile.*;
+import org.glavo.classfile.attribute.*;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.constantpool.ConstantPool;
+import org.glavo.classfile.constantpool.ConstantValueEntry;
+import org.glavo.classfile.constantpool.LoadableConstantEntry;
+import org.glavo.classfile.constantpool.ModuleEntry;
+import org.glavo.classfile.constantpool.NameAndTypeEntry;
+import org.glavo.classfile.constantpool.PackageEntry;
+import org.glavo.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.jdk.CollectionUtils;
 
 public abstract sealed class BoundAttribute<T extends Attribute<T>>
         extends AbstractElement
@@ -122,7 +122,7 @@ public abstract sealed class BoundAttribute<T extends Attribute<T>>
         for (int i = 0; p < end; i++, p += 2) {
             entries[i] = classReader.readEntry(p);
         }
-        return SharedSecrets.getJavaUtilCollectionAccess().listFromTrustedArray(entries);
+        return CollectionUtils.listFromTrustedArray(entries);
     }
 
     public static List<Attribute<?>> readAttributes(AttributedElement enclosing, ClassReader reader, int pos,

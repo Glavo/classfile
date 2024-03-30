@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,27 +22,16 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.glavo.classfile.constantpool;
+package org.glavo.classfile.constant;
 
-import org.glavo.classfile.constant.PackageDesc;
-import org.glavo.classfile.impl.AbstractPoolEntry;
-
-/**
- * Models a {@code CONSTANT_Package_info} constant in the constant pool of a
- * classfile.
- * @jvms 4.4.12 The CONSTANT_Package_info Structure
- *
- * @since 22
+/*
+ * Implementation of {@code ModuleDesc}
+ * @param name must have been validated
  */
-public sealed interface PackageEntry extends PoolEntry
-        permits AbstractPoolEntry.PackageEntryImpl {
-    /**
-     * {@return the package name}
-     */
-    Utf8Entry name();
+record ModuleDescImpl(String name) implements ModuleDesc {
 
-    /**
-     * {@return a symbolic descriptor for the package name}
-     */
-    PackageDesc asSymbol();
+    @Override
+    public String toString() {
+        return String.format("ModuleDesc[%s]", name());
+    }
 }

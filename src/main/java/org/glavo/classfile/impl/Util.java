@@ -31,18 +31,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-import java.lang.classfile.Attribute;
-import java.lang.classfile.AttributeMapper;
-import java.lang.classfile.ClassFile;
-import java.lang.classfile.Opcode;
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.classfile.constantpool.ModuleEntry;
-import java.lang.classfile.constantpool.NameAndTypeEntry;
-import java.lang.constant.ModuleDesc;
-import java.lang.reflect.AccessFlag;
-import jdk.internal.access.SharedSecrets;
+import org.glavo.classfile.*;
+import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.constantpool.ModuleEntry;
+import org.glavo.classfile.constantpool.NameAndTypeEntry;
+import org.glavo.classfile.jdk.ClassDescUtils;
+import org.glavo.classfile.jdk.CollectionUtils;
 
-import static java.lang.classfile.ClassFile.ACC_STATIC;
+import static org.glavo.classfile.ClassFile.ACC_STATIC;
 
 /**
  * Helper to create and manipulate type descriptors, where type descriptors are
@@ -108,7 +105,7 @@ public class Util {
     public static ClassDesc toClassDesc(String classInternalNameOrArrayDesc) {
         return classInternalNameOrArrayDesc.charAt(0) == '['
                 ? ClassDesc.ofDescriptor(classInternalNameOrArrayDesc)
-                : ClassDesc.ofInternalName(classInternalNameOrArrayDesc);
+                : ClassDescUtils.ofInternalName(classInternalNameOrArrayDesc);
     }
 
     public static<T, U> List<U> mappedList(List<? extends T> list, Function<T, U> mapper) {
@@ -130,7 +127,7 @@ public class Util {
         for (int i = 0; i < result.length; i++) {
             result[i] = TemporaryConstantPool.INSTANCE.classEntry(list.get(i));
         }
-        return SharedSecrets.getJavaUtilCollectionAccess().listFromTrustedArray(result);
+        return CollectionUtils.listFromTrustedArray(result);
     }
 
     public static List<ModuleEntry> moduleEntryList(List<? extends ModuleDesc> list) {
@@ -138,7 +135,7 @@ public class Util {
         for (int i = 0; i < result.length; i++) {
             result[i] = TemporaryConstantPool.INSTANCE.moduleEntry(TemporaryConstantPool.INSTANCE.utf8Entry(list.get(i).name()));
         }
-        return SharedSecrets.getJavaUtilCollectionAccess().listFromTrustedArray(result);
+        return CollectionUtils.listFromTrustedArray(result);
     }
 
     public static void checkKind(Opcode op, Opcode.Kind k) {

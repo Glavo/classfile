@@ -28,17 +28,17 @@ package org.glavo.classfile.impl;
 import java.lang.constant.MethodTypeDesc;
 import java.util.function.Consumer;
 
-import java.lang.classfile.BufWriter;
-import java.lang.classfile.ClassFile;
-import java.lang.classfile.CodeBuilder;
-import java.lang.classfile.CodeModel;
-import java.lang.classfile.CodeTransform;
-import java.lang.classfile.CustomAttribute;
-import java.lang.classfile.MethodBuilder;
-import java.lang.classfile.MethodElement;
-import java.lang.classfile.MethodModel;
-import java.lang.classfile.WritableElement;
-import java.lang.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.BufWriter;
+import org.glavo.classfile.ClassFile;
+import org.glavo.classfile.CodeBuilder;
+import org.glavo.classfile.CodeModel;
+import org.glavo.classfile.CodeTransform;
+import org.glavo.classfile.CustomAttribute;
+import org.glavo.classfile.MethodBuilder;
+import org.glavo.classfile.MethodElement;
+import org.glavo.classfile.MethodModel;
+import org.glavo.classfile.WritableElement;
+import org.glavo.classfile.constantpool.Utf8Entry;
 
 public final class DirectMethodBuilder
         extends AbstractDirectBuilder<MethodModel>

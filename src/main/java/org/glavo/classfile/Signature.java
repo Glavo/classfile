@@ -31,6 +31,7 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 import java.util.Optional;
 import org.glavo.classfile.impl.Util;
+import org.glavo.classfile.jdk.ClassDescUtils;
 
 /**
  * Models generic Java type signatures, as defined in {@jvms 4.7.9.1}.
@@ -129,7 +130,7 @@ public sealed interface Signature {
         /** {@return the class name, as a symbolic descriptor} */
         default ClassDesc classDesc() {
             var outer = outerType();
-            return outer.isEmpty() ? ClassDesc.ofInternalName(className())
+            return outer.isEmpty() ? ClassDescUtils.ofInternalName(className())
                     : outer.get().classDesc().nested(className());
         }
 

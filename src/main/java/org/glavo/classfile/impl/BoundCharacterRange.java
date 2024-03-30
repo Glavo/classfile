@@ -25,8 +25,8 @@
 
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.Label;
-import java.lang.classfile.instruction.CharacterRange;
+import org.glavo.classfile.Label;
+import org.glavo.classfile.instruction.CharacterRange;
 
 public final class BoundCharacterRange
         extends AbstractElement

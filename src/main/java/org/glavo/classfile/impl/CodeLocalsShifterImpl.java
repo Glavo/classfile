@@ -24,16 +24,16 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.CodeBuilder;
-import java.lang.classfile.CodeElement;
-import java.lang.classfile.Signature;
-import java.lang.classfile.TypeKind;
-import java.lang.classfile.components.CodeLocalsShifter;
-import java.lang.classfile.instruction.IncrementInstruction;
-import java.lang.classfile.instruction.LoadInstruction;
-import java.lang.classfile.instruction.LocalVariable;
-import java.lang.classfile.instruction.LocalVariableType;
-import java.lang.classfile.instruction.StoreInstruction;
+import org.glavo.classfile.CodeBuilder;
+import org.glavo.classfile.CodeElement;
+import org.glavo.classfile.Signature;
+import org.glavo.classfile.TypeKind;
+import org.glavo.classfile.components.CodeLocalsShifter;
+import org.glavo.classfile.instruction.IncrementInstruction;
+import org.glavo.classfile.instruction.LoadInstruction;
+import org.glavo.classfile.instruction.LocalVariable;
+import org.glavo.classfile.instruction.LocalVariableType;
+import org.glavo.classfile.instruction.StoreInstruction;
 
 import java.util.Arrays;
 

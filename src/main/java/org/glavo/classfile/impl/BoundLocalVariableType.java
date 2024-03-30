@@ -24,9 +24,9 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.attribute.LocalVariableTypeInfo;
-import java.lang.classfile.constantpool.Utf8Entry;
-import java.lang.classfile.instruction.LocalVariableType;
+import org.glavo.classfile.attribute.LocalVariableTypeInfo;
+import org.glavo.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.instruction.LocalVariableType;
 
 public final class BoundLocalVariableType
         extends AbstractBoundLocalVariable

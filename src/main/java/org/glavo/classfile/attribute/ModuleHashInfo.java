@@ -24,8 +24,8 @@
  */
 package org.glavo.classfile.attribute;
 
+import org.glavo.classfile.constant.ModuleDesc;
 import org.glavo.classfile.constantpool.ModuleEntry;
-import java.lang.constant.ModuleDesc;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 

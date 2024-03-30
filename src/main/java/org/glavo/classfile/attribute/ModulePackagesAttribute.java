@@ -26,6 +26,7 @@ package org.glavo.classfile.attribute;
 
 import org.glavo.classfile.Attribute;
 import org.glavo.classfile.ClassElement;
+import org.glavo.classfile.constant.PackageDesc;
 import org.glavo.classfile.impl.BoundAttribute;
 
 import java.util.Arrays;
@@ -33,7 +34,6 @@ import java.util.List;
 
 import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.constantpool.PackageEntry;
-import java.lang.constant.PackageDesc;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 

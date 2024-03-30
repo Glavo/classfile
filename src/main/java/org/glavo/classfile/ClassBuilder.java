@@ -38,7 +38,6 @@ import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.impl.ChainedClassBuilder;
 import org.glavo.classfile.impl.DirectClassBuilder;
 import org.glavo.classfile.impl.Util;
-import java.lang.reflect.AccessFlag;
 import org.glavo.classfile.attribute.CodeAttribute;
 
 /**

@@ -27,9 +27,9 @@ package org.glavo.classfile.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.lang.classfile.Attribute;
-import java.lang.classfile.AttributeMapper;
-import java.lang.classfile.BufWriter;
+import org.glavo.classfile.Attribute;
+import org.glavo.classfile.AttributeMapper;
+import org.glavo.classfile.BufWriter;
 
 public class AttributeHolder {
     private final List<Attribute<?>> attributes = new ArrayList<>();

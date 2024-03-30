@@ -24,7 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.CodeBuilder;
+import org.glavo.classfile.CodeBuilder;
 
 public sealed interface TerminalCodeBuilder extends CodeBuilder
         permits DirectCodeBuilder, BufferedCodeBuilder, TransformingCodeBuilder {

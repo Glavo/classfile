@@ -29,32 +29,33 @@ import java.lang.invoke.TypeDescriptor;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import java.lang.classfile.ClassFile;
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.classfile.constantpool.ConstantDynamicEntry;
-import java.lang.classfile.constantpool.ConstantPool;
-import java.lang.classfile.constantpool.ConstantPoolBuilder;
-import java.lang.classfile.BufWriter;
-import java.lang.classfile.constantpool.DoubleEntry;
-import java.lang.classfile.constantpool.FieldRefEntry;
-import java.lang.classfile.constantpool.FloatEntry;
-import java.lang.classfile.constantpool.IntegerEntry;
-import java.lang.classfile.constantpool.InterfaceMethodRefEntry;
-import java.lang.classfile.constantpool.InvokeDynamicEntry;
-import java.lang.classfile.constantpool.LongEntry;
-import java.lang.classfile.constantpool.MemberRefEntry;
-import java.lang.classfile.constantpool.MethodHandleEntry;
-import java.lang.classfile.constantpool.MethodRefEntry;
-import java.lang.classfile.constantpool.MethodTypeEntry;
-import java.lang.classfile.constantpool.ModuleEntry;
-import java.lang.classfile.constantpool.NameAndTypeEntry;
-import java.lang.classfile.constantpool.PackageEntry;
-import java.lang.classfile.constantpool.PoolEntry;
-import java.lang.classfile.constantpool.StringEntry;
-import java.lang.classfile.constantpool.Utf8Entry;
-import jdk.internal.access.JavaLangAccess;
-import jdk.internal.access.SharedSecrets;
-import jdk.internal.util.ArraysSupport;
+import org.glavo.classfile.ClassFile;
+import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.constant.PackageDesc;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.constantpool.ConstantDynamicEntry;
+import org.glavo.classfile.constantpool.ConstantPool;
+import org.glavo.classfile.constantpool.ConstantPoolBuilder;
+import org.glavo.classfile.BufWriter;
+import org.glavo.classfile.constantpool.DoubleEntry;
+import org.glavo.classfile.constantpool.FieldRefEntry;
+import org.glavo.classfile.constantpool.FloatEntry;
+import org.glavo.classfile.constantpool.IntegerEntry;
+import org.glavo.classfile.constantpool.InterfaceMethodRefEntry;
+import org.glavo.classfile.constantpool.InvokeDynamicEntry;
+import org.glavo.classfile.constantpool.LongEntry;
+import org.glavo.classfile.constantpool.MemberRefEntry;
+import org.glavo.classfile.constantpool.MethodHandleEntry;
+import org.glavo.classfile.constantpool.MethodRefEntry;
+import org.glavo.classfile.constantpool.MethodTypeEntry;
+import org.glavo.classfile.constantpool.ModuleEntry;
+import org.glavo.classfile.constantpool.NameAndTypeEntry;
+import org.glavo.classfile.constantpool.PackageEntry;
+import org.glavo.classfile.constantpool.PoolEntry;
+import org.glavo.classfile.constantpool.StringEntry;
+import org.glavo.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.jdk.ArrayUtils;
+import org.glavo.classfile.jdk.JavaLangAccessUtils;
 
 public abstract sealed class AbstractPoolEntry {
     /*
@@ -143,8 +144,6 @@ public abstract sealed class AbstractPoolEntry {
 
         enum State { RAW, BYTE, CHAR, STRING }
 
-        private static final JavaLangAccess JLA = SharedSecrets.getJavaLangAccess();
-
         private State state;
         private final byte[] rawBytes; // null if initialized directly from a string
         private final int offset;
@@ -229,8 +228,8 @@ public abstract sealed class AbstractPoolEntry {
          * two-times-three-byte format instead.
          */
         private void inflate() {
-            int singleBytes = JLA.countPositives(rawBytes, offset, rawLen);
-            int hash = ArraysSupport.vectorizedHashCode(rawBytes, offset, singleBytes, 0, ArraysSupport.T_BOOLEAN);
+            int singleBytes = JavaLangAccessUtils.countPositives(rawBytes, offset, rawLen);
+            int hash = ArrayUtils.signedHashCode(0, rawBytes, offset, singleBytes);
             if (singleBytes == rawLen) {
                 this.hash = hashString(hash);
                 charLen = rawLen;
@@ -240,7 +239,7 @@ public abstract sealed class AbstractPoolEntry {
                 char[] chararr = new char[rawLen];
                 int chararr_count = singleBytes;
                 // Inflate prefix of bytes to characters
-                JLA.inflateBytesToChars(rawBytes, offset, chararr, 0, singleBytes);
+                JavaLangAccessUtils.inflateBytesToChars(rawBytes, offset, chararr, 0, singleBytes);
 
                 int px = offset + singleBytes;
                 int utfend = offset + rawLen;

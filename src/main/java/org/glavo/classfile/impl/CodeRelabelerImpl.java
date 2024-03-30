@@ -24,19 +24,19 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.CodeBuilder;
-import java.lang.classfile.CodeElement;
-import java.lang.classfile.Label;
-import java.lang.classfile.components.CodeRelabeler;
-import java.lang.classfile.instruction.BranchInstruction;
-import java.lang.classfile.instruction.CharacterRange;
-import java.lang.classfile.instruction.ExceptionCatch;
-import java.lang.classfile.instruction.LabelTarget;
-import java.lang.classfile.instruction.LocalVariable;
-import java.lang.classfile.instruction.LocalVariableType;
-import java.lang.classfile.instruction.LookupSwitchInstruction;
-import java.lang.classfile.instruction.SwitchCase;
-import java.lang.classfile.instruction.TableSwitchInstruction;
+import org.glavo.classfile.CodeBuilder;
+import org.glavo.classfile.CodeElement;
+import org.glavo.classfile.Label;
+import org.glavo.classfile.components.CodeRelabeler;
+import org.glavo.classfile.instruction.BranchInstruction;
+import org.glavo.classfile.instruction.CharacterRange;
+import org.glavo.classfile.instruction.ExceptionCatch;
+import org.glavo.classfile.instruction.LabelTarget;
+import org.glavo.classfile.instruction.LocalVariable;
+import org.glavo.classfile.instruction.LocalVariableType;
+import org.glavo.classfile.instruction.LookupSwitchInstruction;
+import org.glavo.classfile.instruction.SwitchCase;
+import org.glavo.classfile.instruction.TableSwitchInstruction;
 
 import java.util.function.BiFunction;
 

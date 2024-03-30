@@ -25,10 +25,10 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.TypeKind;
-import java.lang.classfile.constantpool.ConstantDynamicEntry;
-import java.lang.classfile.constantpool.DynamicConstantPoolEntry;
-import java.lang.classfile.constantpool.MemberRefEntry;
+import org.glavo.classfile.TypeKind;
+import org.glavo.classfile.constantpool.ConstantDynamicEntry;
+import org.glavo.classfile.constantpool.DynamicConstantPoolEntry;
+import org.glavo.classfile.constantpool.MemberRefEntry;
 import java.lang.constant.MethodTypeDesc;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
@@ -36,7 +36,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Queue;
 
-import static java.lang.classfile.ClassFile.*;
+import static org.glavo.classfile.ClassFile.*;
 
 public final class StackCounter {
 

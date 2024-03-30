@@ -31,27 +31,27 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import java.lang.classfile.*;
-import java.lang.classfile.attribute.BootstrapMethodsAttribute;
-import java.lang.classfile.constantpool.*;
+import org.glavo.classfile.*;
+import org.glavo.classfile.attribute.BootstrapMethodsAttribute;
+import org.glavo.classfile.constantpool.*;
 
-import static java.lang.classfile.ClassFile.TAG_CLASS;
-import static java.lang.classfile.ClassFile.TAG_CONSTANTDYNAMIC;
-import static java.lang.classfile.ClassFile.TAG_DOUBLE;
-import static java.lang.classfile.ClassFile.TAG_FIELDREF;
-import static java.lang.classfile.ClassFile.TAG_FLOAT;
-import static java.lang.classfile.ClassFile.TAG_INTEGER;
-import static java.lang.classfile.ClassFile.TAG_INTERFACEMETHODREF;
-import static java.lang.classfile.ClassFile.TAG_INVOKEDYNAMIC;
-import static java.lang.classfile.ClassFile.TAG_LONG;
-import static java.lang.classfile.ClassFile.TAG_METHODHANDLE;
-import static java.lang.classfile.ClassFile.TAG_METHODREF;
-import static java.lang.classfile.ClassFile.TAG_METHODTYPE;
-import static java.lang.classfile.ClassFile.TAG_MODULE;
-import static java.lang.classfile.ClassFile.TAG_NAMEANDTYPE;
-import static java.lang.classfile.ClassFile.TAG_PACKAGE;
-import static java.lang.classfile.ClassFile.TAG_STRING;
-import static java.lang.classfile.ClassFile.TAG_UTF8;
+import static org.glavo.classfile.ClassFile.TAG_CLASS;
+import static org.glavo.classfile.ClassFile.TAG_CONSTANTDYNAMIC;
+import static org.glavo.classfile.ClassFile.TAG_DOUBLE;
+import static org.glavo.classfile.ClassFile.TAG_FIELDREF;
+import static org.glavo.classfile.ClassFile.TAG_FLOAT;
+import static org.glavo.classfile.ClassFile.TAG_INTEGER;
+import static org.glavo.classfile.ClassFile.TAG_INTERFACEMETHODREF;
+import static org.glavo.classfile.ClassFile.TAG_INVOKEDYNAMIC;
+import static org.glavo.classfile.ClassFile.TAG_LONG;
+import static org.glavo.classfile.ClassFile.TAG_METHODHANDLE;
+import static org.glavo.classfile.ClassFile.TAG_METHODREF;
+import static org.glavo.classfile.ClassFile.TAG_METHODTYPE;
+import static org.glavo.classfile.ClassFile.TAG_MODULE;
+import static org.glavo.classfile.ClassFile.TAG_NAMEANDTYPE;
+import static org.glavo.classfile.ClassFile.TAG_PACKAGE;
+import static org.glavo.classfile.ClassFile.TAG_STRING;
+import static org.glavo.classfile.ClassFile.TAG_UTF8;
 
 public final class ClassReaderImpl
         implements ClassReader {

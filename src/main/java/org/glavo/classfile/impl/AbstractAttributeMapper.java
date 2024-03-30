@@ -24,9 +24,9 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.Attribute;
-import java.lang.classfile.AttributeMapper;
-import java.lang.classfile.BufWriter;
+import org.glavo.classfile.Attribute;
+import org.glavo.classfile.AttributeMapper;
+import org.glavo.classfile.BufWriter;
 
 public abstract class AbstractAttributeMapper<T extends Attribute<T>>
         implements AttributeMapper<T> {

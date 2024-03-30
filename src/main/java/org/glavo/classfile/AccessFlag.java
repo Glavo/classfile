@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2021, 2023, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -91,7 +91,7 @@ import static java.util.Map.entry;
  * @see java.lang.module.ModuleDescriptor.Requires.Modifier
  * @see java.lang.module.ModuleDescriptor.Exports.Modifier
  * @see java.lang.module.ModuleDescriptor.Opens.Modifier
- * @see javax.lang.model.element.Modifier
+ * @see java.compiler/javax.lang.model.element.Modifier
  * @since 20
  */
 @SuppressWarnings("doclint:reference") // cross-module link
@@ -250,6 +250,7 @@ public enum AccessFlag {
     /**
      * The access flag {@code ACC_BRIDGE} with a mask value of
      * <code>{@value "0x%04x" Modifier#BRIDGE}</code>
+     * @see Method#isBridge()
      */
     BRIDGE(/*Modifier.BRIDGE*/ 0x0000_0040, false, Location.SET_METHOD,
             new Function<ClassFileFormatVersion, Set<Location>>() {
@@ -501,8 +502,8 @@ public enum AccessFlag {
         }
         if (mask != 0) {
             throw new IllegalArgumentException("Unmatched bit position 0x" +
-                    Integer.toHexString(mask) +
-                    " for location " + location);
+                                               Integer.toHexString(mask) +
+                                               " for location " + location);
         }
         return Collections.unmodifiableSet(result);
     }
@@ -541,7 +542,7 @@ public enum AccessFlag {
         INNER_CLASS,
 
         /**
-         * Method parameter loccation.
+         * Method parameter location.
          * @jvms 4.7.24. The MethodParameters Attribute
          */
         METHOD_PARAMETER,
@@ -623,7 +624,7 @@ public enum AccessFlag {
     }
 
     private static class LocationToFlags {
-        private static final Map<Location, Set<AccessFlag>> locationToFlags =
+        private static Map<Location, Set<AccessFlag>> locationToFlags =
                 Map.ofEntries(entry(Location.CLASS,
                                 Set.of(PUBLIC, FINAL, SUPER,
                                         INTERFACE, ABSTRACT,

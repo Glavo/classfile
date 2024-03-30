@@ -27,13 +27,13 @@ package org.glavo.classfile.impl;
 
 import java.util.function.Consumer;
 
-import java.lang.classfile.BufWriter;
-import java.lang.classfile.CustomAttribute;
-import java.lang.classfile.FieldBuilder;
-import java.lang.classfile.FieldElement;
-import java.lang.classfile.FieldModel;
-import java.lang.classfile.WritableElement;
-import java.lang.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.BufWriter;
+import org.glavo.classfile.CustomAttribute;
+import org.glavo.classfile.FieldBuilder;
+import org.glavo.classfile.FieldElement;
+import org.glavo.classfile.FieldModel;
+import org.glavo.classfile.WritableElement;
+import org.glavo.classfile.constantpool.Utf8Entry;
 
 public final class DirectFieldBuilder
         extends AbstractDirectBuilder<FieldModel>

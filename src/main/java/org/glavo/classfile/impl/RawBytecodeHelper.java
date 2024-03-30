@@ -25,11 +25,11 @@
 package org.glavo.classfile.impl;
 
 import java.nio.ByteBuffer;
-import static java.lang.classfile.ClassFile.ASTORE_3;
-import static java.lang.classfile.ClassFile.ISTORE;
-import static java.lang.classfile.ClassFile.LOOKUPSWITCH;
-import static java.lang.classfile.ClassFile.TABLESWITCH;
-import static java.lang.classfile.ClassFile.WIDE;
+import static org.glavo.classfile.ClassFile.ASTORE_3;
+import static org.glavo.classfile.ClassFile.ISTORE;
+import static org.glavo.classfile.ClassFile.LOOKUPSWITCH;
+import static org.glavo.classfile.ClassFile.TABLESWITCH;
+import static org.glavo.classfile.ClassFile.WIDE;
 
 public final class RawBytecodeHelper {
 

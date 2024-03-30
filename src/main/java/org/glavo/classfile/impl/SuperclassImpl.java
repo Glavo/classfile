@@ -24,8 +24,8 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.classfile.Superclass;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.Superclass;
 
 import static java.util.Objects.requireNonNull;
 

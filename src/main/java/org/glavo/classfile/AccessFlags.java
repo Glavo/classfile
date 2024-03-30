@@ -26,7 +26,6 @@ package org.glavo.classfile;
 
 import java.util.Set;
 import org.glavo.classfile.impl.AccessFlagsImpl;
-import java.lang.reflect.AccessFlag;
 
 /**
  * Models the access flags for a class, method, or field.  Delivered as a

@@ -31,7 +31,6 @@ import java.util.function.Consumer;
 import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.impl.ChainedMethodBuilder;
 import org.glavo.classfile.impl.TerminalMethodBuilder;
-import java.lang.reflect.AccessFlag;
 
 /**
  * A builder for methods.  Builders are not created directly; they are passed

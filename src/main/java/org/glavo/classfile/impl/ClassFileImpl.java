@@ -29,16 +29,16 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Consumer;
 
-import java.lang.classfile.AttributeMapper;
-import java.lang.classfile.ClassFile;
-import java.lang.classfile.ClassFile.*;
-import java.lang.classfile.ClassBuilder;
-import java.lang.classfile.ClassHierarchyResolver;
-import java.lang.classfile.ClassModel;
-import java.lang.classfile.ClassTransform;
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.classfile.constantpool.ConstantPoolBuilder;
-import java.lang.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.AttributeMapper;
+import org.glavo.classfile.ClassFile;
+import org.glavo.classfile.ClassFile.*;
+import org.glavo.classfile.ClassBuilder;
+import org.glavo.classfile.ClassHierarchyResolver;
+import org.glavo.classfile.ClassModel;
+import org.glavo.classfile.ClassTransform;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.constantpool.ConstantPoolBuilder;
+import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.impl.verifier.VerifierImpl;
 
 public record ClassFileImpl(StackMapsOption stackMapsOption,

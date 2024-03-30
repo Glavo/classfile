@@ -25,19 +25,19 @@
 
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.Annotation;
-import java.lang.classfile.AnnotationElement;
-import java.lang.classfile.AnnotationValue;
-import java.lang.classfile.ClassReader;
-import java.lang.classfile.constantpool.*;
-import java.lang.classfile.TypeAnnotation;
-import static java.lang.classfile.ClassFile.*;
-import static java.lang.classfile.TypeAnnotation.TargetInfo.*;
+import org.glavo.classfile.Annotation;
+import org.glavo.classfile.AnnotationElement;
+import org.glavo.classfile.AnnotationValue;
+import org.glavo.classfile.ClassReader;
+import org.glavo.classfile.constantpool.*;
+import org.glavo.classfile.TypeAnnotation;
+import static org.glavo.classfile.ClassFile.*;
+import static org.glavo.classfile.TypeAnnotation.TargetInfo.*;
 
 import java.util.List;
-import java.lang.classfile.Label;
-import java.lang.classfile.constantpool.Utf8Entry;
-import jdk.internal.access.SharedSecrets;
+import org.glavo.classfile.Label;
+import org.glavo.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.jdk.CollectionUtils;
 
 class AnnotationReader {
     private AnnotationReader() { }
@@ -51,7 +51,7 @@ class AnnotationReader {
             annos[i] = readAnnotation(classReader, pos);
             pos = skipAnnotation(classReader, pos);
         }
-        return SharedSecrets.getJavaUtilCollectionAccess().listFromTrustedArray(annos);
+        return CollectionUtils.listFromTrustedArray(annos);
     }
 
     public static AnnotationValue readElementValue(ClassReader classReader, int p) {
@@ -78,7 +78,7 @@ class AnnotationReader {
                     values[i] = readElementValue(classReader, p);
                     p = skipElementValue(classReader, p);
                 }
-                yield new AnnotationImpl.OfArrayImpl(SharedSecrets.getJavaUtilCollectionAccess().listFromTrustedArray(values));
+                yield new AnnotationImpl.OfArrayImpl(CollectionUtils.listFromTrustedArray(values));
             }
             default -> throw new IllegalArgumentException(
                     "Unexpected tag '%s' in AnnotationValue, pos = %d".formatted(tag, p - 1));
@@ -93,7 +93,7 @@ class AnnotationReader {
             annotations[i] = readTypeAnnotation(classReader, p, lc);
             p = skipTypeAnnotation(classReader, p);
         }
-        return SharedSecrets.getJavaUtilCollectionAccess().listFromTrustedArray(annotations);
+        return CollectionUtils.listFromTrustedArray(annotations);
     }
 
     public static List<List<Annotation>> readParameterAnnotations(ClassReader classReader, int p) {
@@ -103,7 +103,7 @@ class AnnotationReader {
             pas[i] = readAnnotations(classReader, p);
             p = skipAnnotations(classReader, p);
         }
-        return SharedSecrets.getJavaUtilCollectionAccess().listFromTrustedArray(pas);
+        return CollectionUtils.listFromTrustedArray(pas);
     }
 
     private static int skipElementValue(ClassReader classReader, int p) {
@@ -156,7 +156,7 @@ class AnnotationReader {
             annotationElements[i] = new AnnotationImpl.AnnotationElementImpl(elementName, value);
             p = skipElementValue(classReader, p);
         }
-        return SharedSecrets.getJavaUtilCollectionAccess().listFromTrustedArray(annotationElements);
+        return CollectionUtils.listFromTrustedArray(annotationElements);
     }
 
     private static int skipElementValuePairs(ClassReader classReader, int p) {
@@ -257,7 +257,7 @@ class AnnotationReader {
                     classReader.readU2(p + 4));
             p += 6;
         }
-        return SharedSecrets.getJavaUtilCollectionAccess().listFromTrustedArray(entries);
+        return CollectionUtils.listFromTrustedArray(entries);
     }
 
     private static int skipTypeAnnotation(ClassReader classReader, int p) {

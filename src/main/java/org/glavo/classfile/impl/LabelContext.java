@@ -24,7 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.Label;
+import org.glavo.classfile.Label;
 
 public sealed interface LabelContext
         permits BufferedCodeBuilder, CodeImpl, DirectCodeBuilder {

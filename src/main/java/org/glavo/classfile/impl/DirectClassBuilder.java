@@ -31,21 +31,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import java.lang.classfile.BufWriter;
-import java.lang.classfile.ClassBuilder;
-import java.lang.classfile.ClassElement;
-import java.lang.classfile.ClassModel;
-import java.lang.classfile.ClassFile;
-import java.lang.classfile.CustomAttribute;
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.classfile.FieldBuilder;
-import java.lang.classfile.FieldModel;
-import java.lang.classfile.FieldTransform;
-import java.lang.classfile.MethodBuilder;
-import java.lang.classfile.MethodModel;
-import java.lang.classfile.MethodTransform;
-import java.lang.classfile.WritableElement;
-import java.lang.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.BufWriter;
+import org.glavo.classfile.ClassBuilder;
+import org.glavo.classfile.ClassElement;
+import org.glavo.classfile.ClassModel;
+import org.glavo.classfile.ClassFile;
+import org.glavo.classfile.CustomAttribute;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.FieldBuilder;
+import org.glavo.classfile.FieldModel;
+import org.glavo.classfile.FieldTransform;
+import org.glavo.classfile.MethodBuilder;
+import org.glavo.classfile.MethodModel;
+import org.glavo.classfile.MethodTransform;
+import org.glavo.classfile.WritableElement;
+import org.glavo.classfile.constantpool.Utf8Entry;
 
 public final class DirectClassBuilder
         extends AbstractDirectBuilder<ClassModel>

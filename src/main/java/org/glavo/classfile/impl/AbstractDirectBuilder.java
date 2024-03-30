@@ -26,7 +26,7 @@ package org.glavo.classfile.impl;
 
 import java.util.Optional;
 
-import java.lang.classfile.Attribute;
+import org.glavo.classfile.Attribute;
 
 public class AbstractDirectBuilder<M> {
     protected final SplitConstantPool constantPool;

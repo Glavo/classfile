@@ -26,15 +26,15 @@ package org.glavo.classfile.impl;
 
 import java.util.Optional;
 
-import java.lang.classfile.BufWriter;
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.classfile.constantpool.Utf8Entry;
-import java.lang.classfile.instruction.CharacterRange;
-import java.lang.classfile.instruction.ExceptionCatch;
-import java.lang.classfile.instruction.LocalVariable;
-import java.lang.classfile.instruction.LocalVariableType;
-import java.lang.classfile.Label;
-import java.lang.classfile.PseudoInstruction;
+import org.glavo.classfile.BufWriter;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.instruction.CharacterRange;
+import org.glavo.classfile.instruction.ExceptionCatch;
+import org.glavo.classfile.instruction.LocalVariable;
+import org.glavo.classfile.instruction.LocalVariableType;
+import org.glavo.classfile.Label;
+import org.glavo.classfile.PseudoInstruction;
 
 public abstract sealed class AbstractPseudoInstruction
         extends AbstractElement

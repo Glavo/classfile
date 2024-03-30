@@ -24,9 +24,9 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.BufWriter;
-import java.lang.classfile.Label;
-import java.lang.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.BufWriter;
+import org.glavo.classfile.Label;
+import org.glavo.classfile.constantpool.Utf8Entry;
 
 public class AbstractBoundLocalVariable
         extends AbstractElement {

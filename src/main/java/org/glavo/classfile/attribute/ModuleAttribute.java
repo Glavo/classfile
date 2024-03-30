@@ -26,9 +26,13 @@ package org.glavo.classfile.attribute;
 
 import java.lang.constant.ClassDesc;
 import java.util.Collection;
+
+import org.glavo.classfile.AccessFlag;
 import org.glavo.classfile.Attribute;
 import org.glavo.classfile.ClassElement;
 import org.glavo.classfile.ClassModel;
+import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.constant.PackageDesc;
 import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.constantpool.ModuleEntry;
 import org.glavo.classfile.constantpool.Utf8Entry;
@@ -39,9 +43,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.lang.reflect.AccessFlag;
-import java.lang.constant.ModuleDesc;
-import java.lang.constant.PackageDesc;
 import org.glavo.classfile.impl.ModuleAttributeBuilderImpl;
 import org.glavo.classfile.impl.Util;
 

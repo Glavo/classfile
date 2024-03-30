@@ -30,26 +30,10 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import java.lang.classfile.ClassBuilder;
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.reflect.AccessFlag;
-import java.lang.classfile.AccessFlags;
-import java.lang.classfile.Attribute;
-import java.lang.classfile.AttributeMapper;
-import java.lang.classfile.Attributes;
-import java.lang.classfile.ClassElement;
-import java.lang.classfile.ClassModel;
-import java.lang.classfile.ClassReader;
-import java.lang.classfile.ClassTransform;
-import java.lang.classfile.ClassFile;
-import java.lang.classfile.ClassFileVersion;
-import java.lang.classfile.constantpool.ConstantPool;
-import java.lang.classfile.constantpool.ConstantPoolBuilder;
-import java.lang.classfile.FieldModel;
-import java.lang.classfile.Interfaces;
-import java.lang.classfile.MethodModel;
-import java.lang.classfile.Superclass;
-import jdk.internal.access.SharedSecrets;
+import org.glavo.classfile.*;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.constantpool.ConstantPool;
+import org.glavo.classfile.jdk.CollectionUtils;
 
 public final class ClassImpl
         extends AbstractElement
@@ -137,7 +121,7 @@ public final class ClassImpl
                 arr[i] = reader.readClassEntry(pos);
                 pos += 2;
             }
-            this.interfaces = SharedSecrets.getJavaUtilCollectionAccess().listFromTrustedArray(arr);
+            this.interfaces = CollectionUtils.listFromTrustedArray(arr);
         }
         return interfaces;
     }

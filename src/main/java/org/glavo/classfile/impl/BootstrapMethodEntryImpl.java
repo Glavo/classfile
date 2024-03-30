@@ -26,11 +26,11 @@ package org.glavo.classfile.impl;
 
 import java.util.List;
 
-import java.lang.classfile.constantpool.ConstantPool;
-import java.lang.classfile.BootstrapMethodEntry;
-import java.lang.classfile.BufWriter;
-import java.lang.classfile.constantpool.LoadableConstantEntry;
-import java.lang.classfile.constantpool.MethodHandleEntry;
+import org.glavo.classfile.constantpool.ConstantPool;
+import org.glavo.classfile.BootstrapMethodEntry;
+import org.glavo.classfile.BufWriter;
+import org.glavo.classfile.constantpool.LoadableConstantEntry;
+import org.glavo.classfile.constantpool.MethodHandleEntry;
 
 import static org.glavo.classfile.impl.AbstractPoolEntry.MethodHandleEntryImpl;
 

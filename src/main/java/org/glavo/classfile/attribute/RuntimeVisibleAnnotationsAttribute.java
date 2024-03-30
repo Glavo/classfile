@@ -25,7 +25,7 @@
 
 package org.glavo.classfile.attribute;
 
-import java.lang.classfile.*;
+import org.glavo.classfile.*;
 import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.UnboundAttribute;
 

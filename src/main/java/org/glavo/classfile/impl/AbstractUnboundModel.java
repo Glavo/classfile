@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import java.lang.classfile.Attribute;
-import java.lang.classfile.AttributedElement;
-import java.lang.classfile.ClassFileElement;
-import java.lang.classfile.CompoundElement;
+import org.glavo.classfile.Attribute;
+import org.glavo.classfile.AttributedElement;
+import org.glavo.classfile.ClassFileElement;
+import org.glavo.classfile.CompoundElement;
 
 public abstract sealed class AbstractUnboundModel<E extends ClassFileElement>
         extends AbstractElement

@@ -25,13 +25,13 @@
 
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.attribute.*;
-import java.lang.classfile.attribute.ModuleAttribute.ModuleAttributeBuilder;
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.classfile.constantpool.ModuleEntry;
-import java.lang.classfile.constantpool.Utf8Entry;
-import java.lang.constant.ModuleDesc;
-import java.lang.constant.PackageDesc;
+import org.glavo.classfile.attribute.*;
+import org.glavo.classfile.attribute.ModuleAttribute.ModuleAttributeBuilder;
+import org.glavo.classfile.constant.ModuleDesc;
+import org.glavo.classfile.constant.PackageDesc;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.constantpool.ModuleEntry;
+import org.glavo.classfile.constantpool.Utf8Entry;
 
 import java.lang.constant.ClassDesc;
 import java.util.*;

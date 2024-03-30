@@ -26,10 +26,10 @@ package org.glavo.classfile.impl;
 
 import java.util.List;
 
-import java.lang.classfile.Attribute;
-import java.lang.classfile.ClassReader;
-import java.lang.classfile.attribute.RecordComponentInfo;
-import java.lang.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.Attribute;
+import org.glavo.classfile.ClassReader;
+import org.glavo.classfile.attribute.RecordComponentInfo;
+import org.glavo.classfile.constantpool.Utf8Entry;
 
 public final class BoundRecordComponentInfo
         implements RecordComponentInfo {

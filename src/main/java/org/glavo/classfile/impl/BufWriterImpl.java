@@ -29,12 +29,12 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
-import java.lang.classfile.BufWriter;
-import java.lang.classfile.WritableElement;
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.classfile.constantpool.ConstantPool;
-import java.lang.classfile.constantpool.ConstantPoolBuilder;
-import java.lang.classfile.constantpool.PoolEntry;
+import org.glavo.classfile.BufWriter;
+import org.glavo.classfile.WritableElement;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.constantpool.ConstantPool;
+import org.glavo.classfile.constantpool.ConstantPoolBuilder;
+import org.glavo.classfile.constantpool.PoolEntry;
 
 public final class BufWriterImpl implements BufWriter {
 

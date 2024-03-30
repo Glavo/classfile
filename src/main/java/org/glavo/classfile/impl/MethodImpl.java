@@ -25,8 +25,8 @@
 package org.glavo.classfile.impl;
 
 import java.lang.constant.MethodTypeDesc;
-import java.lang.classfile.*;
-import java.lang.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.*;
+import org.glavo.classfile.constantpool.Utf8Entry;
 
 import java.util.List;
 import java.util.Optional;

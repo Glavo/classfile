@@ -29,9 +29,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import java.lang.classfile.*;
-import java.lang.classfile.constantpool.ConstantPoolBuilder;
-import java.lang.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.*;
+import org.glavo.classfile.constantpool.ConstantPoolBuilder;
+import org.glavo.classfile.constantpool.Utf8Entry;
 
 public final class BufferedFieldBuilder
         implements TerminalFieldBuilder {

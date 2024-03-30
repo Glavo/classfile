@@ -24,12 +24,13 @@
  */
 package org.glavo.classfile.impl;
 
+import java.util.Objects;
 import java.util.Optional;
 
-import java.lang.classfile.CodeBuilder;
-import java.lang.classfile.CodeModel;
-import java.lang.classfile.Label;
-import java.lang.classfile.constantpool.ConstantPoolBuilder;
+import org.glavo.classfile.CodeBuilder;
+import org.glavo.classfile.CodeModel;
+import org.glavo.classfile.Label;
+import org.glavo.classfile.constantpool.ConstantPoolBuilder;
 
 public abstract sealed class NonterminalCodeBuilder implements CodeBuilder
     permits ChainedCodeBuilder, BlockCodeBuilderImpl {
@@ -38,10 +39,13 @@ public abstract sealed class NonterminalCodeBuilder implements CodeBuilder
 
     public NonterminalCodeBuilder(CodeBuilder parent) {
         this.parent = parent;
-        this.terminal = switch (parent) {
-            case NonterminalCodeBuilder cb -> cb.terminal;
-            case TerminalCodeBuilder cb -> cb;
-        };
+        if (Objects.requireNonNull(parent) instanceof NonterminalCodeBuilder cb) {
+            this.terminal = cb.terminal;
+        } else if (parent instanceof TerminalCodeBuilder cb) {
+            this.terminal = cb;
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override

@@ -6,6 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 
 public final class CollectionUtils {
+
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> listFromTrustedArray(Object[] arr) {
+        return (List<T>) List.of(arr);
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> List<T> listFromTrustedArrayNullsAllowed(Object[] arr) {
         //noinspection Java9CollectionFactory

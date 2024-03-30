@@ -24,13 +24,13 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.*;
-import java.lang.classfile.constantpool.*;
+import org.glavo.classfile.*;
+import org.glavo.classfile.constantpool.*;
 
 import java.lang.constant.ConstantDesc;
 import java.util.List;
 
-import static java.lang.classfile.ClassFile.*;
+import static org.glavo.classfile.ClassFile.*;
 
 public final class AnnotationImpl implements Annotation {
     private final Utf8Entry className;

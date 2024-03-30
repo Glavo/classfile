@@ -29,10 +29,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Collections;
-import java.lang.classfile.ClassSignature;
-import java.lang.classfile.MethodSignature;
-import java.lang.classfile.Signature;
-import java.lang.classfile.Signature.*;
+import org.glavo.classfile.ClassSignature;
+import org.glavo.classfile.MethodSignature;
+import org.glavo.classfile.Signature;
+import org.glavo.classfile.Signature.*;
 
 public final class SignaturesImpl {
 

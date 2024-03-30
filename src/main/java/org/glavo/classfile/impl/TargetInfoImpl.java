@@ -26,9 +26,9 @@ package org.glavo.classfile.impl;
 
 import java.util.List;
 import java.util.Objects;
-import java.lang.classfile.Label;
-import java.lang.classfile.TypeAnnotation.*;
-import static java.lang.classfile.ClassFile.*;
+import org.glavo.classfile.Label;
+import org.glavo.classfile.TypeAnnotation.*;
+import static org.glavo.classfile.ClassFile.*;
 import static java.util.Objects.requireNonNull;
 
 public final class TargetInfoImpl {

@@ -28,12 +28,12 @@ package org.glavo.classfile.impl;
 import java.lang.constant.ClassDesc;
 import static java.lang.constant.ConstantDescs.*;
 import java.lang.constant.MethodTypeDesc;
-import java.lang.classfile.ClassFile;
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.classfile.constantpool.ConstantDynamicEntry;
-import java.lang.classfile.constantpool.DynamicConstantPoolEntry;
-import java.lang.classfile.constantpool.MemberRefEntry;
-import java.lang.classfile.constantpool.ConstantPoolBuilder;
+import org.glavo.classfile.ClassFile;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.constantpool.ConstantDynamicEntry;
+import org.glavo.classfile.constantpool.DynamicConstantPoolEntry;
+import org.glavo.classfile.constantpool.MemberRefEntry;
+import org.glavo.classfile.constantpool.ConstantPoolBuilder;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,15 +41,15 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.lang.classfile.Attribute;
+import org.glavo.classfile.Attribute;
 
-import static java.lang.classfile.ClassFile.*;
-import java.lang.classfile.BufWriter;
-import java.lang.classfile.Label;
-import java.lang.classfile.attribute.StackMapTableAttribute;
-import java.lang.classfile.Attributes;
-import java.lang.classfile.components.ClassPrinter;
-import java.lang.classfile.attribute.CodeAttribute;
+import static org.glavo.classfile.ClassFile.*;
+import org.glavo.classfile.BufWriter;
+import org.glavo.classfile.Label;
+import org.glavo.classfile.attribute.StackMapTableAttribute;
+import org.glavo.classfile.Attributes;
+import org.glavo.classfile.components.ClassPrinter;
+import org.glavo.classfile.attribute.CodeAttribute;
 
 /**
  * StackMapGenerator is responsible for stack map frames generation.

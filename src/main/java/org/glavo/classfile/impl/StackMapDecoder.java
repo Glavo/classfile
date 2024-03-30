@@ -27,19 +27,16 @@ package org.glavo.classfile.impl;
 
 import java.lang.constant.ConstantDescs;
 import java.lang.constant.MethodTypeDesc;
-import java.lang.reflect.AccessFlag;
 import java.util.List;
 import java.util.TreeMap;
-import java.lang.classfile.BufWriter;
 
-import java.lang.classfile.constantpool.ClassEntry;
-import java.lang.classfile.attribute.StackMapFrameInfo;
-import java.lang.classfile.attribute.StackMapFrameInfo.*;
-import java.lang.classfile.ClassReader;
+import org.glavo.classfile.*;
 
-import static java.lang.classfile.ClassFile.*;
-import java.lang.classfile.Label;
-import java.lang.classfile.MethodModel;
+import org.glavo.classfile.constantpool.ClassEntry;
+import org.glavo.classfile.attribute.StackMapFrameInfo;
+import org.glavo.classfile.attribute.StackMapFrameInfo.*;
+
+import static org.glavo.classfile.ClassFile.*;
 
 public class StackMapDecoder {
 
@@ -161,13 +158,11 @@ public class StackMapDecoder {
 
     private static void writeTypeInfo(BufWriterImpl bw, VerificationTypeInfo vti) {
         bw.writeU1(vti.tag());
-        switch (vti) {
-            case SimpleVerificationTypeInfo svti ->
-                {}
-            case ObjectVerificationTypeInfo ovti ->
-                bw.writeIndex(ovti.className());
-            case UninitializedVerificationTypeInfo uvti ->
-                bw.writeU2(bw.labelContext().labelToBci(uvti.newTarget()));
+        if (vti instanceof SimpleVerificationTypeInfo) {
+        } else if (vti instanceof ObjectVerificationTypeInfo ovti) {
+            bw.writeIndex(ovti.className());
+        } else if (vti instanceof UninitializedVerificationTypeInfo uvti) {
+            bw.writeU2(bw.labelContext().labelToBci(uvti.newTarget()));
         }
     }
 

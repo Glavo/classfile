@@ -24,7 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
-import java.lang.classfile.ClassFileVersion;
+import org.glavo.classfile.ClassFileVersion;
 
 public final class ClassFileVersionImpl
         extends AbstractElement

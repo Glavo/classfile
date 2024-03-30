@@ -26,7 +26,7 @@ package org.glavo.classfile.impl.verifier;
 
 import java.nio.ByteBuffer;
 
-import java.lang.classfile.ClassFile;
+import org.glavo.classfile.ClassFile;
 
 /**
  * @see <a href="https://raw.githubusercontent.com/openjdk/jdk/master/src/hotspot/share/interpreter/bytecodes.hpp">hotspot/share/interpreter/bytecodes.hpp</a>
