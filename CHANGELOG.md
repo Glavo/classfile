@@ -1,8 +1,42 @@
 # Changelog
 
-## Version 0.5.0 (In development)
+## Version 0.5.0 (2024-03-30)
 
-Sync upstream to commit `20cb6e786fbf6d924c509e28d6fded86d61a5f84`.
+Sync upstream changes:
+
+* [JDK-8304837](https://github.com/openjdk/jdk/commit/a2d3fc83b0dd7eea38e1dd5898a97d6d7ff60194)
+* [JDK-8304937](https://github.com/openjdk/jdk/commit/dc4096ce136c867e0806070a2d7c8b4efef5294c)
+* [JDK-8304031](https://github.com/openjdk/jdk/commit/cd5d0ff5b29065222ffafbc4fb04b90f6f8909e2)
+* [JDK-8305990](https://github.com/openjdk/jdk/commit/a05560d99352bd5952f3feef37b56dceb74ede3b)
+* [JDK-8307326](https://github.com/openjdk/jdk/commit/5763be726700be322de3bbaf345d80e11936b472)
+* [JDK-8306842](https://github.com/openjdk/jdk/commit/f4f5542f8d49dbb756f52a281b745c3c2bbc9829)
+* [JDK-8306457](https://github.com/openjdk/jdk/commit/3c9ec26370dfae5d1230b6b69ae26122fe42e51d)
+* [JDK-8308549](https://github.com/openjdk/jdk/commit/bfcae68ed10e4330c35f5de0bdb2d31e44e2872e)
+* [JDK-8308856](https://github.com/openjdk/jdk/commit/a6109bf1ea2acbebd6a3517813c0b82fdba00c2f)
+* [JDK-8308842](https://github.com/openjdk/jdk/commit/4b8922f57611d06a9bea5c94e2f4493dc42a2053)
+* [JDK-8304425](https://github.com/openjdk/jdk/commit/ac3ce2bf759735042480b846f3c1cf37a0843b8d)
+* [JDK-8309838](https://github.com/openjdk/jdk/commit/1a9edb8df9c1da9eb0178aa53be748828dc7835e)
+* [JDK-8308899](https://github.com/openjdk/jdk/commit/990e3a700dce3441bd9506ca571c1790e57849a9)
+* [JDK-8311020](https://github.com/openjdk/jdk/commit/cbf418a4863f92241f116f782f9a676b7cb4771d)
+* [JDK-8313312](https://github.com/openjdk/jdk/commit/53ca75b18ea419d469758475fac8352bf915b484)
+* [JDK-8315541](https://github.com/openjdk/jdk/commit/c7d306c65c5ed26839b323f3dfc7e5b68e5adaa1)
+* [JDK-8313258](https://github.com/openjdk/jdk/commit/6d47fc6d5b81d6764af322cc17653683f79a89de)
+* [JDK-8315678](https://github.com/openjdk/jdk/commit/ca747f09b67071938fb101ce61742c56305af341)
+* [JDK-8313452](https://github.com/openjdk/jdk/commit/b2e91060db82a13e993227f538c8d54b41a9796b)
+* [JDK-8294969](https://github.com/openjdk/jdk/commit/1203e11a8d9b3ef0695282d980ad411213e6aa6c)
+* [JDK-8316587](https://github.com/openjdk/jdk/commit/4812cabaa489e99481facddce69686a9fee29c44)
+* [JDK-8320222](https://github.com/openjdk/jdk/commit/c4aee66d742008848e5b5bc8ce3b2e3032a39bc3)
+* [JDK-8320618](https://github.com/openjdk/jdk/commit/28d3762bd30a31623f2ed97a1870313d3a2b9acb)
+* [JDK-8308753](https://github.com/openjdk/jdk/commit/2b00ac0d02a110326846c75ea7ea535dccbb1924)
+* [JDK-8321248](https://github.com/openjdk/jdk/commit/0217b5ac8b25db96fce026ac027b18024e25a329)
+* [JDK-8319413](https://github.com/openjdk/jdk/commit/519ecd352a66633589f160db7390647d90e36b99)
+* [JDK-8321641](https://github.com/openjdk/jdk/commit/3c6459e1de9e75898a1b32a95acf684050fbe1af)
+* [JDK-8321540](https://github.com/openjdk/jdk/commit/f9aec02f3caabb6bc06672c214127f8912449615)
+* [JDK-8320360](https://github.com/openjdk/jdk/commit/a5cf4210cd9c293a9e9bce60dc6d0f08fd838c77)
+* [JDK-8319463](https://github.com/openjdk/jdk/commit/3bffe223a34e8077cb1ce11f64fc34fcb0751ac7)
+* [JDK-8325109](https://github.com/openjdk/jdk/commit/18e24d0619ffef7c6dbfc419105faba9f7ba1874)
+* [JDK-8323183](https://github.com/openjdk/jdk/commit/0583f7357480c0500daa82f490b2fcc05f2fb65a)
+
 
 ## Version 0.4.0 (2023-03-23)
 
