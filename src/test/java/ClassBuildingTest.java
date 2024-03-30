@@ -29,6 +29,7 @@
  * @run junit ClassBuildingTest
  */
 
+import helpers.ByteArrayClassLoader;
 import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.ClassTransform;
 import org.glavo.classfile.ClassFile;
@@ -39,7 +40,6 @@ import org.glavo.classfile.components.ClassRemapper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ClassDesc;
-import java.lang.invoke.MethodHandles;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
@@ -59,7 +59,8 @@ public class ClassBuildingTest {
         transform = transform.andThen(ClassTransform.transformingMethods(MethodTransform.dropping(me
                 -> me instanceof SignatureAttribute)));
 
-        // fixme: MethodHandles.lookup().defineClass(cc.transform(cm, transform));
+        var loader = new ByteArrayClassLoader(ClassBuildingTest.class.getClassLoader(), "Outer$1Local", cc.transform(cm, transform));
+        loader.findClass("Outer$1Local");
     }
 }
 
