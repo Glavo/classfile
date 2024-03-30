@@ -41,6 +41,8 @@ import org.glavo.classfile.attribute.CharacterRangeInfo;
 import org.glavo.classfile.attribute.LocalVariableInfo;
 import org.glavo.classfile.attribute.LocalVariableTypeInfo;
 import org.glavo.classfile.instruction.ExceptionCatch;
+import org.glavo.classfile.jdk.JdkUtils;
+
 import java.util.List;
 import static java.util.Objects.requireNonNull;
 
@@ -1470,18 +1472,19 @@ public sealed interface ClassFile
      */
     int PREVIEW_MINOR_VERSION = 65535;
 
+
     /**
      * {@return the latest major Java version}
      */
     static int latestMajorVersion() {
-        return JAVA_23_VERSION;
+        return JdkUtils.LATEST_CLASSFILE_MAJOR_VERSION;
     }
 
     /**
      * {@return the latest minor Java version}
      */
     static int latestMinorVersion() {
-        return 0;
+        return JdkUtils.LATEST_CLASSFILE_MINOR_VERSION;
     }
 
 }

@@ -27,4 +27,8 @@ public final class CollectionUtils {
     public static <K, V> HashMap<K, V> newHashMap(int numMappings) {
         return new HashMap<>(calculateHashMapCapacity(numMappings));
     }
+
+    private CollectionUtils() {
+
+    }
 }

@@ -40,6 +40,7 @@ import org.glavo.classfile.MethodModel;
 import org.glavo.classfile.Attributes;
 import org.glavo.classfile.attribute.*;
 import org.glavo.classfile.constantpool.Utf8Entry;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * LowJCovAttributeTest
  */
+@Disabled("Not compiled with -Xjcov")
 class LowJCovAttributeTest {
 
     private static final boolean VERBOSE = false;

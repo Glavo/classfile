@@ -16,4 +16,7 @@ public final class JavaLangAccessUtils {
             dst[dstOff++] = (char)(src[srcOff++] & 0xff);
         }
     }
+
+    private JavaLangAccessUtils() {
+    }
 }

@@ -1,10 +1,3 @@
-import org.aya.gradle.BuildUtil
-
-buildscript {
-    repositories { mavenCentral() }
-    dependencies { classpath("org.aya-prover.upstream:build-util:0.0.11") }
-}
-
 plugins {
     id("java-library")
     id("jacoco")
@@ -40,20 +33,6 @@ tasks.compileJava {
     })
 
     options.release.set(sourceToolchainVersion)
-
-    val root = destinationDirectory.asFile.get()
-    doLast {
-        val tree = fileTree(root)
-        tree.include("**/*.class")
-        tree.include("module-info.class")
-        tree.forEach {
-            BuildUtil.stripPreview(
-                root.toPath(), it.toPath(),
-                true, false,
-                "java/lang/AssertionError",
-            )
-        }
-    }
 }
 
 tasks.compileTestJava {
@@ -115,11 +94,13 @@ dependencies {
 }
 
 tasks.test {
-    javaLauncher.set(javaToolchains.launcherFor() {
+    javaLauncher.set(javaToolchains.launcherFor {
         languageVersion.set(JavaLanguageVersion.of(testToolchainVersion))
     })
 
     useJUnitPlatform()
+
+    jvmArgs("--add-opens=java.base/java.util=ALL-UNNAMED", "-Xlog:class+load=info:class.txt")
 }
 
 tasks.jacocoTestReport {
