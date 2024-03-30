@@ -6,6 +6,6 @@ The directories that need to be synchronized are:
 
 * Source file directory:
   * `src/java.base/share/classes/java/lang/classfile`: https://github.com/openjdk/jdk/commits/master/src/java.base/share/classes/java/lang/classfile/
-  * `src/java.base/share/classes/jdk/internal/classfile/impl`: https://github.com/openjdk/jdk/commits/master/src/java.base/share/classes/jdk/internal/classfile/impl/
+  * `src/java.base/share/classes/jdk/internal/classfile`: https://github.com/openjdk/jdk/commits/master/src/java.base/share/classes/jdk/internal/classfile/
 * Test file directory
   * `test/jdk/jdk/classfile`: https://github.com/openjdk/jdk/commits/master/test/jdk/jdk/classfile
