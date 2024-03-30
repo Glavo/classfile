@@ -1,4 +1,4 @@
-# Java Classfile API
+# Java Class-File API
 
 [![Gradle Check](https://github.com/Glavo/classfile/actions/workflows/check.yml/badge.svg)](https://github.com/Glavo/classfile/actions/workflows/check.yml)
 [![codecov](https://codecov.io/gh/Glavo/classfile/branch/main/graph/badge.svg?token=O9EUO58YKZ)](https://codecov.io/gh/Glavo/classfile)
@@ -11,27 +11,26 @@ requires Java 17 as a minimum version.
 
 ## Adding to your build
 
-Please replace `${version}` with the [current version](https://github.com/Glavo/classfile/releases) of this library.
-
 Maven:
 ```xml
 <dependency>
   <groupId>org.glavo</groupId>
   <artifactId>classfile</artifactId>
-  <version>${version}</version>
+  <version>0.5.0</version>
 </dependency>
 ```
 
 Gradle:
 ```kotlin
-implementation("org.glavo:classfile:${version}")
+implementation("org.glavo:classfile:0.5.0")
 ```
 
 ## Get started
 
-The core class of the Classfile API is [`Classfile`](src/main/java/org/glavo/classfile/Classfile.java).
-
-A tutorial is in the works, now you can look at the [examples](src/examples/java), or check out the [JEP draft](https://openjdk.org/jeps/8280389) for help.
+* [Tutorial](https://javadoc.io/doc/org.glavo/classfile/latest/org.glavo.classfile/org/glavo/classfile/package-summary.html): The best way to learn how to use the Class-File API;
+* [Javadoc](https://javadoc.io/doc/org.glavo/classfile): Documentation for the current release;
+* [Examples](./src/examples/java): Some examples showing the usage of Class-File API;
+* [JDK Enhancement Proposal](https://openjdk.org/jeps/466): The JEP for Class-File API.
 
 ## Note
 
