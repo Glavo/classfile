@@ -35,7 +35,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Helper methods for the implementation of {@code java.lang.constant}.
  */
-public class ConstantUtils {
+final class ConstantUtils {
 
     /**
      * The special name of instance initialization methods, {@value}. An instance

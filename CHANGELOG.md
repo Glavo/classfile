@@ -1,5 +1,7 @@
 # Changelog
 
+## Version 0.6.0 (In development) 
+
 ## Version 0.5.0 (2024-03-30)
 
 Sync upstream changes:

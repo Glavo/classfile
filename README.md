@@ -1,4 +1,4 @@
-# Java Class-File API
+# Class-File API for Java 17
 
 [![Gradle Check](https://github.com/Glavo/classfile/actions/workflows/check.yml/badge.svg)](https://github.com/Glavo/classfile/actions/workflows/check.yml)
 [![codecov](https://codecov.io/gh/Glavo/classfile/branch/main/graph/badge.svg?token=O9EUO58YKZ)](https://codecov.io/gh/Glavo/classfile)
@@ -6,8 +6,7 @@
 [![javadoc](https://javadoc.io/badge2/org.glavo/classfile/javadoc.svg)](https://javadoc.io/doc/org.glavo/classfile)
 
 This is a modern Java classfile manipulation and analysis library.
-This library is a modern replacement for [ASM](https://asm.ow2.io/), extracted from the latest implementation of JDK,
-requires Java 17 as a minimum version.
+This library is a modern replacement for [ASM](https://asm.ow2.io/), extracted from the latest implementation of JDK and backport to Java 17. 
 
 ## Adding to your build
 
@@ -36,6 +35,8 @@ implementation("org.glavo:classfile:0.5.0")
 
 This library is extracted from OpenJDK 23 and renamed package `jdk.internal.classfile` to `org.glavo.classfile`.
 
+Since the Class-File API is still in preview, this library may also undergo breaking changes until the Class-File API is generally available.
+
 In order to be compatible with Java 17, this library also copies some new APIs in Java 20/21:
 
 * `java.lang.reflect.AccessFlag` -> `org.glavo.classfile.AccessFlag`
@@ -49,4 +50,4 @@ Since the Class-File API is still in preview, it is not yet stable
 
 If you encounter problems when using this library, please feed back through [issue](https://github.com/Glavo/classfile/issues).
 
-If you want to discuss the design of the Classfile API, please go to the [Classfile API mailing list](https://mail.openjdk.org/mailman/listinfo/classfile-api-dev) (classfile-api-dev@openjdk.org) for discussion.
+If you want to discuss the design of the Class-File API, please go to the [Class-File API mailing list](https://mail.openjdk.org/mailman/listinfo/classfile-api-dev) (classfile-api-dev@openjdk.org) for discussion.
