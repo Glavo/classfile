@@ -12,6 +12,7 @@ Important changes:
 * Add the Java SE 28 preview `LoadableDescriptors` attribute and access flags for identity classes and strict field initialization.
 * Synchronize the upstream parser, verifier, stack map generator, transformations, examples, snippets, and tests.
 * Backport the updated implementation to Java 17 without depending on newer JDK-internal APIs.
+* Build and test with JDK 25 selected by `JAVA_HOME`, while compiling the main library with `--release 17`.
 
 ## Version 0.5.0 (2024-03-30)
 

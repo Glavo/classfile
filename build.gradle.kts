@@ -12,9 +12,7 @@ group = "org.glavo"
 version = "0.6.0" + "-SNAPSHOT"
 description = "OpenJDK Class-File API backport for Java 17"
 
-val sourceToolchainVersion = 17
-val javadocToolchainVersion = 21
-val testToolchainVersion = 21
+val targetJavaVersion = 17
 
 sourceSets {
     test {
@@ -29,27 +27,10 @@ tasks.withType<JavaCompile> {
 }
 
 tasks.compileJava {
-    javaCompiler.set(javaToolchains.compilerFor {
-        languageVersion.set(JavaLanguageVersion.of(sourceToolchainVersion))
-    })
-
-    options.release.set(sourceToolchainVersion)
-}
-
-tasks.compileTestJava {
-    javaCompiler.set(javaToolchains.compilerFor {
-        languageVersion.set(JavaLanguageVersion.of(testToolchainVersion))
-    })
-    options.compilerArgs.add("--enable-preview")
-
-    options.release.set(testToolchainVersion)
+    options.release.set(targetJavaVersion)
 }
 
 tasks.javadoc {
-    javadocTool.set(javaToolchains.javadocToolFor {
-        languageVersion.set(JavaLanguageVersion.of(javadocToolchainVersion))
-    })
-
     val options = this.options as StandardJavadocDocletOptions
 
     options.jFlags("-Duser.language=en")
@@ -58,8 +39,6 @@ tasks.javadoc {
     options.tags("apiNote", "implNote", "implSpec", "jvms", "jls", "snippet-files")
 
     options.addStringOption("Xdoclint:none", "-quiet")
-    options.addBooleanOption("-enable-preview", true)
-    options.addStringOption("-source", "21")
     options.addStringOption("link", "https://docs.oracle.com/en/java/javase/25/docs/api/")
 
     options.addStringOption("-snippet-path", file("src/main/snippet-files").absolutePath)
@@ -96,15 +75,11 @@ dependencies {
 }
 
 tasks.test {
-    javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(testToolchainVersion))
-    })
-
     useJUnitPlatform()
 
     exclude("testdata/**")
 
-    jvmArgs("--enable-preview", "--add-opens=java.base/java.util=ALL-UNNAMED")
+    jvmArgs("--add-opens=java.base/java.util=ALL-UNNAMED")
 }
 
 tasks.jacocoTestReport {
