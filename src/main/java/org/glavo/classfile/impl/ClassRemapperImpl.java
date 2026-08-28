@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,69 +24,13 @@
  */
 package org.glavo.classfile.impl;
 
-import org.glavo.classfile.Annotation;
-import org.glavo.classfile.AnnotationElement;
-import org.glavo.classfile.AnnotationValue;
-import org.glavo.classfile.ClassBuilder;
-import org.glavo.classfile.ClassElement;
-import org.glavo.classfile.ClassSignature;
-import org.glavo.classfile.CodeBuilder;
-import org.glavo.classfile.CodeElement;
-import org.glavo.classfile.CodeModel;
-import org.glavo.classfile.CodeTransform;
-import org.glavo.classfile.FieldBuilder;
-import org.glavo.classfile.FieldElement;
-import org.glavo.classfile.FieldModel;
-import org.glavo.classfile.FieldTransform;
-import org.glavo.classfile.Interfaces;
-import org.glavo.classfile.MethodBuilder;
-import org.glavo.classfile.MethodElement;
-import org.glavo.classfile.MethodModel;
-import org.glavo.classfile.MethodSignature;
-import org.glavo.classfile.MethodTransform;
-import org.glavo.classfile.Signature;
-import org.glavo.classfile.Superclass;
-import org.glavo.classfile.TypeAnnotation;
-import org.glavo.classfile.attribute.AnnotationDefaultAttribute;
-import org.glavo.classfile.attribute.EnclosingMethodAttribute;
-import org.glavo.classfile.attribute.ExceptionsAttribute;
-import org.glavo.classfile.attribute.InnerClassInfo;
-import org.glavo.classfile.attribute.InnerClassesAttribute;
-import org.glavo.classfile.attribute.ModuleAttribute;
-import org.glavo.classfile.attribute.ModuleProvideInfo;
-import org.glavo.classfile.attribute.NestHostAttribute;
-import org.glavo.classfile.attribute.NestMembersAttribute;
-import org.glavo.classfile.attribute.PermittedSubclassesAttribute;
-import org.glavo.classfile.attribute.RecordAttribute;
-import org.glavo.classfile.attribute.RecordComponentInfo;
-import org.glavo.classfile.attribute.RuntimeInvisibleAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeInvisibleParameterAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeInvisibleTypeAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeVisibleParameterAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeVisibleTypeAnnotationsAttribute;
-import org.glavo.classfile.attribute.SignatureAttribute;
+import org.glavo.classfile.*;
+import org.glavo.classfile.attribute.*;
 import org.glavo.classfile.components.ClassRemapper;
 import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.instruction.ConstantInstruction.LoadConstantInstruction;
-import org.glavo.classfile.instruction.ExceptionCatch;
-import org.glavo.classfile.instruction.FieldInstruction;
-import org.glavo.classfile.instruction.InvokeDynamicInstruction;
-import org.glavo.classfile.instruction.InvokeInstruction;
-import org.glavo.classfile.instruction.LocalVariable;
-import org.glavo.classfile.instruction.LocalVariableType;
-import org.glavo.classfile.instruction.NewMultiArrayInstruction;
-import org.glavo.classfile.instruction.NewObjectInstruction;
-import org.glavo.classfile.instruction.NewReferenceArrayInstruction;
-import org.glavo.classfile.instruction.TypeCheckInstruction;
-
-import java.lang.constant.ClassDesc;
-import java.lang.constant.ConstantDesc;
-import java.lang.constant.DirectMethodHandleDesc;
-import java.lang.constant.DynamicCallSiteDesc;
-import java.lang.constant.DynamicConstantDesc;
-import java.lang.constant.MethodHandleDesc;
-import java.lang.constant.MethodTypeDesc;
+import org.glavo.classfile.instruction.*;
+import java.lang.constant.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -97,64 +41,57 @@ public record ClassRemapperImpl(Function<ClassDesc, ClassDesc> mapFunction) impl
     public void accept(ClassBuilder clb, ClassElement cle) {
         Objects.requireNonNull(cle);
         if (cle instanceof FieldModel fm) {
-            clb.withField(fm.fieldName().stringValue(), map(
-                    fm.fieldTypeSymbol()), fb ->
-                    fm.forEachElement(asFieldTransform().resolve(fb).consumer()));
+            clb.withField(fm.fieldName().stringValue(), map(fm.fieldTypeSymbol()),
+                    fb -> fb.transform(fm, asFieldTransform()));
         } else if (cle instanceof MethodModel mm) {
-            clb.withMethod(mm.methodName().stringValue(), mapMethodDesc(
-                    mm.methodTypeSymbol()), mm.flags().flagsMask(), mb ->
-                    mm.forEachElement(asMethodTransform().resolve(mb).consumer()));
+            clb.withMethod(mm.methodName().stringValue(), mapMethodDesc(mm.methodTypeSymbol()),
+                    mm.flags().flagsMask(), mb -> mb.transform(mm, asMethodTransform()));
         } else if (cle instanceof Superclass sc) {
             clb.withSuperclass(map(sc.superclassEntry().asSymbol()));
-        } else if (cle instanceof Interfaces ins) {
-            clb.withInterfaceSymbols(Util.mappedList(ins.interfaces(), in ->
-                    map(in.asSymbol())));
-        } else if (cle instanceof SignatureAttribute sa) {
-            clb.with(SignatureAttribute.of(mapClassSignature(sa.asClassSignature())));
-        } else if (cle instanceof InnerClassesAttribute ica) {
-            clb.with(InnerClassesAttribute.of(ica.classes().stream().map(ici ->
+        } else if (cle instanceof Interfaces interfaces) {
+            clb.withInterfaceSymbols(Util.mappedList(interfaces.interfaces(), in -> map(in.asSymbol())));
+        } else if (cle instanceof SignatureAttribute signature) {
+            clb.with(SignatureAttribute.of(mapClassSignature(signature.asClassSignature())));
+        } else if (cle instanceof InnerClassesAttribute innerClasses) {
+            clb.with(InnerClassesAttribute.of(innerClasses.classes().stream().map(ici ->
                     InnerClassInfo.of(map(ici.innerClass().asSymbol()),
                             ici.outerClass().map(oc -> map(oc.asSymbol())),
                             ici.innerName().map(Utf8Entry::stringValue),
                             ici.flagsMask())).toList()));
-        } else if (cle instanceof EnclosingMethodAttribute ema) {
-            clb.with(EnclosingMethodAttribute.of(map(ema.enclosingClass().asSymbol()),
-                    ema.enclosingMethodName().map(Utf8Entry::stringValue),
-                    ema.enclosingMethodTypeSymbol().map(this::mapMethodDesc)));
-        } else if (cle instanceof RecordAttribute ra) {
-            clb.with(RecordAttribute.of(ra.components().stream()
-                    .map(this::mapRecordComponent).toList()));
-        } else if (cle instanceof ModuleAttribute ma) {
-            clb.with(ModuleAttribute.of(ma.moduleName(), ma.moduleFlagsMask(),
-                    ma.moduleVersion().orElse(null),
-                    ma.requires(), ma.exports(), ma.opens(),
-                    ma.uses().stream().map(ce ->
+        } else if (cle instanceof EnclosingMethodAttribute enclosingMethod) {
+            clb.with(EnclosingMethodAttribute.of(map(enclosingMethod.enclosingClass().asSymbol()),
+                    enclosingMethod.enclosingMethodName().map(Utf8Entry::stringValue),
+                    enclosingMethod.enclosingMethodTypeSymbol().map(this::mapMethodDesc)));
+        } else if (cle instanceof RecordAttribute record) {
+            clb.with(RecordAttribute.of(record.components().stream().map(this::mapRecordComponent).toList()));
+        } else if (cle instanceof ModuleAttribute module) {
+            clb.with(ModuleAttribute.of(module.moduleName(), module.moduleFlagsMask(),
+                    module.moduleVersion().orElse(null),
+                    module.requires(), module.exports(), module.opens(),
+                    module.uses().stream().map(ce ->
                             clb.constantPool().classEntry(map(ce.asSymbol()))).toList(),
-                    ma.provides().stream().map(mp ->
+                    module.provides().stream().map(mp ->
                             ModuleProvideInfo.of(map(mp.provides().asSymbol()),
-                                    mp.providesWith().stream().map(pw ->
-                                            map(pw.asSymbol())).toList())).toList()));
-        } else if (cle instanceof NestHostAttribute nha) {
-            clb.with(NestHostAttribute.of(map(nha.nestHost().asSymbol())));
-        } else if (cle instanceof NestMembersAttribute nma) {
-            clb.with(NestMembersAttribute.ofSymbols(nma.nestMembers().stream()
+                                    mp.providesWith().stream().map(pw -> map(pw.asSymbol())).toList())).toList()));
+        } else if (cle instanceof NestHostAttribute nestHost) {
+            clb.with(NestHostAttribute.of(map(nestHost.nestHost().asSymbol())));
+        } else if (cle instanceof NestMembersAttribute nestMembers) {
+            clb.with(NestMembersAttribute.ofSymbols(nestMembers.nestMembers().stream()
                     .map(nm -> map(nm.asSymbol())).toList()));
-        } else if (cle instanceof PermittedSubclassesAttribute psa) {
-            clb.with(PermittedSubclassesAttribute.ofSymbols(
-                    psa.permittedSubclasses().stream().map(ps ->
-                            map(ps.asSymbol())).toList()));
-        } else if (cle instanceof RuntimeVisibleAnnotationsAttribute aa) {
-            clb.with(RuntimeVisibleAnnotationsAttribute.of(
-                    mapAnnotations(aa.annotations())));
-        } else if (cle instanceof RuntimeInvisibleAnnotationsAttribute aa) {
-            clb.with(RuntimeInvisibleAnnotationsAttribute.of(
-                    mapAnnotations(aa.annotations())));
-        } else if (cle instanceof RuntimeVisibleTypeAnnotationsAttribute aa) {
-            clb.with(RuntimeVisibleTypeAnnotationsAttribute.of(
-                    mapTypeAnnotations(aa.annotations())));
-        } else if (cle instanceof RuntimeInvisibleTypeAnnotationsAttribute aa) {
-            clb.with(RuntimeInvisibleTypeAnnotationsAttribute.of(
-                    mapTypeAnnotations(aa.annotations())));
+        } else if (cle instanceof PermittedSubclassesAttribute permittedSubclasses) {
+            clb.with(PermittedSubclassesAttribute.ofSymbols(permittedSubclasses.permittedSubclasses().stream()
+                    .map(ps -> map(ps.asSymbol())).toList()));
+        } else if (cle instanceof LoadableDescriptorsAttribute loadableDescriptors) {
+            clb.with(LoadableDescriptorsAttribute.ofSymbols(loadableDescriptors.loadableDescriptorSymbols().stream()
+                    .map(this::map).toList()));
+        } else if (cle instanceof RuntimeVisibleAnnotationsAttribute annotations) {
+            clb.with(RuntimeVisibleAnnotationsAttribute.of(mapAnnotations(annotations.annotations())));
+        } else if (cle instanceof RuntimeInvisibleAnnotationsAttribute annotations) {
+            clb.with(RuntimeInvisibleAnnotationsAttribute.of(mapAnnotations(annotations.annotations())));
+        } else if (cle instanceof RuntimeVisibleTypeAnnotationsAttribute annotations) {
+            clb.with(RuntimeVisibleTypeAnnotationsAttribute.of(mapTypeAnnotations(annotations.annotations())));
+        } else if (cle instanceof RuntimeInvisibleTypeAnnotationsAttribute annotations) {
+            clb.with(RuntimeInvisibleTypeAnnotationsAttribute.of(mapTypeAnnotations(annotations.annotations())));
         } else {
             clb.with(cle);
         }
@@ -164,21 +101,16 @@ public record ClassRemapperImpl(Function<ClassDesc, ClassDesc> mapFunction) impl
     public FieldTransform asFieldTransform() {
         return (FieldBuilder fb, FieldElement fe) -> {
             Objects.requireNonNull(fe);
-            if (fe instanceof SignatureAttribute sa) {
-                fb.with(SignatureAttribute.of(
-                        mapSignature(sa.asTypeSignature())));
-            } else if (fe instanceof RuntimeVisibleAnnotationsAttribute aa) {
-                fb.with(RuntimeVisibleAnnotationsAttribute.of(
-                        mapAnnotations(aa.annotations())));
-            } else if (fe instanceof RuntimeInvisibleAnnotationsAttribute aa) {
-                fb.with(RuntimeInvisibleAnnotationsAttribute.of(
-                        mapAnnotations(aa.annotations())));
-            } else if (fe instanceof RuntimeVisibleTypeAnnotationsAttribute aa) {
-                fb.with(RuntimeVisibleTypeAnnotationsAttribute.of(
-                        mapTypeAnnotations(aa.annotations())));
-            } else if (fe instanceof RuntimeInvisibleTypeAnnotationsAttribute aa) {
-                fb.with(RuntimeInvisibleTypeAnnotationsAttribute.of(
-                        mapTypeAnnotations(aa.annotations())));
+            if (fe instanceof SignatureAttribute signature) {
+                fb.with(SignatureAttribute.of(mapSignature(signature.asTypeSignature())));
+            } else if (fe instanceof RuntimeVisibleAnnotationsAttribute annotations) {
+                fb.with(RuntimeVisibleAnnotationsAttribute.of(mapAnnotations(annotations.annotations())));
+            } else if (fe instanceof RuntimeInvisibleAnnotationsAttribute annotations) {
+                fb.with(RuntimeInvisibleAnnotationsAttribute.of(mapAnnotations(annotations.annotations())));
+            } else if (fe instanceof RuntimeVisibleTypeAnnotationsAttribute annotations) {
+                fb.with(RuntimeVisibleTypeAnnotationsAttribute.of(mapTypeAnnotations(annotations.annotations())));
+            } else if (fe instanceof RuntimeInvisibleTypeAnnotationsAttribute annotations) {
+                fb.with(RuntimeInvisibleTypeAnnotationsAttribute.of(mapTypeAnnotations(annotations.annotations())));
             } else {
                 fb.with(fe);
             }
@@ -189,38 +121,29 @@ public record ClassRemapperImpl(Function<ClassDesc, ClassDesc> mapFunction) impl
     public MethodTransform asMethodTransform() {
         return (MethodBuilder mb, MethodElement me) -> {
             Objects.requireNonNull(me);
-            if (me instanceof AnnotationDefaultAttribute ada) {
-                mb.with(AnnotationDefaultAttribute.of(
-                        mapAnnotationValue(ada.defaultValue())));
-            } else if (me instanceof CodeModel com) {
-                mb.transformCode(com, asCodeTransform());
-            } else if (me instanceof ExceptionsAttribute ea) {
-                mb.with(ExceptionsAttribute.ofSymbols(
-                        ea.exceptions().stream().map(ce ->
-                                map(ce.asSymbol())).toList()));
-            } else if (me instanceof SignatureAttribute sa) {
-                mb.with(SignatureAttribute.of(
-                        mapMethodSignature(sa.asMethodSignature())));
-            } else if (me instanceof RuntimeVisibleAnnotationsAttribute aa) {
-                mb.with(RuntimeVisibleAnnotationsAttribute.of(
-                        mapAnnotations(aa.annotations())));
-            } else if (me instanceof RuntimeInvisibleAnnotationsAttribute aa) {
-                mb.with(RuntimeInvisibleAnnotationsAttribute.of(
-                        mapAnnotations(aa.annotations())));
-            } else if (me instanceof RuntimeVisibleParameterAnnotationsAttribute paa) {
-                mb.with(RuntimeVisibleParameterAnnotationsAttribute.of(
-                        paa.parameterAnnotations().stream()
-                                .map(this::mapAnnotations).toList()));
-            } else if (me instanceof RuntimeInvisibleParameterAnnotationsAttribute paa) {
-                mb.with(RuntimeInvisibleParameterAnnotationsAttribute.of(
-                        paa.parameterAnnotations().stream()
-                                .map(this::mapAnnotations).toList()));
-            } else if (me instanceof RuntimeVisibleTypeAnnotationsAttribute aa) {
-                mb.with(RuntimeVisibleTypeAnnotationsAttribute.of(
-                        mapTypeAnnotations(aa.annotations())));
-            } else if (me instanceof RuntimeInvisibleTypeAnnotationsAttribute aa) {
-                mb.with(RuntimeInvisibleTypeAnnotationsAttribute.of(
-                        mapTypeAnnotations(aa.annotations())));
+            if (me instanceof AnnotationDefaultAttribute annotationDefault) {
+                mb.with(AnnotationDefaultAttribute.of(mapAnnotationValue(annotationDefault.defaultValue())));
+            } else if (me instanceof CodeModel code) {
+                mb.transformCode(code, asCodeTransform());
+            } else if (me instanceof ExceptionsAttribute exceptions) {
+                mb.with(ExceptionsAttribute.ofSymbols(exceptions.exceptions().stream()
+                        .map(ce -> map(ce.asSymbol())).toList()));
+            } else if (me instanceof SignatureAttribute signature) {
+                mb.with(SignatureAttribute.of(mapMethodSignature(signature.asMethodSignature())));
+            } else if (me instanceof RuntimeVisibleAnnotationsAttribute annotations) {
+                mb.with(RuntimeVisibleAnnotationsAttribute.of(mapAnnotations(annotations.annotations())));
+            } else if (me instanceof RuntimeInvisibleAnnotationsAttribute annotations) {
+                mb.with(RuntimeInvisibleAnnotationsAttribute.of(mapAnnotations(annotations.annotations())));
+            } else if (me instanceof RuntimeVisibleParameterAnnotationsAttribute annotations) {
+                mb.with(RuntimeVisibleParameterAnnotationsAttribute.of(annotations.parameterAnnotations().stream()
+                        .map(this::mapAnnotations).toList()));
+            } else if (me instanceof RuntimeInvisibleParameterAnnotationsAttribute annotations) {
+                mb.with(RuntimeInvisibleParameterAnnotationsAttribute.of(annotations.parameterAnnotations().stream()
+                        .map(this::mapAnnotations).toList()));
+            } else if (me instanceof RuntimeVisibleTypeAnnotationsAttribute annotations) {
+                mb.with(RuntimeVisibleTypeAnnotationsAttribute.of(mapTypeAnnotations(annotations.annotations())));
+            } else if (me instanceof RuntimeInvisibleTypeAnnotationsAttribute annotations) {
+                mb.with(RuntimeInvisibleTypeAnnotationsAttribute.of(mapTypeAnnotations(annotations.annotations())));
             } else {
                 mb.with(me);
             }
@@ -231,44 +154,43 @@ public record ClassRemapperImpl(Function<ClassDesc, ClassDesc> mapFunction) impl
     public CodeTransform asCodeTransform() {
         return (CodeBuilder cob, CodeElement coe) -> {
             Objects.requireNonNull(coe);
-            if (coe instanceof FieldInstruction fai) {
-                cob.fieldInstruction(fai.opcode(), map(fai.owner().asSymbol()),
-                        fai.name().stringValue(), map(fai.typeSymbol()));
-            } else if (coe instanceof InvokeInstruction ii) {
-                cob.invokeInstruction(ii.opcode(), map(ii.owner().asSymbol()),
-                        ii.name().stringValue(), mapMethodDesc(ii.typeSymbol()),
-                        ii.isInterface());
-            } else if (coe instanceof InvokeDynamicInstruction idi) {
-                cob.invokeDynamicInstruction(DynamicCallSiteDesc.of(
-                        idi.bootstrapMethod(), idi.name().stringValue(),
-                        mapMethodDesc(idi.typeSymbol()),
-                        idi.bootstrapArgs().stream().map(this::mapConstantValue).toArray(ConstantDesc[]::new)));
-            } else if (coe instanceof NewObjectInstruction c) {
-                cob.newObjectInstruction(map(c.className().asSymbol()));
-            } else if (coe instanceof NewReferenceArrayInstruction c) {
-                cob.anewarray(map(c.componentType().asSymbol()));
-            } else if (coe instanceof NewMultiArrayInstruction c) {
-                cob.multianewarray(map(c.arrayType().asSymbol()), c.dimensions());
-            } else if (coe instanceof TypeCheckInstruction c) {
-                cob.typeCheckInstruction(c.opcode(), map(c.type().asSymbol()));
-            } else if (coe instanceof ExceptionCatch c) {
-                cob.exceptionCatch(c.tryStart(), c.tryEnd(), c.handler(), c.catchType()
-                        .map(d -> TemporaryConstantPool.INSTANCE.classEntry(map(d.asSymbol()))));
-            } else if (coe instanceof LocalVariable c) {
-                cob.localVariable(c.slot(), c.name().stringValue(), map(c.typeSymbol()),
-                        c.startScope(), c.endScope());
-            } else if (coe instanceof LocalVariableType c) {
-                cob.localVariableType(c.slot(), c.name().stringValue(),
-                        mapSignature(c.signatureSymbol()), c.startScope(), c.endScope());
-            } else if (coe instanceof LoadConstantInstruction ldc) {
-                cob.constantInstruction(ldc.opcode(),
-                        mapConstantValue(ldc.constantValue()));
-            } else if (coe instanceof RuntimeVisibleTypeAnnotationsAttribute aa) {
-                cob.with(RuntimeVisibleTypeAnnotationsAttribute.of(
-                        mapTypeAnnotations(aa.annotations())));
-            } else if (coe instanceof RuntimeInvisibleTypeAnnotationsAttribute aa) {
-                cob.with(RuntimeInvisibleTypeAnnotationsAttribute.of(
-                        mapTypeAnnotations(aa.annotations())));
+            if (coe instanceof FieldInstruction field) {
+                cob.fieldAccess(field.opcode(), map(field.owner().asSymbol()),
+                        field.name().stringValue(), map(field.typeSymbol()));
+            } else if (coe instanceof InvokeInstruction invoke) {
+                cob.invoke(invoke.opcode(), map(invoke.owner().asSymbol()),
+                        invoke.name().stringValue(), mapMethodDesc(invoke.typeSymbol()), invoke.isInterface());
+            } else if (coe instanceof InvokeDynamicInstruction invokeDynamic) {
+                cob.invokedynamic(DynamicCallSiteDesc.of(
+                        mapDirectMethodHandle(invokeDynamic.bootstrapMethod()),
+                        invokeDynamic.name().stringValue(),
+                        mapMethodDesc(invokeDynamic.typeSymbol()),
+                        invokeDynamic.bootstrapArgs().stream().map(this::mapConstantValue)
+                                .toArray(ConstantDesc[]::new)));
+            } else if (coe instanceof NewObjectInstruction newObject) {
+                cob.new_(map(newObject.className().asSymbol()));
+            } else if (coe instanceof NewReferenceArrayInstruction newArray) {
+                cob.anewarray(map(newArray.componentType().asSymbol()));
+            } else if (coe instanceof NewMultiArrayInstruction newMultiArray) {
+                cob.multianewarray(map(newMultiArray.arrayType().asSymbol()), newMultiArray.dimensions());
+            } else if (coe instanceof TypeCheckInstruction typeCheck) {
+                cob.with(TypeCheckInstruction.of(typeCheck.opcode(), map(typeCheck.type().asSymbol())));
+            } else if (coe instanceof ExceptionCatch exceptionCatch) {
+                cob.exceptionCatch(exceptionCatch.tryStart(), exceptionCatch.tryEnd(), exceptionCatch.handler(),
+                        exceptionCatch.catchType().map(d ->
+                                TemporaryConstantPool.INSTANCE.classEntry(map(d.asSymbol()))));
+            } else if (coe instanceof LocalVariable local) {
+                cob.localVariable(local.slot(), local.name().stringValue(), map(local.typeSymbol()),
+                        local.startScope(), local.endScope());
+            } else if (coe instanceof LocalVariableType localType) {
+                cob.localVariableType(localType.slot(), localType.name().stringValue(),
+                        mapSignature(localType.signatureSymbol()), localType.startScope(), localType.endScope());
+            } else if (coe instanceof LoadConstantInstruction loadConstant) {
+                cob.ldc(mapConstantValue(loadConstant.constantValue()));
+            } else if (coe instanceof RuntimeVisibleTypeAnnotationsAttribute annotations) {
+                cob.with(RuntimeVisibleTypeAnnotationsAttribute.of(mapTypeAnnotations(annotations.annotations())));
+            } else if (coe instanceof RuntimeInvisibleTypeAnnotationsAttribute annotations) {
+                cob.with(RuntimeInvisibleTypeAnnotationsAttribute.of(mapTypeAnnotations(annotations.annotations())));
             } else {
                 cob.with(coe);
             }
@@ -306,27 +228,22 @@ public record ClassRemapperImpl(Function<ClassDesc, ClassDesc> mapFunction) impl
     RecordComponentInfo mapRecordComponent(RecordComponentInfo component) {
         return RecordComponentInfo.of(component.name().stringValue(),
                 map(component.descriptorSymbol()),
-                component.attributes().stream().map(atr -> {
-                    Objects.requireNonNull(atr);
-                    if (atr instanceof SignatureAttribute sa) {
-                        return SignatureAttribute.of(
-                                mapSignature(sa.asTypeSignature()));
-                    } else if (atr instanceof RuntimeVisibleAnnotationsAttribute aa) {
-                        return RuntimeVisibleAnnotationsAttribute.of(
-                                mapAnnotations(aa.annotations()));
-                    } else if (atr instanceof RuntimeInvisibleAnnotationsAttribute aa) {
-                        return RuntimeInvisibleAnnotationsAttribute.of(
-                                mapAnnotations(aa.annotations()));
-                    } else if (atr instanceof RuntimeVisibleTypeAnnotationsAttribute aa) {
-                        return RuntimeVisibleTypeAnnotationsAttribute.of(
-                                mapTypeAnnotations(aa.annotations()));
-                    } else if (atr instanceof RuntimeInvisibleTypeAnnotationsAttribute aa) {
-                        return RuntimeInvisibleTypeAnnotationsAttribute.of(
-                                mapTypeAnnotations(aa.annotations()));
-                    } else {
-                        return atr;
-                    }
-                }).toList());
+                component.attributes().stream().map(this::mapRecordComponentAttribute).toList());
+    }
+
+    private Attribute<?> mapRecordComponentAttribute(Attribute<?> attribute) {
+        if (attribute instanceof SignatureAttribute signature) {
+            return SignatureAttribute.of(mapSignature(signature.asTypeSignature()));
+        } else if (attribute instanceof RuntimeVisibleAnnotationsAttribute annotations) {
+            return RuntimeVisibleAnnotationsAttribute.of(mapAnnotations(annotations.annotations()));
+        } else if (attribute instanceof RuntimeInvisibleAnnotationsAttribute annotations) {
+            return RuntimeInvisibleAnnotationsAttribute.of(mapAnnotations(annotations.annotations()));
+        } else if (attribute instanceof RuntimeVisibleTypeAnnotationsAttribute annotations) {
+            return RuntimeVisibleTypeAnnotationsAttribute.of(mapTypeAnnotations(annotations.annotations()));
+        } else if (attribute instanceof RuntimeInvisibleTypeAnnotationsAttribute annotations) {
+            return RuntimeInvisibleTypeAnnotationsAttribute.of(mapTypeAnnotations(annotations.annotations()));
+        }
+        return attribute;
     }
 
     DirectMethodHandleDesc mapDirectMethodHandle(DirectMethodHandleDesc dmhd) {
@@ -344,17 +261,16 @@ public record ClassRemapperImpl(Function<ClassDesc, ClassDesc> mapFunction) impl
 
     ConstantDesc mapConstantValue(ConstantDesc value) {
         Objects.requireNonNull(value);
-        if (value instanceof ClassDesc cd) {
-            return map(cd);
-        } else if (value instanceof DynamicConstantDesc<?> dcd) {
-            return mapDynamicConstant(dcd);
-        } else if (value instanceof DirectMethodHandleDesc dmhd) {
-            return mapDirectMethodHandle(dmhd);
-        } else if (value instanceof MethodTypeDesc mtd) {
-            return mapMethodDesc(mtd);
-        } else {
-            return value;
+        if (value instanceof ClassDesc classDesc) {
+            return map(classDesc);
+        } else if (value instanceof DynamicConstantDesc<?> dynamicConstant) {
+            return mapDynamicConstant(dynamicConstant);
+        } else if (value instanceof DirectMethodHandleDesc methodHandle) {
+            return mapDirectMethodHandle(methodHandle);
+        } else if (value instanceof MethodTypeDesc methodType) {
+            return mapMethodDesc(methodType);
         }
+        return value;
     }
 
     DynamicConstantDesc<?> mapDynamicConstant(DynamicConstantDesc<?> dcd) {
@@ -367,20 +283,24 @@ public record ClassRemapperImpl(Function<ClassDesc, ClassDesc> mapFunction) impl
     @SuppressWarnings("unchecked")
     <S extends Signature> S mapSignature(S signature) {
         Objects.requireNonNull(signature);
-        if (signature instanceof Signature.ArrayTypeSig ats) {
-            return (S) Signature.ArrayTypeSig.of(mapSignature(ats.componentSignature()));
-        } else if (signature instanceof Signature.ClassTypeSig cts) {
+        if (signature instanceof Signature.ArrayTypeSig array) {
+            return (S) Signature.ArrayTypeSig.of(mapSignature(array.componentSignature()));
+        } else if (signature instanceof Signature.ClassTypeSig classType) {
             return (S) Signature.ClassTypeSig.of(
-                    cts.outerType().map(this::mapSignature).orElse(null),
-                    map(cts.classDesc()),
-                    cts.typeArgs().stream()
-                            .map(ta -> Signature.TypeArg.of(
-                                    ta.wildcardIndicator(),
-                                    ta.boundType().map(this::mapSignature)))
+                    classType.outerType().map(this::mapSignature).orElse(null),
+                    Util.toInternalName(map(classType.classDesc())),
+                    classType.typeArgs().stream().map(this::mapTypeArgument)
                             .toArray(Signature.TypeArg[]::new));
-        } else {
-            return signature;
         }
+        return signature;
+    }
+
+    private Signature.TypeArg mapTypeArgument(Signature.TypeArg argument) {
+        if (argument instanceof Signature.TypeArg.Unbounded) {
+            return argument;
+        }
+        var bounded = (Signature.TypeArg.Bounded) argument;
+        return Signature.TypeArg.bounded(bounded.wildcardIndicator(), mapSignature(bounded.boundType()));
     }
 
     List<Annotation> mapAnnotations(List<Annotation> annotations) {
@@ -394,26 +314,23 @@ public record ClassRemapperImpl(Function<ClassDesc, ClassDesc> mapFunction) impl
 
     AnnotationValue mapAnnotationValue(AnnotationValue val) {
         Objects.requireNonNull(val);
-        if (val instanceof AnnotationValue.OfAnnotation oa) {
-            return AnnotationValue.ofAnnotation(mapAnnotation(oa.annotation()));
-        } else if (val instanceof AnnotationValue.OfArray oa) {
-            return AnnotationValue.ofArray(oa.values().stream().map(this::mapAnnotationValue).toList());
-        } else if (val instanceof AnnotationValue.OfConstant oc) {
-            return oc;
-        } else if (val instanceof AnnotationValue.OfClass oc) {
-            return AnnotationValue.ofClass(map(oc.classSymbol()));
-        } else if (val instanceof AnnotationValue.OfEnum oe) {
-            return AnnotationValue.ofEnum(map(oe.classSymbol()), oe.constantName().stringValue());
-        } else {
-            throw new IllegalArgumentException();
+        if (val instanceof AnnotationValue.OfAnnotation annotation) {
+            return AnnotationValue.ofAnnotation(mapAnnotation(annotation.annotation()));
+        } else if (val instanceof AnnotationValue.OfArray array) {
+            return AnnotationValue.ofArray(array.values().stream().map(this::mapAnnotationValue).toList());
+        } else if (val instanceof AnnotationValue.OfConstant) {
+            return val;
+        } else if (val instanceof AnnotationValue.OfClass classValue) {
+            return AnnotationValue.ofClass(map(classValue.classSymbol()));
+        } else if (val instanceof AnnotationValue.OfEnum enumValue) {
+            return AnnotationValue.ofEnum(map(enumValue.classSymbol()), enumValue.constantName().stringValue());
         }
+        throw new AssertionError("Unexpected annotation value: " + val);
     }
 
     List<TypeAnnotation> mapTypeAnnotations(List<TypeAnnotation> typeAnnotations) {
         return typeAnnotations.stream().map(a -> TypeAnnotation.of(a.targetInfo(),
-                a.targetPath(), map(a.classSymbol()),
-                a.elements().stream().map(el -> AnnotationElement.of(el.name(),
-                        mapAnnotationValue(el.value()))).toList())).toList();
+                a.targetPath(), mapAnnotation(a.annotation()))).toList();
     }
 
     List<Signature.TypeParam> mapTypeParams(List<Signature.TypeParam> typeParams) {

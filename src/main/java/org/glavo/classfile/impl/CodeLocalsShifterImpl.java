@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -34,7 +34,6 @@ import org.glavo.classfile.instruction.LoadInstruction;
 import org.glavo.classfile.instruction.LocalVariable;
 import org.glavo.classfile.instruction.LocalVariableType;
 import org.glavo.classfile.instruction.StoreInstruction;
-
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -51,17 +50,11 @@ public final class CodeLocalsShifterImpl implements CodeLocalsShifter {
     public void accept(CodeBuilder cob, CodeElement coe) {
         Objects.requireNonNull(coe);
         if (coe instanceof LoadInstruction li) {
-            cob.loadInstruction(
-                    li.typeKind(),
-                    shift(cob, li.slot(), li.typeKind()));
+            cob.loadLocal(li.typeKind(), shift(cob, li.slot(), li.typeKind()));
         } else if (coe instanceof StoreInstruction si) {
-            cob.storeInstruction(
-                    si.typeKind(),
-                    shift(cob, si.slot(), si.typeKind()));
+            cob.storeLocal(si.typeKind(), shift(cob, si.slot(), si.typeKind()));
         } else if (coe instanceof IncrementInstruction ii) {
-            cob.incrementInstruction(
-                    shift(cob, ii.slot(), TypeKind.IntType),
-                    ii.constant());
+            cob.iinc(shift(cob, ii.slot(), TypeKind.INT), ii.constant());
         } else if (coe instanceof LocalVariable lv) {
             cob.localVariable(
                     shift(cob, lv.slot(), TypeKind.fromDescriptor(lv.type().stringValue())),
@@ -74,7 +67,7 @@ public final class CodeLocalsShifterImpl implements CodeLocalsShifter {
                     shift(cob, lvt.slot(),
                             (lvt.signatureSymbol() instanceof Signature.BaseTypeSig bsig)
                                     ? TypeKind.fromDescriptor(bsig.signatureString())
-                                    : TypeKind.ReferenceType),
+                                    : TypeKind.REFERENCE),
                     lvt.name(),
                     lvt.signature(),
                     lvt.startScope(),
@@ -85,7 +78,7 @@ public final class CodeLocalsShifterImpl implements CodeLocalsShifter {
     }
 
     private int shift(CodeBuilder cob, int slot, TypeKind tk) {
-        if (tk == TypeKind.VoidType)  throw new IllegalArgumentException("Illegal local void type");
+        if (tk == TypeKind.VOID)  throw new IllegalArgumentException("Illegal local void type");
         if (slot >= fixed) {
             int key = 2*slot - fixed + tk.slotSize() - 1;
             if (key >= locals.length) locals = Arrays.copyOf(locals, key + 20);

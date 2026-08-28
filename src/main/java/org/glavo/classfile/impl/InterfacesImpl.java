@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,11 +24,10 @@
  */
 package org.glavo.classfile.impl;
 
+import org.glavo.classfile.Interfaces;
+import org.glavo.classfile.constantpool.ClassEntry;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.glavo.classfile.constantpool.ClassEntry;
-import org.glavo.classfile.Interfaces;
 
 public final class InterfacesImpl
         extends AbstractElement
@@ -36,7 +35,7 @@ public final class InterfacesImpl
     private final List<ClassEntry> interfaces;
 
     public InterfacesImpl(List<ClassEntry> interfaces) {
-        this.interfaces = List.copyOf(interfaces);
+        this.interfaces = Util.sanitizeU2List(interfaces);
     }
 
     @Override

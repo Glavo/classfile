@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,22 +24,21 @@
  */
 package org.glavo.classfile.impl;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
 import org.glavo.classfile.*;
+import org.glavo.classfile.attribute.*;
 import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.constantpool.ConstantPool;
+import org.glavo.classfile.AccessFlag;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+
 import org.glavo.classfile.jdk.CollectionUtils;
 
 public final class ClassImpl
         extends AbstractElement
         implements ClassModel {
-
-    final ClassReader reader;
+    final ClassReaderImpl reader;
     private final int attributesPos;
     private final List<MethodModel> methods;
     private final List<FieldModel> fields;
@@ -48,7 +47,6 @@ public final class ClassImpl
 
     public ClassImpl(byte[] cfbytes, ClassFileImpl context) {
         this.reader = new ClassReaderImpl(cfbytes, context);
-        ClassReaderImpl reader = (ClassReaderImpl) this.reader;
         int p = reader.interfacesPos;
         int icnt = reader.readU2(p);
         p += 2 + icnt * 2;
@@ -82,7 +80,7 @@ public final class ClassImpl
 
     @Override
     public AccessFlags flags() {
-        return AccessFlags.ofClass(reader.flags());
+        return new AccessFlagsImpl(AccessFlag.Location.CLASS, reader.flags(), reader.classFileVersion());
     }
 
     @Override
@@ -118,7 +116,7 @@ public final class ClassImpl
             pos += 2;
             var arr = new Object[cnt];
             for (int i = 0; i < cnt; ++i) {
-                arr[i] = reader.readClassEntry(pos);
+                arr[i] = reader.readEntry(pos, ClassEntry.class);
                 pos += 2;
             }
             this.interfaces = CollectionUtils.listFromTrustedArray(arr);
@@ -137,7 +135,7 @@ public final class ClassImpl
     // ClassModel
 
     @Override
-    public void forEachElement(Consumer<ClassElement> consumer) {
+    public void forEach(Consumer<? super ClassElement> consumer) {
         consumer.accept(flags());
         consumer.accept(ClassFileVersion.of(majorVersion(), minorVersion()));
         superclass().ifPresent(new Consumer<ClassEntry>() {
@@ -185,28 +183,21 @@ public final class ClassImpl
     }
 
     private boolean verifyModuleAttributes() {
-        if (findAttribute(Attributes.MODULE).isEmpty())
+        if (findAttribute(Attributes.module()).isEmpty())
             return false;
 
-        Set<AttributeMapper<?>> found = attributes().stream()
-                                                    .map(Attribute::attributeMapper)
-                                                    .collect(Collectors.toSet());
-
-        found.removeAll(allowedModuleAttributes);
-        found.retainAll(Attributes.PREDEFINED_ATTRIBUTES);
-        return found.isEmpty();
+        return attributes().stream().allMatch(a ->
+                a instanceof ModuleAttribute
+             || a instanceof ModulePackagesAttribute
+             || a instanceof ModuleHashesAttribute
+             || a instanceof ModuleMainClassAttribute
+             || a instanceof ModuleResolutionAttribute
+             || a instanceof ModuleTargetAttribute
+             || a instanceof InnerClassesAttribute
+             || a instanceof SourceFileAttribute
+             || a instanceof SourceDebugExtensionAttribute
+             || a instanceof RuntimeVisibleAnnotationsAttribute
+             || a instanceof RuntimeInvisibleAnnotationsAttribute
+             || a instanceof CustomAttribute);
     }
-
-    private static final Set<AttributeMapper<?>> allowedModuleAttributes
-            = Set.of(Attributes.MODULE,
-                     Attributes.MODULE_HASHES,
-                     Attributes.MODULE_MAIN_CLASS,
-                     Attributes.MODULE_PACKAGES,
-                     Attributes.MODULE_RESOLUTION,
-                     Attributes.MODULE_TARGET,
-                     Attributes.INNER_CLASSES,
-                     Attributes.SOURCE_FILE,
-                     Attributes.SOURCE_DEBUG_EXTENSION,
-                     Attributes.RUNTIME_VISIBLE_ANNOTATIONS,
-                     Attributes.RUNTIME_INVISIBLE_ANNOTATIONS);
 }

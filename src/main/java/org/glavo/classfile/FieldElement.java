@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,28 +24,29 @@
  */
 package org.glavo.classfile;
 
-import org.glavo.classfile.attribute.ConstantValueAttribute;
-import org.glavo.classfile.attribute.DeprecatedAttribute;
-import org.glavo.classfile.attribute.RuntimeInvisibleAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeInvisibleTypeAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeVisibleTypeAnnotationsAttribute;
-import org.glavo.classfile.attribute.SignatureAttribute;
-import org.glavo.classfile.attribute.SyntheticAttribute;
-import org.glavo.classfile.attribute.UnknownAttribute;
+import org.glavo.classfile.attribute.*;
 
 /**
- * A marker interface for elements that can appear when traversing
- * a {@link FieldModel} or be presented to a {@link FieldBuilder}.
+ * Marker interface for a member element of a {@link FieldModel}.  Such an
+ * element can appear when traversing a {@link FieldModel} unless otherwise
+ * specified, be supplied to a {@link FieldBuilder}, and be processed by a
+ * {@link FieldTransform}.
+ * <p>
+ * {@link AccessFlags} is the only member element of a field that appear exactly
+ * once during the traversal of a {@link FieldModel}.
  *
+ * @see ClassFileElement##membership Membership Elements
+ * @see ClassElement
+ * @see MethodElement
+ * @see CodeElement
  * @sealedGraph
- * @since 22
+ * @since 24
  */
 public sealed interface FieldElement extends ClassFileElement
         permits AccessFlags,
                 CustomAttribute, ConstantValueAttribute, DeprecatedAttribute,
-        RuntimeInvisibleAnnotationsAttribute, RuntimeInvisibleTypeAnnotationsAttribute,
-        RuntimeVisibleAnnotationsAttribute, RuntimeVisibleTypeAnnotationsAttribute,
+                RuntimeInvisibleAnnotationsAttribute, RuntimeInvisibleTypeAnnotationsAttribute,
+                RuntimeVisibleAnnotationsAttribute, RuntimeVisibleTypeAnnotationsAttribute,
                 SignatureAttribute, SyntheticAttribute, UnknownAttribute {
 
 }

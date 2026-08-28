@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,27 +24,39 @@
  */
 package org.glavo.classfile.instruction;
 
-import java.lang.constant.ClassDesc;
-
+import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.CodeModel;
-import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.Instruction;
 import org.glavo.classfile.Opcode;
+import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.constantpool.FieldRefEntry;
 import org.glavo.classfile.constantpool.NameAndTypeEntry;
 import org.glavo.classfile.constantpool.Utf8Entry;
+import java.lang.constant.ClassDesc;
+
 import org.glavo.classfile.impl.AbstractInstruction;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.Util;
 
 /**
  * Models a field access instruction in the {@code code} array of a {@code Code}
- * attribute.  Corresponding opcodes will have a {@code kind} of {@link
- * Opcode.Kind#FIELD_ACCESS}.  Delivered as a {@link CodeElement} when
+ * attribute.  Corresponding opcodes have a {@linkplain Opcode#kind() kind}
+ * of {@link Opcode.Kind#FIELD_ACCESS}.  Delivered as a {@link CodeElement} when
  * traversing the elements of a {@link CodeModel}.
+ * <p>
+ * A field access instruction is composite:
+ * {@snippet lang=text :
+ * // @link substring="FieldInstruction" target="#of(Opcode, FieldRefEntry)" :
+ * FieldInstruction(
+ *     Opcode opcode, // @link substring="opcode" target="#opcode()"
+ *     FieldRefEntry field, // @link substring="field" target="#field()"
+ * )
+ * }
  *
- * @since 22
+ * @see Opcode.Kind#FIELD_ACCESS
+ * @see CodeBuilder#fieldAccess CodeBuilder::fieldAccess
+ * @since 24
  */
 public sealed interface FieldInstruction extends Instruction
         permits AbstractInstruction.BoundFieldInstruction, AbstractInstruction.UnboundFieldInstruction {
@@ -68,7 +80,11 @@ public sealed interface FieldInstruction extends Instruction
     }
 
     /**
-     * {@return the field descriptor of the field}
+     * {@return the field descriptor string of the field}
+     *
+     * @apiNote
+     * A symbolic descriptor for the type of the field is available through
+     * {@link #typeSymbol() typeSymbol()}.
      */
     default Utf8Entry type() {
         return field().nameAndType().type();
@@ -87,6 +103,8 @@ public sealed interface FieldInstruction extends Instruction
      * @param op the opcode for the specific type of field access instruction,
      *           which must be of kind {@link Opcode.Kind#FIELD_ACCESS}
      * @param field a constant pool entry describing the field
+     * @throws IllegalArgumentException if the opcode kind is not
+     *         {@link Opcode.Kind#FIELD_ACCESS}.
      */
     static FieldInstruction of(Opcode op, FieldRefEntry field) {
         Util.checkKind(op, Opcode.Kind.FIELD_ACCESS);
@@ -101,6 +119,8 @@ public sealed interface FieldInstruction extends Instruction
      * @param owner the class holding the field
      * @param name the name of the field
      * @param type the field descriptor
+     * @throws IllegalArgumentException if the opcode kind is not
+     *         {@link Opcode.Kind#FIELD_ACCESS}.
      */
     static FieldInstruction of(Opcode op,
                                ClassEntry owner,
@@ -116,6 +136,8 @@ public sealed interface FieldInstruction extends Instruction
      *           which must be of kind {@link Opcode.Kind#FIELD_ACCESS}
      * @param owner the class holding the field
      * @param nameAndType the name and field descriptor of the field
+     * @throws IllegalArgumentException if the opcode kind is not
+     *         {@link Opcode.Kind#FIELD_ACCESS}.
      */
     static FieldInstruction of(Opcode op,
                                ClassEntry owner,

@@ -2,6 +2,17 @@
 
 ## Version 0.6.0 (In development) 
 
+Sync upstream changes from [openjdk/jdk@0583f73](https://github.com/openjdk/jdk/commit/0583f7357480c0500daa82f490b2fcc05f2fb65a) through [JDK-8388374](https://github.com/openjdk/jdk/commit/b1467bd6af8d4f98612191c3dfbb301150f4199b).
+
+Now the Class-File API is based on [openjdk/jdk@b1467bd](https://github.com/openjdk/jdk/commit/b1467bd6af8d4f98612191c3dfbb301150f4199b).
+
+Important changes:
+
+* Support class files through Java SE 28 (major version 72) while continuing to generate Java 17 class files by default.
+* Add the Java SE 28 preview `LoadableDescriptors` attribute and access flags for identity classes and strict field initialization.
+* Synchronize the upstream parser, verifier, stack map generator, transformations, examples, snippets, and tests.
+* Backport the updated implementation to Java 17 without depending on newer JDK-internal APIs.
+
 ## Version 0.5.0 (2024-03-30)
 
 Sync upstream changes:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,24 +26,24 @@
 package org.glavo.classfile.attribute;
 
 import org.glavo.classfile.Attribute;
+import org.glavo.classfile.AttributeMapper;
+import org.glavo.classfile.AttributeMapper.AttributeStability;
+import org.glavo.classfile.Attributes;
 import org.glavo.classfile.ClassElement;
-
-import java.util.List;
-
 import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.constantpool.Utf8Entry;
+import java.util.List;
+
 import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 
 /**
- * Models the {@code ModuleHashes} attribute, which can
- * appear on classes that represent module descriptors.  This is a JDK-specific
- * attribute, which captures the hashes of a set of co-delivered modules.
- * Delivered as a {@link ClassElement} when
- * traversing the elements of a {@link ClassModel}.
- *
- *  <p>The specification of the {@code ModuleHashes} attribute is:
+ * Models the {@link Attributes#moduleHashes() ModuleHashes} attribute, which
+ * appears on classes that {@linkplain ClassModel#isModuleInfo() represent}
+ * module descriptors to capture the hashes of a set of co-delivered modules.
+ * <p>
+ * The specification of the {@code ModuleHashes} attribute is:
  * <pre> {@code
  *
  * ModuleHashes_attribute {
@@ -65,11 +65,18 @@ import org.glavo.classfile.impl.UnboundAttribute;
  * }
  * } </pre>
  * <p>
- * The attribute does not permit multiple instances in a given location.
- * Subsequent occurrence of the attribute takes precedence during the attributed
- * element build or transformation.
+ * This attribute only appears on classes, and does not permit {@linkplain
+ * AttributeMapper#allowMultiple multiple instances} in a class.  It has a
+ * data dependency on the {@linkplain AttributeStability#CP_REFS constant pool}.
+ * <p>
+ * This attribute is not predefined in the Java SE Platform.  This is a
+ * JDK-specific nonstandard attribute produced by the {@code jdk.jlink} module,
+ * which defines the {@code jlink} and {@code jmod} tools.
  *
- * @since 22
+ * @see Attributes#moduleHashes()
+ * @see ModuleResolutionAttribute
+ * @see ModuleTargetAttribute
+ * @since 24
  */
 public sealed interface ModuleHashesAttribute
         extends Attribute<ModuleHashesAttribute>, ClassElement
@@ -89,6 +96,8 @@ public sealed interface ModuleHashesAttribute
      * {@return a {@code ModuleHashes} attribute}
      * @param algorithm the hashing algorithm
      * @param hashes the hash descriptions
+     * @throws IllegalArgumentException if the number of descriptions exceeds
+     *         the limit of {@link org.glavo.classfile##u2 u2}
      */
     static ModuleHashesAttribute of(String algorithm,
                                     List<ModuleHashInfo> hashes) {
@@ -99,6 +108,8 @@ public sealed interface ModuleHashesAttribute
      * {@return a {@code ModuleHashes} attribute}
      * @param algorithm the hashing algorithm
      * @param hashes the hash descriptions
+     * @throws IllegalArgumentException if the number of descriptions exceeds
+     *         the limit of {@link org.glavo.classfile##u2 u2}
      */
     static ModuleHashesAttribute of(String algorithm,
                                     ModuleHashInfo... hashes) {
@@ -109,6 +120,8 @@ public sealed interface ModuleHashesAttribute
      * {@return a {@code ModuleHashes} attribute}
      * @param algorithm the hashing algorithm
      * @param hashes the hash descriptions
+     * @throws IllegalArgumentException if the number of descriptions exceeds
+     *         the limit of {@link org.glavo.classfile##u2 u2}
      */
     static ModuleHashesAttribute of(Utf8Entry algorithm,
                                     List<ModuleHashInfo> hashes) {
@@ -119,6 +132,8 @@ public sealed interface ModuleHashesAttribute
      * {@return a {@code ModuleHashes} attribute}
      * @param algorithm the hashing algorithm
      * @param hashes the hash descriptions
+     * @throws IllegalArgumentException if the number of descriptions exceeds
+     *         the limit of {@link org.glavo.classfile##u2 u2}
      */
     static ModuleHashesAttribute of(Utf8Entry algorithm,
                                     ModuleHashInfo... hashes) {

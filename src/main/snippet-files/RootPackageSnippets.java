@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,44 +22,18 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package java.lang.classfile.snippets;
+package org.glavo.classfile.snippets;
 
 import org.glavo.classfile.*;
-import org.glavo.classfile.components.ClassRemapper;
-import org.glavo.classfile.components.CodeLocalsShifter;
-import org.glavo.classfile.components.CodeRelabeler;
+import org.glavo.classfile.attribute.CodeAttribute;
 import org.glavo.classfile.instruction.*;
-import org.glavo.classfile.ClassBuilder;
 import java.lang.constant.ClassDesc;
 import java.lang.constant.ConstantDescs;
 import java.lang.constant.MethodTypeDesc;
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.Set;
-
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.glavo.classfile.ClassElement;
-import org.glavo.classfile.ClassHierarchyResolver;
-import org.glavo.classfile.ClassModel;
-import org.glavo.classfile.ClassTransform;
-import org.glavo.classfile.ClassFile;
-import org.glavo.classfile.ClassFileVersion;
-import org.glavo.classfile.CodeBuilder;
-import org.glavo.classfile.CodeElement;
-import org.glavo.classfile.CodeModel;
-import org.glavo.classfile.CodeTransform;
-import org.glavo.classfile.FieldModel;
-import org.glavo.classfile.MethodElement;
-import org.glavo.classfile.MethodModel;
-import org.glavo.classfile.Opcode;
-import org.glavo.classfile.PseudoInstruction;
-import org.glavo.classfile.TypeKind;
-import org.glavo.classfile.instruction.*;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -114,17 +88,17 @@ class PackageSnippets {
         // @start region="gatherDependencies2"
         ClassModel cm = ClassFile.of().parse(bytes);
         Set<ClassDesc> dependencies =
-                cm.elementStream()
-                        .flatMap(ce -> ce instanceof MethodModel mm ? mm.elementStream() : Stream.empty())
-                        .flatMap(me -> me instanceof CodeModel com ? com.elementStream() : Stream.empty())
-                        .<ClassDesc>mapMulti((xe, c) -> {
-                            switch (xe) {
-                                case InvokeInstruction i -> c.accept(i.owner().asSymbol());
-                                case FieldInstruction i -> c.accept(i.owner().asSymbol());
-                                default -> { }
-                            }
-                        })
-                        .collect(toSet());
+              cm.elementStream()
+                .flatMap(ce -> ce instanceof MethodModel mm ? mm.elementStream() : Stream.empty())
+                .flatMap(me -> me instanceof CodeModel com ? com.elementStream() : Stream.empty())
+                .<ClassDesc>mapMulti((xe, c) -> {
+                    switch (xe) {
+                        case InvokeInstruction i -> c.accept(i.owner().asSymbol());
+                        case FieldInstruction i -> c.accept(i.owner().asSymbol());
+                        default -> { }
+                    }
+                })
+                .collect(toSet());
         // @end
     }
 
@@ -140,19 +114,19 @@ class PackageSnippets {
         // @start region="helloWorld1"
         byte[] bytes = ClassFile.of().build(CD_Hello,
                 clb -> clb.withFlags(ClassFile.ACC_PUBLIC)
-                        .withMethod(ConstantDescs.INIT_NAME, ConstantDescs.MTD_void,
-                                ClassFile.ACC_PUBLIC,
-                                mb -> mb.withCode(
-                                        cob -> cob.aload(0)
-                                                .invokespecial(ConstantDescs.CD_Object,
-                                                        ConstantDescs.INIT_NAME, ConstantDescs.MTD_void)
-                                                .return_()))
-                        .withMethod("main", MTD_void_StringArray, ClassFile.ACC_PUBLIC + ClassFile.ACC_STATIC,
-                                mb -> mb.withCode(
-                                        cob -> cob.getstatic(CD_System, "out", CD_PrintStream)
-                                                .ldc("Hello World")
-                                                .invokevirtual(CD_PrintStream, "println", MTD_void_String)
-                                                .return_())));
+                          .withMethod(ConstantDescs.INIT_NAME, ConstantDescs.MTD_void,
+                                      ClassFile.ACC_PUBLIC,
+                                      mb -> mb.withCode(
+                                              cob -> cob.aload(0)
+                                                        .invokespecial(ConstantDescs.CD_Object,
+                                                                       ConstantDescs.INIT_NAME, ConstantDescs.MTD_void)
+                                                        .return_()))
+                          .withMethod("main", MTD_void_StringArray, ClassFile.ACC_PUBLIC + ClassFile.ACC_STATIC,
+                                      mb -> mb.withCode(
+                                              cob -> cob.getstatic(CD_System, "out", CD_PrintStream)
+                                                        .ldc("Hello World")
+                                                        .invokevirtual(CD_PrintStream, "println", MTD_void_String)
+                                                        .return_())));
         // @end
     }
 
@@ -160,17 +134,17 @@ class PackageSnippets {
         // @start region="helloWorld2"
         byte[] bytes = ClassFile.of().build(CD_Hello,
                 clb -> clb.withFlags(ClassFile.ACC_PUBLIC)
-                        .withMethodBody(ConstantDescs.INIT_NAME, ConstantDescs.MTD_void,
-                                ClassFile.ACC_PUBLIC,
-                                cob -> cob.aload(0)
-                                        .invokespecial(ConstantDescs.CD_Object,
-                                                ConstantDescs.INIT_NAME, ConstantDescs.MTD_void)
-                                        .return_())
-                        .withMethodBody("main", MTD_void_StringArray, ClassFile.ACC_PUBLIC + ClassFile.ACC_STATIC,
-                                cob -> cob.getstatic(CD_System, "out", CD_PrintStream)
-                                        .ldc("Hello World")
-                                        .invokevirtual(CD_PrintStream, "println", MTD_void_String)
-                                        .return_()));
+                          .withMethodBody(ConstantDescs.INIT_NAME, ConstantDescs.MTD_void,
+                                          ClassFile.ACC_PUBLIC,
+                                          cob -> cob.aload(0)
+                                                    .invokespecial(ConstantDescs.CD_Object,
+                                                                   ConstantDescs.INIT_NAME, ConstantDescs.MTD_void)
+                                                    .return_())
+                          .withMethodBody("main", MTD_void_StringArray, ClassFile.ACC_PUBLIC + ClassFile.ACC_STATIC,
+                                          cob -> cob.getstatic(CD_System, "out", CD_PrintStream)
+                                                    .ldc("Hello World")
+                                                    .invokevirtual(CD_PrintStream, "println", MTD_void_String)
+                                                    .return_()));
         // @end
     }
 
@@ -181,7 +155,7 @@ class PackageSnippets {
                 classBuilder -> {
                     for (ClassElement ce : classModel) {
                         if (!(ce instanceof MethodModel mm
-                              && mm.methodName().stringValue().startsWith("debug"))) {
+                                && mm.methodName().stringValue().startsWith("debug"))) {
                             classBuilder.with(ce);
                         }
                     }
@@ -196,15 +170,15 @@ class PackageSnippets {
                 builder.with(element);
         };
         var cc = ClassFile.of();
-        byte[] newBytes = cc.transform(cc.parse(bytes), ct);
+        byte[] newBytes = cc.transformClass(cc.parse(bytes), ct);
         // @end
     }
 
     void stripDebugMethods3(byte[] bytes) {
         // @start region="stripDebugMethods3"
         ClassTransform ct = ClassTransform.dropping(
-                element -> element instanceof MethodModel mm
-                           && mm.methodName().stringValue().startsWith("debug"));
+                                    element -> element instanceof MethodModel mm
+                                            && mm.methodName().stringValue().startsWith("debug"));
         // @end
     }
 
@@ -212,10 +186,14 @@ class PackageSnippets {
         // @start region="fooToBarTransform"
         CodeTransform fooToBar = (b, e) -> {
             if (e instanceof InvokeInstruction i
-                && i.owner().asInternalName().equals("Foo")
-                && i.opcode() == Opcode.INVOKESTATIC)
-                b.invokeInstruction(i.opcode(), CD_Bar, i.name().stringValue(), i.typeSymbol(), i.isInterface());
-            else b.with(e);
+                    && i.owner().name().equalsString("Foo")
+                    && i.opcode() == Opcode.INVOKESTATIC) {
+                // remove the old element i by doing nothing to the builder
+                // add a new invokestatic instruction to the builder
+                b.invokestatic(CD_Bar, i.name().stringValue(), i.typeSymbol(), i.isInterface());
+            } else {
+                b.with(e);  // leaves the element in place
+            }
         };
         // @end
     }
@@ -240,7 +218,7 @@ class PackageSnippets {
         ClassTransform fooToBar = (b, e) -> {
             switch (e) {
                 case ClassFileVersion v when v.majorVersion() > ClassFile.JAVA_22_VERSION ->
-                        throw new IllegalArgumentException("Cannot transform class file version " + v.majorVersion());
+                    throw new IllegalArgumentException("Cannot transform class file version " + v.majorVersion());
                 default ->  doSomething(b, e);
             }
         };
@@ -278,7 +256,7 @@ class PackageSnippets {
                 case TypeCheckInstruction i -> doSomething(b, i);
                 case PseudoInstruction i ->  doSomething(b, i);
                 default ->
-                        throw new IllegalArgumentException("An unknown instruction could not be handled by this transformation");
+                    throw new IllegalArgumentException("An unknown instruction could not be handled by this transformation");
             }
         };
         // @end
@@ -305,8 +283,8 @@ class PackageSnippets {
         CodeTransform instrumentCalls = (b, e) -> {
             if (e instanceof InvokeInstruction i) {
                 b.getstatic(CD_System, "out", CD_PrintStream)
-                        .ldc(i.name().stringValue())
-                        .invokevirtual(CD_PrintStream, "println", MTD_void_String);
+                 .ldc(i.name().stringValue())
+                 .invokevirtual(CD_PrintStream, "println", MTD_void_String);
             }
             b.with(e);
         };
@@ -316,115 +294,47 @@ class PackageSnippets {
     void fooToBarUnrolled(ClassModel classModel) {
         // @start region="fooToBarUnrolled"
         byte[] newBytes = ClassFile.of().build(classModel.thisClass().asSymbol(),
-                classBuilder -> {
-                    for (ClassElement ce : classModel) {
-                        if (ce instanceof MethodModel mm) {
-                            classBuilder.withMethod(mm.methodName().stringValue(), mm.methodTypeSymbol(),
-                                    mm.flags().flagsMask(),
-                                    methodBuilder -> {
-                                        for (MethodElement me : mm) {
-                                            if (me instanceof CodeModel xm) {
-                                                methodBuilder.withCode(codeBuilder -> {
-                                                    for (CodeElement e : xm) {
-                                                        if (e instanceof InvokeInstruction i && i.owner().asInternalName().equals("Foo")
-                                                            && i.opcode() == Opcode.INVOKESTATIC)
-                                                            codeBuilder.invokeInstruction(i.opcode(), CD_Bar,
-                                                                    i.name().stringValue(), i.typeSymbol(), i.isInterface());
-                                                        else codeBuilder.with(e);
-                                                    }});
-                                            }
-                                            else
-                                                methodBuilder.with(me);
-                                        }
-                                    });
-                        }
-                        else
-                            classBuilder.with(ce);
-                    }
-                });
+            classBuilder -> {
+              for (ClassElement ce : classModel) {
+                  if (ce instanceof MethodModel mm) {
+                      classBuilder.withMethod(mm.methodName().stringValue(), mm.methodTypeSymbol(),
+                                              mm.flags().flagsMask(),
+                                              methodBuilder -> {
+                                  for (MethodElement me : mm) {
+                                      if (me instanceof CodeModel xm) {
+                                          methodBuilder.withCode(codeBuilder -> {
+                                              for (CodeElement e : xm) {
+                                                  if (e instanceof InvokeInstruction i && i.owner().asInternalName().equals("Foo")
+                                                                               && i.opcode() == Opcode.INVOKESTATIC)
+                                                              codeBuilder.invoke(i.opcode(), CD_Bar,
+                                                                                            i.name().stringValue(), i.typeSymbol(), i.isInterface());
+                                                  else codeBuilder.with(e);
+                                              }});
+                                          }
+                                          else
+                                          methodBuilder.with(me);
+                                      }
+                                  });
+                              }
+                      else
+                      classBuilder.with(ce);
+                  }
+              });
         // @end
     }
-
-    void codeRelabeling(ClassModel classModel) {
-        // @start region="codeRelabeling"
-        byte[] newBytes = ClassFile.of().transform(classModel,
-                ClassTransform.transformingMethodBodies(
-                        CodeTransform.ofStateful(CodeRelabeler::of)));
-        // @end
-    }
-
-    // @start region="classInstrumentation"
-    byte[] classInstrumentation(ClassModel target, ClassModel instrumentor, Predicate<MethodModel> instrumentedMethodsFilter) {
-        var instrumentorCodeMap = instrumentor.methods().stream()
-                .filter(instrumentedMethodsFilter)
-                .collect(Collectors.toMap(mm -> mm.methodName().stringValue() + mm.methodType().stringValue(), mm -> mm.code().orElseThrow()));
-        var targetFieldNames = target.fields().stream().map(f -> f.fieldName().stringValue()).collect(Collectors.toSet());
-        var targetMethods = target.methods().stream().map(m -> m.methodName().stringValue() + m.methodType().stringValue()).collect(Collectors.toSet());
-        var instrumentorClassRemapper = ClassRemapper.of(Map.of(instrumentor.thisClass().asSymbol(), target.thisClass().asSymbol()));
-        return ClassFile.of().transform(target,
-                ClassTransform.transformingMethods(
-                                instrumentedMethodsFilter,
-                                (mb, me) -> {
-                                    if (me instanceof CodeModel targetCodeModel) {
-                                        var mm = targetCodeModel.parent().get();
-                                        //instrumented methods code is taken from instrumentor
-                                        mb.transformCode(instrumentorCodeMap.get(mm.methodName().stringValue() + mm.methodType().stringValue()),
-                                                //all references to the instrumentor class are remapped to target class
-                                                instrumentorClassRemapper.asCodeTransform()
-                                                        .andThen((codeBuilder, instrumentorCodeElement) -> {
-                                                            //all invocations of target methods from instrumentor are inlined
-                                                            if (instrumentorCodeElement instanceof InvokeInstruction inv
-                                                                && target.thisClass().asInternalName().equals(inv.owner().asInternalName())
-                                                                && mm.methodName().stringValue().equals(inv.name().stringValue())
-                                                                && mm.methodType().stringValue().equals(inv.type().stringValue())) {
-
-                                                                //store stacked method parameters into locals
-                                                                var storeStack = new ArrayDeque<StoreInstruction>();
-                                                                int slot = 0;
-                                                                if (!mm.flags().has(AccessFlag.STATIC))
-                                                                    storeStack.push(StoreInstruction.of(TypeKind.ReferenceType, slot++));
-                                                                for (var pt : mm.methodTypeSymbol().parameterList()) {
-                                                                    var tk = TypeKind.from(pt);
-                                                                    storeStack.push(StoreInstruction.of(tk, slot));
-                                                                    slot += tk.slotSize();
-                                                                }
-                                                                storeStack.forEach(codeBuilder::with);
-
-                                                                //inlined target locals must be shifted based on the actual instrumentor locals
-                                                                codeBuilder.block(inlinedBlockBuilder -> inlinedBlockBuilder
-                                                                        .transform(targetCodeModel, CodeLocalsShifter.of(mm.flags(), mm.methodTypeSymbol())
-                                                                                .andThen(CodeRelabeler.of())
-                                                                                .andThen((innerBuilder, shiftedTargetCode) -> {
-                                                                                    //returns must be replaced with jump to the end of the inlined method
-                                                                                    if (shiftedTargetCode instanceof ReturnInstruction)
-                                                                                        innerBuilder.goto_(inlinedBlockBuilder.breakLabel());
-                                                                                    else
-                                                                                        innerBuilder.with(shiftedTargetCode);
-                                                                                })));
-                                                            } else
-                                                                codeBuilder.with(instrumentorCodeElement);
-                                                        }));
-                                    } else
-                                        mb.with(me);
-                                })
-                        .andThen(ClassTransform.endHandler(clb ->
-                                //remaining instrumentor fields and methods are injected at the end
-                                clb.transform(instrumentor,
-                                        ClassTransform.dropping(cle ->
-                                                        !(cle instanceof FieldModel fm
-                                                          && !targetFieldNames.contains(fm.fieldName().stringValue()))
-                                                        && !(cle instanceof MethodModel mm
-                                                             && !ConstantDescs.INIT_NAME.equals(mm.methodName().stringValue())
-                                                             && !targetMethods.contains(mm.methodName().stringValue() + mm.methodType().stringValue())))
-                                                //and instrumentor class references remapped to target class
-                                                .andThen(instrumentorClassRemapper)))));
-    }
-    // @end
 
     void resolverExample() {
         // @start region="lookup-class-hierarchy-resolver"
         MethodHandles.Lookup lookup = MethodHandles.lookup(); // @replace regex="MethodHandles\.lookup\(\)" replacement="..."
         ClassHierarchyResolver resolver = ClassHierarchyResolver.ofClassLoading(lookup).cached();
+        // @end
+    }
+
+    void manualReuseStackMaps(CodeBuilder cob, MethodModel method) {
+        // @start region="manual-reuse-stack-maps"
+        CodeAttribute code = method.findAttribute(Attributes.code()).orElseThrow();
+        // Note that StackMapTable may be absent, representing code with no branching
+        code.findAttribute(Attributes.stackMapTable()).ifPresent(cob);
         // @end
     }
 }

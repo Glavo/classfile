@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,7 +29,6 @@
  * @run junit ClassBuildingTest
  */
 
-import helpers.ByteArrayClassLoader;
 import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.ClassTransform;
 import org.glavo.classfile.ClassFile;
@@ -40,6 +39,7 @@ import org.glavo.classfile.components.ClassRemapper;
 import org.junit.jupiter.api.Test;
 
 import java.lang.constant.ClassDesc;
+import java.lang.invoke.MethodHandles;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
@@ -59,8 +59,7 @@ public class ClassBuildingTest {
         transform = transform.andThen(ClassTransform.transformingMethods(MethodTransform.dropping(me
                 -> me instanceof SignatureAttribute)));
 
-        var loader = new ByteArrayClassLoader(ClassBuildingTest.class.getClassLoader(), "Outer$1Local", cc.transform(cm, transform));
-        loader.findClass("Outer$1Local");
+        MethodHandles.lookup().defineHiddenClass(cc.transformClass(cm, transform), true);
     }
 }
 

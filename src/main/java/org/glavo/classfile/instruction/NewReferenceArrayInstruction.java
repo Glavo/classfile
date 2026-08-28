@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,18 +24,30 @@
  */
 package org.glavo.classfile.instruction;
 
+import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.CodeModel;
-import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.Instruction;
+import org.glavo.classfile.Opcode;
+import org.glavo.classfile.constantpool.ClassEntry;
+
 import org.glavo.classfile.impl.AbstractInstruction;
 
 /**
- * Models a {@code anewarray} invocation instruction in the {@code code}
+ * Models a {@link Opcode#ANEWARRAY anewarray} instruction in the {@code code}
  * array of a {@code Code} attribute.  Delivered as a {@link CodeElement}
  * when traversing the elements of a {@link CodeModel}.
+ * <p>
+ * A new reference array instruction is composite:
+ * {@snippet lang=text :
+ * // @link substring="NewReferenceArrayInstruction" target="#of" :
+ * NewReferenceArrayInstruction(ClassEntry componentType) // @link substring="componentType" target="#componentType"
+ * }
  *
- * @since 22
+ * @see Opcode.Kind#NEW_REF_ARRAY
+ * @see CodeBuilder#newarray CodeBuilder::anewarray
+ * @jvms 6.5.anewarray <em>anewarray</em>
+ * @since 24
  */
 public sealed interface NewReferenceArrayInstruction extends Instruction
         permits AbstractInstruction.BoundNewReferenceArrayInstruction, AbstractInstruction.UnboundNewReferenceArrayInstruction {

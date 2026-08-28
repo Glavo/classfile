@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,12 +26,13 @@ package org.glavo.classfile.impl;
 
 import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeElement;
+import org.glavo.classfile.Instruction;
 import org.glavo.classfile.Label;
 import org.glavo.classfile.TypeKind;
 import org.glavo.classfile.instruction.LabelTarget;
-
 import java.util.Objects;
-import org.glavo.classfile.Instruction;
+
+import static java.util.Objects.requireNonNull;
 
 public final class BlockCodeBuilderImpl
         extends NonterminalCodeBuilder
@@ -51,13 +52,13 @@ public final class BlockCodeBuilderImpl
 
     public void start() {
         topLocal = topLocal(parent);
-        terminalMaxLocals = topLocal(terminal);
-        terminal.with((LabelTarget) startLabel);
+        terminalMaxLocals = terminal.curTopLocal();
+        parent.with((LabelTarget) startLabel);
     }
 
     public void end() {
-        terminal.with((LabelTarget) endLabel);
-        if (terminalMaxLocals != topLocal(terminal)) {
+        parent.with((LabelTarget) endLabel);
+        if (terminalMaxLocals != terminal.curTopLocal()) {
             throw new IllegalStateException("Interference in local variable slot management");
         }
     }
@@ -71,29 +72,20 @@ public final class BlockCodeBuilderImpl
     }
 
     private int topLocal(CodeBuilder parent) {
-        Objects.requireNonNull(parent);
-        if (parent instanceof BlockCodeBuilderImpl b) {
-            return b.topLocal;
-        } else if (parent instanceof ChainedCodeBuilder b) {
-            return topLocal(b.terminal);
-        } else if (parent instanceof DirectCodeBuilder b) {
-            return b.curTopLocal();
-        } else if (parent instanceof BufferedCodeBuilder b) {
-            return b.curTopLocal();
-        } else if (parent instanceof TransformingCodeBuilder b) {
-            return topLocal(b.delegate);
+        if (parent instanceof BlockCodeBuilderImpl bcb) {
+            return bcb.topLocal;
         }
-        throw new IllegalArgumentException();
+        return findTerminal(parent).curTopLocal();
     }
 
     @Override
     public CodeBuilder with(CodeElement element) {
-        parent.with(element);
+        parent.with(requireNonNull(element));
 
         hasInstructions |= element instanceof Instruction;
 
         if (reachable) {
-            if (element instanceof Instruction i && i.opcode().isUnconditionalBranch())
+            if (element instanceof Instruction i && BytecodeHelpers.isUnconditionalBranch(i.opcode()))
                 reachable = false;
         }
         else if (element instanceof LabelTarget) {

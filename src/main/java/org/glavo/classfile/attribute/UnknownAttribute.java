@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,20 +25,25 @@
 
 package org.glavo.classfile.attribute;
 
-import org.glavo.classfile.Attribute;
-import org.glavo.classfile.ClassElement;
-import org.glavo.classfile.FieldElement;
-import org.glavo.classfile.MethodElement;
+import org.glavo.classfile.*;
+import org.glavo.classfile.AttributeMapper.AttributeStability;
+
 import org.glavo.classfile.impl.BoundAttribute;
 
 /**
- * Models an unknown attribute on a class, method, or field.
+ * Models an unknown attribute read from a {@code class} file.  An attribute is
+ * unknown if it is not recognized by one of the mappers in {@link Attributes}
+ * and is not recognized by the {@link ClassFile.AttributesProcessingOption}.
+ * <p>
+ * An unknown attribute may appear anywhere where an attribute may appear, and
+ * has an {@linkplain AttributeStability#UNKNOWN unknown} data dependency.
  *
- * @since 22
+ * @see CustomAttribute
+ * @since 24
  */
 public sealed interface UnknownAttribute
         extends Attribute<UnknownAttribute>,
-                ClassElement, MethodElement, FieldElement
+                ClassElement, MethodElement, FieldElement, CodeElement
         permits BoundAttribute.BoundUnknownAttribute {
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,34 +24,62 @@
  */
 package org.glavo.classfile.instruction;
 
-import java.lang.constant.ClassDesc;
-
-import org.glavo.classfile.BufWriter;
 import org.glavo.classfile.ClassFile;
+import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.Label;
 import org.glavo.classfile.PseudoInstruction;
+import org.glavo.classfile.attribute.LocalVariableInfo;
 import org.glavo.classfile.attribute.LocalVariableTableAttribute;
 import org.glavo.classfile.constantpool.Utf8Entry;
+import java.lang.constant.ClassDesc;
+
 import org.glavo.classfile.impl.AbstractPseudoInstruction;
 import org.glavo.classfile.impl.BoundLocalVariable;
 import org.glavo.classfile.impl.TemporaryConstantPool;
+import org.glavo.classfile.impl.Util;
 
 /**
- * A pseudo-instruction which models a single entry in the
- * {@link LocalVariableTableAttribute}.  Delivered as a {@link CodeElement}
- * during traversal of the elements of a {@link CodeModel}, according to
- * the setting of the {@link ClassFile.DebugElementsOption} option.
+ * A pseudo-instruction which models a single entry in the {@link
+ * LocalVariableTableAttribute LocalVariableTable} attribute.  Delivered as a
+ * {@link CodeElement} during traversal of the elements of a {@link CodeModel},
+ * according to the setting of the {@link ClassFile.DebugElementsOption} option.
+ * <p>
+ * A local variable entry is composite:
+ * {@snippet lang=text :
+ * // @link substring="LocalVariable" target="#of(int, String, ClassDesc, Label, Label)" :
+ * LocalVariable(
+ *     int slot, // @link substring="slot" target="#slot"
+ *     String name, // @link substring="name" target="#name"
+ *     ClassDesc type, // @link substring="type" target="#type"
+ *     Label startScope, // @link substring="startScope" target="#startScope"
+ *     Label endScope // @link substring="endScope" target="#endScope"
+ * )
+ * }
+ * Where {@code slot} is {@link org.glavo.classfile##u2 u2}.
+ * <p>
+ * Another model, {@link LocalVariableInfo}, also models a local variable
+ * entry; it has no dependency on a {@code CodeModel} and represents of bci
+ * values as {@code int}s instead of {@code Label}s, and is used as components
+ * of a {@link LocalVariableTableAttribute}.
  *
- * @see PseudoInstruction
+ * @apiNote
+ * {@code LocalVariable} is used for all local variables in Java source code.
+ * If a local variable has a parameterized type, a type argument, or an array
+ * type of one of the previous types, a {@link LocalVariableType} should be
+ * created for that local variable as well.
  *
- * @since 22
+ * @see LocalVariableInfo
+ * @see CodeBuilder#localVariable CodeBuilder::localVariable
+ * @see ClassFile.DebugElementsOption
+ * @since 24
  */
 public sealed interface LocalVariable extends PseudoInstruction
         permits AbstractPseudoInstruction.UnboundLocalVariable, BoundLocalVariable {
     /**
      * {@return the local variable slot}
+     * It is a {@link org.glavo.classfile##u2 u2} value.
      */
     int slot();
 
@@ -61,7 +89,11 @@ public sealed interface LocalVariable extends PseudoInstruction
     Utf8Entry name();
 
     /**
-     * {@return the local variable field descriptor}
+     * {@return the local variable field descriptor string}
+     *
+     * @apiNote
+     * A symbolic descriptor for the type of the local variable is available
+     * through {@link #typeSymbol() typeSymbol()}.
      */
     Utf8Entry type();
 
@@ -69,7 +101,7 @@ public sealed interface LocalVariable extends PseudoInstruction
      * {@return the local variable type, as a symbolic descriptor}
      */
     default ClassDesc typeSymbol() {
-        return ClassDesc.ofDescriptor(type().stringValue());
+        return Util.fieldTypeSymbol(type());
     }
 
     /**
@@ -83,21 +115,16 @@ public sealed interface LocalVariable extends PseudoInstruction
     Label endScope();
 
     /**
-     * Writes the local variable to the specified writer
-     *
-     * @param buf the writer
-     * @return true if the variable has been written
-     */
-    boolean writeTo(BufWriter buf);
-
-    /**
      * {@return a local variable pseudo-instruction}
+     * {@code slot} must be {@link org.glavo.classfile##u2 u2}.
      *
      * @param slot the local variable slot
      * @param nameEntry the local variable name
      * @param descriptorEntry the local variable descriptor
      * @param startScope the start range of the local variable scope
      * @param endScope the end range of the local variable scope
+     * @throws IllegalArgumentException if {@code slot} is not {@link
+     *         org.glavo.classfile##u2 u2}
      */
     static LocalVariable of(int slot, Utf8Entry nameEntry, Utf8Entry descriptorEntry, Label startScope, Label endScope) {
         return new AbstractPseudoInstruction.UnboundLocalVariable(slot, nameEntry, descriptorEntry,
@@ -106,17 +133,20 @@ public sealed interface LocalVariable extends PseudoInstruction
 
     /**
      * {@return a local variable pseudo-instruction}
+     * {@code slot} must be {@link org.glavo.classfile##u2 u2}.
      *
      * @param slot the local variable slot
      * @param name the local variable name
      * @param descriptor the local variable descriptor
      * @param startScope the start range of the local variable scope
      * @param endScope the end range of the local variable scope
+     * @throws IllegalArgumentException if {@code slot} is not {@link
+     *         org.glavo.classfile##u2 u2}
      */
     static LocalVariable of(int slot, String name, ClassDesc descriptor, Label startScope, Label endScope) {
         return of(slot,
                   TemporaryConstantPool.INSTANCE.utf8Entry(name),
-                  TemporaryConstantPool.INSTANCE.utf8Entry(descriptor.descriptorString()),
+                  TemporaryConstantPool.INSTANCE.utf8Entry(descriptor),
                   startScope, endScope);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,23 +26,33 @@
 package org.glavo.classfile.attribute;
 
 import org.glavo.classfile.Attribute;
+import org.glavo.classfile.AttributeMapper;
+import org.glavo.classfile.AttributeMapper.AttributeStability;
+import org.glavo.classfile.Attributes;
 import org.glavo.classfile.ClassElement;
-import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.constantpool.Utf8Entry;
+
 import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 
 /**
- * Models the {@code SourceID} attribute, which can
- * appear on classes. Delivered as a {@link ClassElement} when
- * traversing a {@link ClassModel}.
+ * Models the {@link Attributes#sourceId() SourceID} attribute, which records
+ * the last modified time of the source file from which this {@code class} file
+ * was compiled.
  * <p>
- * The attribute does not permit multiple instances in a given location.
- * Subsequent occurrence of the attribute takes precedence during the attributed
- * element build or transformation.
+ * This attribute only appears on classes, and does not permit {@linkplain
+ * AttributeMapper#allowMultiple multiple instances} in a class.  It has a
+ * data dependency on the {@linkplain AttributeStability#CP_REFS constant pool}.
+ * <p>
+ * This attribute is not predefined in the Java SE Platform.  This is a
+ * JDK-specific nonstandard attribute produced by the reference implementation
+ * of the system Java compiler, defined by the {@code jdk.compiler} module.
  *
- * @since 22
+ * @see Attributes#sourceId()
+ * @see CompilationIDAttribute
+ * @see CharacterRangeTableAttribute
+ * @since 24
  */
 public sealed interface SourceIDAttribute
         extends Attribute<SourceIDAttribute>, ClassElement
@@ -50,13 +60,14 @@ public sealed interface SourceIDAttribute
 
     /**
      * {@return the source id}  The source id is the last modified time of the
-     * source file (as reported by the filesystem, in milliseconds) when the
-     * classfile is compiled.
+     * source file (as reported by the file system, in milliseconds) when this
+     * {@code class} file is compiled.
      */
     Utf8Entry sourceId();
 
     /**
      * {@return a {@code SourceID} attribute}
+     *
      * @param sourceId the source id
      */
     static SourceIDAttribute of(Utf8Entry sourceId) {
@@ -65,6 +76,7 @@ public sealed interface SourceIDAttribute
 
     /**
      * {@return a {@code SourceID} attribute}
+     *
      * @param sourceId the source id
      */
     static SourceIDAttribute of(String sourceId) {

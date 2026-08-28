@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,66 +24,48 @@
  */
 package org.glavo.classfile;
 
-import org.glavo.classfile.attribute.AnnotationDefaultAttribute;
-import org.glavo.classfile.attribute.BootstrapMethodsAttribute;
-import org.glavo.classfile.attribute.CharacterRangeTableAttribute;
-import org.glavo.classfile.attribute.CodeAttribute;
-import org.glavo.classfile.attribute.CompilationIDAttribute;
-import org.glavo.classfile.attribute.ConstantValueAttribute;
-import org.glavo.classfile.attribute.DeprecatedAttribute;
-import org.glavo.classfile.attribute.EnclosingMethodAttribute;
-import org.glavo.classfile.attribute.ExceptionsAttribute;
-import org.glavo.classfile.attribute.InnerClassesAttribute;
-import org.glavo.classfile.attribute.LineNumberTableAttribute;
-import org.glavo.classfile.attribute.LocalVariableTableAttribute;
-import org.glavo.classfile.attribute.LocalVariableTypeTableAttribute;
-import org.glavo.classfile.attribute.MethodParametersAttribute;
-import org.glavo.classfile.attribute.ModuleAttribute;
-import org.glavo.classfile.attribute.ModuleHashesAttribute;
-import org.glavo.classfile.attribute.ModuleMainClassAttribute;
-import org.glavo.classfile.attribute.ModulePackagesAttribute;
-import org.glavo.classfile.attribute.ModuleResolutionAttribute;
-import org.glavo.classfile.attribute.ModuleTargetAttribute;
-import org.glavo.classfile.attribute.NestHostAttribute;
-import org.glavo.classfile.attribute.NestMembersAttribute;
-import org.glavo.classfile.attribute.PermittedSubclassesAttribute;
-import org.glavo.classfile.attribute.RecordAttribute;
-import org.glavo.classfile.attribute.RuntimeInvisibleAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeInvisibleParameterAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeInvisibleTypeAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeVisibleParameterAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeVisibleTypeAnnotationsAttribute;
-import org.glavo.classfile.attribute.SignatureAttribute;
-import org.glavo.classfile.attribute.SourceDebugExtensionAttribute;
-import org.glavo.classfile.attribute.SourceFileAttribute;
-import org.glavo.classfile.attribute.SourceIDAttribute;
-import org.glavo.classfile.attribute.StackMapTableAttribute;
-import org.glavo.classfile.attribute.SyntheticAttribute;
-import org.glavo.classfile.attribute.UnknownAttribute;
+import org.glavo.classfile.attribute.*;
+import org.glavo.classfile.constantpool.Utf8Entry;
+
 import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.UnboundAttribute;
 
 /**
- * Models a classfile attribute {@jvms 4.7}.  Many, though not all, subtypes of
- * {@linkplain Attribute} will implement {@link ClassElement}, {@link
- * MethodElement}, {@link FieldElement}, or {@link CodeElement}; attributes that
- * are also elements will be delivered when traversing the elements of the
- * corresponding model type. Additionally, all attributes are accessible
- * directly from the corresponding model type through {@link
- * AttributedElement#findAttribute(AttributeMapper)}.
- * @param <A> the attribute type
+ * Models an attribute (JVMS {@jvms 4.7}) in the {@code class} file format.
+ * Attributes exist on certain {@code class} file structures modeled by {@link
+ * AttributedElement}, which provides basic read access to the attributes.
+ * <p>
+ * This sealed interface hierarchy includes attributes predefined in the JVMS
+ * and JDK-specific nonstandard attributes.  Their {@linkplain #attributeMapper()
+ * mappers} are available in {@link Attributes}.  Two special subtypes of {@code
+ * Attribute} are {@link CustomAttribute}, which all user-defined attributes
+ * should extend from, and {@link UnknownAttribute}, representing attributes
+ * read from {@code class} file but are not recognized by the {@link
+ * ClassFile.AttributeMapperOption}.
+ * <p>
+ * Attributes are read through {@link AttributedElement} or element traversal of
+ * a {@link CompoundElement}; they are written through {@link ClassFileBuilder}.
+ * See {@linkplain org.glavo.classfile.attribute##reading Reading Attributes}
+ * and {@linkplain org.glavo.classfile.attribute##writing Writing Attributes}
+ * for more details.
  *
+ * @param <A> the attribute type
+ * @see org.glavo.classfile.attribute
+ * @see AttributeMapper
+ * @see AttributedElement
+ * @see CustomAttribute
+ * @see UnknownAttribute
+ * @jvms 4.7 Attributes
  * @sealedGraph
- * @since 22
+ * @since 24
  */
 public sealed interface Attribute<A extends Attribute<A>>
-        extends WritableElement<A>
+        extends ClassFileElement
         permits AnnotationDefaultAttribute, BootstrapMethodsAttribute,
-        CharacterRangeTableAttribute, CodeAttribute, CompilationIDAttribute,
+                CharacterRangeTableAttribute, CodeAttribute, CompilationIDAttribute,
                 ConstantValueAttribute, DeprecatedAttribute, EnclosingMethodAttribute,
                 ExceptionsAttribute, InnerClassesAttribute, LineNumberTableAttribute,
-                LocalVariableTableAttribute, LocalVariableTypeTableAttribute,
+                LoadableDescriptorsAttribute, LocalVariableTableAttribute, LocalVariableTypeTableAttribute,
                 MethodParametersAttribute, ModuleAttribute, ModuleHashesAttribute,
                 ModuleMainClassAttribute, ModulePackagesAttribute, ModuleResolutionAttribute,
                 ModuleTargetAttribute, NestHostAttribute, NestMembersAttribute,
@@ -96,9 +78,15 @@ public sealed interface Attribute<A extends Attribute<A>>
                 StackMapTableAttribute, SyntheticAttribute,
                 UnknownAttribute, BoundAttribute, UnboundAttribute, CustomAttribute {
     /**
-     * {@return the name of the attribute}
+     * {@return the name of the attribute}  The {@linkplain
+     * Utf8Entry#stringValue() string value} of the name is equivalent to the
+     * value of {@link AttributeMapper#name() attributeMapper().name()}.
+     * <p>
+     * If this attribute is read from a {@code class} file, this method returns
+     * the {@link Utf8Entry} indicating the attribute name in the {@code class}
+     * file.
      */
-    String attributeName();
+    Utf8Entry attributeName();
 
     /**
      * {@return the {@link AttributeMapper} associated with this attribute}

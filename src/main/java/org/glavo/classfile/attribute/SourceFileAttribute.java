@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,23 +26,32 @@
 package org.glavo.classfile.attribute;
 
 import org.glavo.classfile.Attribute;
+import org.glavo.classfile.AttributeMapper;
+import org.glavo.classfile.AttributeMapper.AttributeStability;
+import org.glavo.classfile.Attributes;
 import org.glavo.classfile.ClassElement;
-import org.glavo.classfile.ClassModel;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.constantpool.Utf8Entry;
+
 import org.glavo.classfile.impl.BoundAttribute;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 
 /**
- * Models the {@code SourceFile} attribute {@jvms 4.7.10}, which
- * can appear on classes. Delivered as a {@link ClassElement}
- * when traversing a {@link ClassModel}.
+ * Models the {@link Attributes#sourceFile() SourceFile} attribute (JVMS {@jvms
+ * 4.7.10}), which indicates the name of the source file from which this {@code
+ * class} file was compiled.
  * <p>
- * The attribute does not permit multiple instances in a given location.
- * Subsequent occurrence of the attribute takes precedence during the attributed
- * element build or transformation.
+ * This attribute only appears on classes, and does not permit {@linkplain
+ * AttributeMapper#allowMultiple multiple instances} in a class.  It has a data
+ * dependency on the {@linkplain AttributeStability#CP_REFS constant pool}.
+ * <p>
+ * The attribute was introduced in the Java SE Platform version 5.0, major
+ * version {@value ClassFile#JAVA_5_VERSION}.
  *
- * @since 22
+ * @see Attributes#sourceFile()
+ * @jvms 4.7.10 The {@code SourceFile} Attribute
+ * @since 24
  */
 public sealed interface SourceFileAttribute
         extends Attribute<SourceFileAttribute>, ClassElement
@@ -55,6 +64,7 @@ public sealed interface SourceFileAttribute
 
     /**
      * {@return a source file attribute}
+     *
      * @param sourceFile the source file name
      */
     static SourceFileAttribute of(String sourceFile) {
@@ -63,6 +73,7 @@ public sealed interface SourceFileAttribute
 
     /**
      * {@return a source file attribute}
+     *
      * @param sourceFile the source file name
      */
     static SourceFileAttribute of(Utf8Entry sourceFile) {

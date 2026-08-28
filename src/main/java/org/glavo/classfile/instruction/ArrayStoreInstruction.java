@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,26 +24,41 @@
  */
 package org.glavo.classfile.instruction;
 
+import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.Instruction;
 import org.glavo.classfile.Opcode;
 import org.glavo.classfile.TypeKind;
+
 import org.glavo.classfile.impl.AbstractInstruction;
 import org.glavo.classfile.impl.Util;
 
 /**
  * Models an array store instruction in the {@code code} array of a {@code Code}
- * attribute.  Corresponding opcodes will have a {@code kind} of {@link
- * Opcode.Kind#ARRAY_STORE}.  Delivered as a {@link CodeElement} when
+ * attribute.  Corresponding opcodes have a {@linkplain Opcode#kind() kind}
+ * of {@link Opcode.Kind#ARRAY_STORE}.  Delivered as a {@link CodeElement} when
  * traversing the elements of a {@link CodeModel}.
+ * <p>
+ * An array store instruction is composite:
+ * {@snippet lang=text :
+ * // @link substring="ArrayStoreInstruction" target="CodeBuilder#arrayStore(TypeKind)" :
+ * ArrayStoreInstruction(TypeKind typeKind) // @link substring="typeKind" target="#typeKind"
+ * }
+ * where {@code typeKind} is not {@link TypeKind#VOID void}, and {@link
+ * TypeKind#BOOLEAN boolean} is converted to {@link TypeKind#BYTE byte}.
  *
- * @since 22
+ * @see Opcode.Kind#ARRAY_STORE
+ * @see CodeBuilder#arrayStore CodeBuilder::arrayStore
+ * @since 24
  */
 public sealed interface ArrayStoreInstruction extends Instruction
         permits AbstractInstruction.UnboundArrayStoreInstruction {
     /**
-     * {@return the component type of the array}
+     * {@return the component type of the array}  The {@link TypeKind#BYTE byte}
+     * type store instruction {@link Opcode#BASTORE bastore} also operates on
+     * {@link TypeKind#BOOLEAN boolean} arrays, so this never returns
+     * {@code boolean}.
      */
     TypeKind typeKind();
 
@@ -52,6 +67,8 @@ public sealed interface ArrayStoreInstruction extends Instruction
      *
      * @param op the opcode for the specific type of array store instruction,
      *           which must be of kind {@link Opcode.Kind#ARRAY_STORE}
+     * @throws IllegalArgumentException if the opcode kind is not
+     *         {@link Opcode.Kind#ARRAY_STORE}
      */
     static ArrayStoreInstruction of(Opcode op) {
         Util.checkKind(op, Opcode.Kind.ARRAY_STORE);

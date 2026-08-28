@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,27 +24,39 @@
  */
 package org.glavo.classfile.instruction;
 
+import org.glavo.classfile.CodeBuilder;
+import org.glavo.classfile.CodeElement;
+import org.glavo.classfile.CodeModel;
+import org.glavo.classfile.Instruction;
+import org.glavo.classfile.Opcode;
+import org.glavo.classfile.constantpool.InvokeDynamicEntry;
+import org.glavo.classfile.constantpool.LoadableConstantEntry;
+import org.glavo.classfile.constantpool.Utf8Entry;
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.DirectMethodHandleDesc;
 import java.lang.constant.MethodTypeDesc;
 import java.util.List;
 import java.util.function.Function;
 
-import org.glavo.classfile.CodeElement;
-import org.glavo.classfile.CodeModel;
-import org.glavo.classfile.Instruction;
-import org.glavo.classfile.constantpool.InvokeDynamicEntry;
-import org.glavo.classfile.constantpool.LoadableConstantEntry;
-import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.impl.AbstractInstruction;
 import org.glavo.classfile.impl.Util;
 
 /**
- * Models an {@code invokedynamic} instruction in the {@code code} array of a
- * {@code Code} attribute.  Delivered as a {@link CodeElement} when traversing
- * the elements of a {@link CodeModel}.
+ * Models a dynamically-computed call site invocation instruction in the
+ * {@code code} array of a {@code Code} attribute.  The corresponding opcode is
+ * {@link Opcode#INVOKEDYNAMIC invokedynamic}.  Delivered as a {@link
+ * CodeElement} when traversing the elements of a {@link CodeModel}.
+ * <p>
+ * A dynamically-computed call site invocation instruction is composite:
+ * {@snippet lang=text :
+ * // @link substring="InvokeDynamicInstruction" target="#of" :
+ * InvokeDynamicInstruction(InvokeDynamicEntry invokedynamic) // @link substring="invokedynamic" target="#invokedynamic()"
+ * }
  *
- * @since 22
+ * @see Opcode.Kind#INVOKE_DYNAMIC
+ * @see CodeBuilder#invokedynamic CodeBuilder::invokedynamic
+ * @jvms 6.5.invokedynamic <em>invokedynamic</em>
+ * @since 24
  */
 public sealed interface InvokeDynamicInstruction extends Instruction
         permits AbstractInstruction.BoundInvokeDynamicInstruction, AbstractInstruction.UnboundInvokeDynamicInstruction {
@@ -62,6 +74,10 @@ public sealed interface InvokeDynamicInstruction extends Instruction
 
     /**
      * {@return the invocation type of the call site}
+     *
+     * @apiNote
+     * A symbolic descriptor for the invocation typeis available through {@link
+     * #typeSymbol() typeSymbol()}.
      */
     default Utf8Entry type() {
         return invokedynamic().type();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2026, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,27 +24,53 @@
  */
 package org.glavo.classfile.impl;
 
+import org.glavo.classfile.AccessFlags;
+import org.glavo.classfile.ClassFile;
+import org.glavo.classfile.AccessFlag;
+import org.glavo.classfile.ClassFileFormatVersion;
 import java.util.Set;
 
-import org.glavo.classfile.AccessFlag;
-import org.glavo.classfile.AccessFlags;
+import org.glavo.classfile.impl.PreviewAccessFlags;
 
 public final class AccessFlagsImpl extends AbstractElement
         implements AccessFlags {
 
     private final AccessFlag.Location location;
     private final int flagsMask;
+    private final ClassFileFormatVersion formatVersion; // null for preview
     private Set<AccessFlag> flags;
 
-    public  AccessFlagsImpl(AccessFlag.Location location, AccessFlag... flags) {
+    public AccessFlagsImpl(AccessFlag.Location location, AccessFlag... flags) {
         this.location = location;
         this.flagsMask = Util.flagsToBits(location, flags);
         this.flags = Set.of(flags);
+        this.formatVersion = ClassFileFormatVersion.latest();
     }
 
     public AccessFlagsImpl(AccessFlag.Location location, int mask) {
+        this(location, mask, ClassFileFormatVersion.latest());
+    }
+
+    public AccessFlagsImpl(AccessFlag.Location location, int mask, int version) {
+        this(location, mask, formatVersion(version));
+    }
+
+    private static ClassFileFormatVersion formatVersion(int version) {
+        int major = version & 0xFFFF;
+        int minor = version >>> Character.SIZE;
+
+        if (major == ClassFile.latestMajorVersion() && minor == ClassFile.PREVIEW_MINOR_VERSION) {
+            return null; // Current preview features
+        }
+        return major >= 45 && major <= ClassFileFormatVersion.latest().major()
+                ? ClassFileFormatVersion.fromMajor(major)
+                : ClassFileFormatVersion.latest(); // Fallback
+    }
+
+    private AccessFlagsImpl(AccessFlag.Location location, int mask, ClassFileFormatVersion version) {
         this.location = location;
-        this.flagsMask = mask;
+        this.flagsMask = Util.checkFlags(mask);
+        this.formatVersion = version;
     }
 
     @Override
@@ -55,7 +81,8 @@ public final class AccessFlagsImpl extends AbstractElement
     @Override
     public Set<AccessFlag> flags() {
         if (flags == null)
-            flags = AccessFlag.maskToAccessFlags(flagsMask, location);
+            flags = formatVersion == null ? PreviewAccessFlags.maskToAccessFlags(flagsMask, location)
+                                          : AccessFlag.maskToAccessFlags(flagsMask, location, formatVersion);
         return flags;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,26 +24,41 @@
  */
 package org.glavo.classfile.attribute;
 
-import java.util.List;
-
 import org.glavo.classfile.Attribute;
-import org.glavo.classfile.impl.BoundAttribute;
-import org.glavo.classfile.impl.UnboundAttribute;
+import org.glavo.classfile.AttributeMapper;
+import org.glavo.classfile.AttributeMapper.AttributeStability;
+import org.glavo.classfile.Attributes;
 import org.glavo.classfile.ClassFile;
+import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.instruction.LineNumber;
+import java.util.List;
+
+import org.glavo.classfile.impl.BoundAttribute;
+import org.glavo.classfile.impl.UnboundAttribute;
 
 /**
- * Models the {@code LineNumberTable} attribute {@jvms 4.7.12}, which can appear
- * on a {@code Code} attribute, and records the mapping between indexes into
- * the code table and line numbers in the source file.
- * Delivered as a {@link LineNumber} when traversing the
- * elements of a {@link CodeModel}, according to the setting of the
- * {@link ClassFile.LineNumbersOption} option.
+ * Models the {@link Attributes#lineNumberTable() LineNumberTable} attribute
+ * (JVMS {@jvms 4.7.12}), which records the mapping between indexes into
+ * the {@code code} array and line numbers in the source file.  Its entries are
+ * delivered as {@link LineNumber} when traversing the elements of a {@link
+ * CodeModel}, which is toggled by {@link ClassFile.LineNumbersOption}.
  * <p>
- * The attribute permits multiple instances in a given location.
+ * This attribute only appears on {@code Code} attributes, and permits {@linkplain
+ * AttributeMapper#allowMultiple() multiple instances} in a {@code Code}
+ * attribute.  It has a data dependency on {@linkplain AttributeStability#LABELS
+ * labels}.
+ * <p>
+ * This attribute cannot be sent to a {@link CodeBuilder}; its entries can be
+ * constructed with {@link LineNumber}, resulting in at most one attribute
+ * instance in the built {@code Code} attribute.
+ * <p>
+ * The attribute was introduced in the Java Platform version 1.0.2, major
+ * version {@value ClassFile#JAVA_1_VERSION}.
  *
- * @since 22
+ * @see Attributes#lineNumberTable()
+ * @jvms 4.7.12 The {@code LineNumberTable} Attribute
+ * @since 24
  */
 public sealed interface LineNumberTableAttribute
         extends Attribute<LineNumberTableAttribute>
@@ -57,7 +72,15 @@ public sealed interface LineNumberTableAttribute
 
     /**
      * {@return a {@code LineNumberTable} attribute}
+     *
+     * @apiNote
+     * The created attribute cannot be written to a {@link CodeBuilder}.  Call
+     * {@link CodeBuilder#lineNumber CodeBuilder::lineNumber} in the correct
+     * order instead.
+     *
      * @param lines the line number descriptions
+     * @throws IllegalArgumentException if the number of descriptions exceeds
+     *         the limit of {@link org.glavo.classfile##u2 u2}
      */
     static LineNumberTableAttribute of(List<LineNumberInfo> lines) {
         return new UnboundAttribute.UnboundLineNumberTableAttribute(lines);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,12 +24,12 @@
  */
 package org.glavo.classfile.components;
 
-import java.lang.constant.MethodTypeDesc;
-
-import org.glavo.classfile.AccessFlag;
 import org.glavo.classfile.AccessFlags;
 import org.glavo.classfile.CodeTransform;
 import org.glavo.classfile.TypeKind;
+import java.lang.constant.MethodTypeDesc;
+import org.glavo.classfile.AccessFlag;
+
 import org.glavo.classfile.impl.CodeLocalsShifterImpl;
 
 /**
@@ -37,8 +37,6 @@ import org.glavo.classfile.impl.CodeLocalsShifterImpl;
  * newly allocated positions to avoid conflicts during code injection.
  * Locals pointing to the receiver or to method arguments slots are never shifted.
  * All locals pointing beyond the method arguments are re-indexed in order of appearance.
- *
- * @since 22
  */
 public sealed interface CodeLocalsShifter extends CodeTransform permits CodeLocalsShifterImpl {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,100 +25,110 @@
 
 package org.glavo.classfile;
 
-import java.lang.constant.ClassDesc;
-import java.util.List;
-
 import org.glavo.classfile.attribute.RuntimeInvisibleTypeAnnotationsAttribute;
 import org.glavo.classfile.attribute.RuntimeVisibleTypeAnnotationsAttribute;
-import org.glavo.classfile.constantpool.Utf8Entry;
+import java.util.List;
+
 import org.glavo.classfile.impl.TargetInfoImpl;
 import org.glavo.classfile.impl.UnboundAttribute;
+import org.glavo.classfile.impl.Util;
 
-import org.glavo.classfile.impl.TemporaryConstantPool;
+import static org.glavo.classfile.TypeAnnotation.TargetInfo.*;
 
 /**
- * Models an annotation on a type use, as defined in {@jvms 4.7.19} and {@jvms 4.7.20}.
+ * Models a {@code type_annotation} structure (JVMS {@jvms 4.7.20}). This model
+ * indicates the annotated type within a declaration or expression and the part
+ * of the indicated type that is annotated, in addition to what is {@linkplain
+ * #annotation() available} in an {@code Annotation}.
+ * <p>
+ * This model can reconstruct an annotation on a type or a part of a type, given
+ * the location of the {@code type_annotation} structure in the class file and
+ * the definition of the annotation interface.
+ * <p>
+ * Two {@code TypeAnnotation} objects should be compared using the {@link
+ * Object#equals(Object) equals} method.
  *
+ * @see Annotation
  * @see RuntimeVisibleTypeAnnotationsAttribute
  * @see RuntimeInvisibleTypeAnnotationsAttribute
  *
- * @since 22
+ * @since 24
  */
 public sealed interface TypeAnnotation
-        extends Annotation
         permits UnboundAttribute.UnboundTypeAnnotation {
 
     /**
-     * The kind of target on which the annotation appears, as defined in {@jvms 4.7.20.1}.
+     * The kind of target on which the annotation appears, as defined in JVMS {@jvms 4.7.20.1}.
      *
-     * @since 22
+     * @see TargetInfo#targetType()
+     * @since 24
      */
-        public enum TargetType {
+    public enum TargetType {
         /** For annotations on a class type parameter declaration. */
-        CLASS_TYPE_PARAMETER(ClassFile.TAT_CLASS_TYPE_PARAMETER, 1),
+        CLASS_TYPE_PARAMETER(TARGET_CLASS_TYPE_PARAMETER, 1),
 
         /** For annotations on a method type parameter declaration. */
-        METHOD_TYPE_PARAMETER(ClassFile.TAT_METHOD_TYPE_PARAMETER, 1),
+        METHOD_TYPE_PARAMETER(TARGET_METHOD_TYPE_PARAMETER, 1),
 
         /** For annotations on the type of an "extends" or "implements" clause. */
-        CLASS_EXTENDS(ClassFile.TAT_CLASS_EXTENDS, 2),
+        CLASS_EXTENDS(TARGET_CLASS_EXTENDS, 2),
 
         /** For annotations on a bound of a type parameter of a class. */
-        CLASS_TYPE_PARAMETER_BOUND(ClassFile.TAT_CLASS_TYPE_PARAMETER_BOUND, 2),
+        CLASS_TYPE_PARAMETER_BOUND(TARGET_CLASS_TYPE_PARAMETER_BOUND, 2),
 
         /** For annotations on a bound of a type parameter of a method. */
-        METHOD_TYPE_PARAMETER_BOUND(ClassFile.TAT_METHOD_TYPE_PARAMETER_BOUND, 2),
+        METHOD_TYPE_PARAMETER_BOUND(TARGET_METHOD_TYPE_PARAMETER_BOUND, 2),
 
         /** For annotations on a field. */
-        FIELD(ClassFile.TAT_FIELD, 0),
+        FIELD(TARGET_FIELD, 0),
 
         /** For annotations on a method return type. */
-        METHOD_RETURN(ClassFile.TAT_METHOD_RETURN, 0),
+        METHOD_RETURN(TARGET_METHOD_RETURN, 0),
 
         /** For annotations on the method receiver. */
-        METHOD_RECEIVER(ClassFile.TAT_METHOD_RECEIVER, 0),
+        METHOD_RECEIVER(TARGET_METHOD_RECEIVER, 0),
 
         /** For annotations on a method parameter. */
-        METHOD_FORMAL_PARAMETER(ClassFile.TAT_METHOD_FORMAL_PARAMETER, 1),
+        METHOD_FORMAL_PARAMETER(TARGET_METHOD_FORMAL_PARAMETER, 1),
 
         /** For annotations on a throws clause in a method declaration. */
-        THROWS(ClassFile.TAT_THROWS, 2),
+        THROWS(TARGET_THROWS, 2),
 
         /** For annotations on a local variable. */
-        LOCAL_VARIABLE(ClassFile.TAT_LOCAL_VARIABLE, -1),
+        LOCAL_VARIABLE(TARGET_LOCAL_VARIABLE, -1),
 
         /** For annotations on a resource variable. */
-        RESOURCE_VARIABLE(ClassFile.TAT_RESOURCE_VARIABLE, -1),
+        RESOURCE_VARIABLE(TARGET_RESOURCE_VARIABLE, -1),
 
         /** For annotations on an exception parameter. */
-        EXCEPTION_PARAMETER(ClassFile.TAT_EXCEPTION_PARAMETER, 2),
+        EXCEPTION_PARAMETER(TARGET_EXCEPTION_PARAMETER, 2),
 
         /** For annotations on a type test. */
-        INSTANCEOF(ClassFile.TAT_INSTANCEOF, 2),
+        INSTANCEOF(TARGET_INSTANCEOF, 2),
 
         /** For annotations on an object creation expression. */
-        NEW(ClassFile.TAT_NEW, 2),
+        NEW(TARGET_NEW, 2),
 
         /** For annotations on a constructor reference receiver. */
-        CONSTRUCTOR_REFERENCE(ClassFile.TAT_CONSTRUCTOR_REFERENCE, 2),
+        CONSTRUCTOR_REFERENCE(TARGET_CONSTRUCTOR_REFERENCE, 2),
 
         /** For annotations on a method reference receiver. */
-        METHOD_REFERENCE(ClassFile.TAT_METHOD_REFERENCE, 2),
+        METHOD_REFERENCE(TARGET_METHOD_REFERENCE, 2),
 
         /** For annotations on a typecast. */
-        CAST(ClassFile.TAT_CAST, 3),
+        CAST(TARGET_CAST, 3),
 
         /** For annotations on a type argument of an object creation expression. */
-        CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT(ClassFile.TAT_CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT, 3),
+        CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT(TARGET_CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT, 3),
 
         /** For annotations on a type argument of a method call. */
-        METHOD_INVOCATION_TYPE_ARGUMENT(ClassFile.TAT_METHOD_INVOCATION_TYPE_ARGUMENT, 3),
+        METHOD_INVOCATION_TYPE_ARGUMENT(TARGET_METHOD_INVOCATION_TYPE_ARGUMENT, 3),
 
         /** For annotations on a type argument of a constructor reference. */
-        CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT(ClassFile.TAT_CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT, 3),
+        CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT(TARGET_CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT, 3),
 
         /** For annotations on a type argument of a method reference. */
-        METHOD_REFERENCE_TYPE_ARGUMENT(ClassFile.TAT_METHOD_REFERENCE_TYPE_ARGUMENT, 3);
+        METHOD_REFERENCE_TYPE_ARGUMENT(TARGET_METHOD_REFERENCE_TYPE_ARGUMENT, 3);
 
         private final int targetTypeValue;
         private final int sizeIfFixed;
@@ -130,6 +140,11 @@ public sealed interface TypeAnnotation
 
         /**
          * {@return the target type value}
+         *
+         * @apiNote
+         * {@code TARGET_}-prefixed constants in {@link TargetInfo}, such as {@link
+         * TargetInfo#TARGET_CLASS_TYPE_PARAMETER}, describe the possible return
+         * values of this method.
          */
         public int targetTypeValue() {
             return targetTypeValue;
@@ -145,7 +160,7 @@ public sealed interface TypeAnnotation
 
     /**
      * {@return information describing precisely which type in a declaration or expression
-     * is annotated}
+     * is annotated} This models the {@code target_type} and {@code target_info} items.
      */
     TargetInfo targetInfo();
 
@@ -155,66 +170,174 @@ public sealed interface TypeAnnotation
     List<TypePathComponent> targetPath();
 
     /**
-     * {@return a type annotation}
-     * @param targetInfo which type in a declaration or expression is annotated
-     * @param targetPath which part of the type is annotated
-     * @param annotationClassUtf8Entry the annotation class
-     * @param annotationElements the annotation elements
+     * {@return the annotation applied to the part indicated by {@link #targetPath()}}
+     * This models the interface of the annotation and the set of element-value pairs,
+     * the subset of the {@code type_annotation} structure that is identical to the
+     * {@code annotation} structure.
      */
-    static TypeAnnotation of(TargetInfo targetInfo, List<TypePathComponent> targetPath,
-                             Utf8Entry annotationClassUtf8Entry,
-                             List<AnnotationElement> annotationElements) {
-        return new UnboundAttribute.UnboundTypeAnnotation(targetInfo, targetPath,
-                annotationClassUtf8Entry, annotationElements);
-    }
+    Annotation annotation();
 
     /**
-     * {@return a type annotation}
+     * {@return a {@code type_annotation} structure}
      * @param targetInfo which type in a declaration or expression is annotated
      * @param targetPath which part of the type is annotated
-     * @param annotationClass the annotation class
-     * @param annotationElements the annotation elements
+     * @param annotation the annotation
+     * @throws IllegalArgumentException if the size of {@code targetPath}
+     *         exceeds the limit of {@link org.glavo.classfile##u1 u1}
      */
     static TypeAnnotation of(TargetInfo targetInfo, List<TypePathComponent> targetPath,
-                             ClassDesc annotationClass,
-                             AnnotationElement... annotationElements) {
-        return of(targetInfo, targetPath, annotationClass, List.of(annotationElements));
-    }
-
-    /**
-     * {@return a type annotation}
-     * @param targetInfo which type in a declaration or expression is annotated
-     * @param targetPath which part of the type is annotated
-     * @param annotationClass the annotation class
-     * @param annotationElements the annotation elements
-     */
-    static TypeAnnotation of(TargetInfo targetInfo, List<TypePathComponent> targetPath,
-                             ClassDesc annotationClass,
-                             List<AnnotationElement> annotationElements) {
-        return of(targetInfo, targetPath,
-                TemporaryConstantPool.INSTANCE.utf8Entry(annotationClass.descriptorString()), annotationElements);
-    }
-
-    /**
-     * {@return a type annotation}
-     * @param targetInfo which type in a declaration or expression is annotated
-     * @param targetPath which part of the type is annotated
-     * @param annotationClassUtf8Entry the annotation class
-     * @param annotationElements the annotation elements
-     */
-    static TypeAnnotation of(TargetInfo targetInfo, List<TypePathComponent> targetPath,
-                             Utf8Entry annotationClassUtf8Entry,
-                             AnnotationElement... annotationElements) {
-        return of(targetInfo, targetPath, annotationClassUtf8Entry, List.of(annotationElements));
+                             Annotation annotation) {
+        return new UnboundAttribute.UnboundTypeAnnotation(targetInfo, targetPath, annotation);
     }
 
     /**
      * Specifies which type in a declaration or expression is being annotated.
      *
+     * @see #targetInfo()
      * @sealedGraph
-     * @since 22
+     * @since 24
      */
-        sealed interface TargetInfo {
+    sealed interface TargetInfo {
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#CLASS_TYPE_PARAMETER CLASS_TYPE_PARAMETER}.
+         */
+        int TARGET_CLASS_TYPE_PARAMETER = 0x00;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#METHOD_TYPE_PARAMETER METHOD_TYPE_PARAMETER}.
+         */
+        int TARGET_METHOD_TYPE_PARAMETER = 0x01;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#CLASS_EXTENDS CLASS_EXTENDS}.
+         */
+        int TARGET_CLASS_EXTENDS = 0x10;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#CLASS_TYPE_PARAMETER_BOUND
+         * CLASS_TYPE_PARAMETER_BOUND}.
+         */
+        int TARGET_CLASS_TYPE_PARAMETER_BOUND = 0x11;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#METHOD_TYPE_PARAMETER_BOUND
+         * METHOD_TYPE_PARAMETER_BOUND}.
+         */
+        int TARGET_METHOD_TYPE_PARAMETER_BOUND = 0x12;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#FIELD FIELD}.
+         */
+        int TARGET_FIELD = 0x13;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#METHOD_RETURN METHOD_RETURN}.
+         */
+        int TARGET_METHOD_RETURN = 0x14;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#METHOD_RECEIVER METHOD_RECEIVER}.
+         */
+        int TARGET_METHOD_RECEIVER = 0x15;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#METHOD_FORMAL_PARAMETER
+         * METHOD_FORMAL_PARAMETER}.
+         */
+        int TARGET_METHOD_FORMAL_PARAMETER = 0x16;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#THROWS THROWS}.
+         */
+        int TARGET_THROWS = 0x17;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#LOCAL_VARIABLE LOCAL_VARIABLE}.
+         */
+        int TARGET_LOCAL_VARIABLE = 0x40;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#RESOURCE_VARIABLE RESOURCE_VARIABLE}.
+         */
+        int TARGET_RESOURCE_VARIABLE = 0x41;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#EXCEPTION_PARAMETER EXCEPTION_PARAMETER}.
+         */
+        int TARGET_EXCEPTION_PARAMETER = 0x42;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#INSTANCEOF INSTANCEOF}.
+         */
+        int TARGET_INSTANCEOF = 0x43;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#NEW NEW}.
+         */
+        int TARGET_NEW = 0x44;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#CONSTRUCTOR_REFERENCE
+         * CONSTRUCTOR_REFERENCE}.
+         */
+        int TARGET_CONSTRUCTOR_REFERENCE = 0x45;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#METHOD_REFERENCE METHOD_REFERENCE}.
+         */
+        int TARGET_METHOD_REFERENCE = 0x46;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#CAST CAST}.
+         */
+        int TARGET_CAST = 0x47;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT
+         * CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT}.
+         */
+        int TARGET_CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT = 0x48;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#METHOD_INVOCATION_TYPE_ARGUMENT
+         * METHOD_INVOCATION_TYPE_ARGUMENT}.
+         */
+        int TARGET_METHOD_INVOCATION_TYPE_ARGUMENT = 0x49;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT
+         * CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT}.
+         */
+        int TARGET_CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT = 0x4A;
+
+        /**
+         * The {@linkplain TargetType#targetTypeValue() value} of type annotation {@linkplain
+         * #targetType target type} {@link TargetType#METHOD_REFERENCE_TYPE_ARGUMENT
+         * METHOD_REFERENCE_TYPE_ARGUMENT}.
+         */
+        int TARGET_METHOD_REFERENCE_TYPE_ARGUMENT = 0x4B;
 
         /**
          * {@return the type of the target}
@@ -232,6 +355,8 @@ public sealed interface TypeAnnotation
          * {@return a target for annotations on a class or method type parameter declaration}
          * @param targetType {@link TargetType#CLASS_TYPE_PARAMETER} or {@link TargetType#METHOD_TYPE_PARAMETER}
          * @param typeParameterIndex specifies which type parameter declaration is annotated
+         * @throws IllegalArgumentException if {@code typeParameterIndex} is not
+         *         {@link org.glavo.classfile##u1 u1}
          */
         static TypeParameterTarget ofTypeParameter(TargetType targetType, int typeParameterIndex) {
             return new TargetInfoImpl.TypeParameterTargetImpl(targetType, typeParameterIndex);
@@ -240,6 +365,8 @@ public sealed interface TypeAnnotation
         /**
          * {@return a target for annotations on a class type parameter declaration}
          * @param typeParameterIndex specifies which type parameter declaration is annotated
+         * @throws IllegalArgumentException if {@code typeParameterIndex} is not
+         *         {@link org.glavo.classfile##u1 u1}
          */
         static TypeParameterTarget ofClassTypeParameter(int typeParameterIndex) {
             return ofTypeParameter(TargetType.CLASS_TYPE_PARAMETER, typeParameterIndex);
@@ -248,6 +375,8 @@ public sealed interface TypeAnnotation
         /**
          * {@return a target for annotations on a method type parameter declaration}
          * @param typeParameterIndex specifies which type parameter declaration is annotated
+         * @throws IllegalArgumentException if {@code typeParameterIndex} is not
+         *         {@link org.glavo.classfile##u1 u1}
          */
         static TypeParameterTarget ofMethodTypeParameter(int typeParameterIndex) {
             return ofTypeParameter(TargetType.METHOD_TYPE_PARAMETER, typeParameterIndex);
@@ -256,6 +385,8 @@ public sealed interface TypeAnnotation
         /**
          * {@return a target for annotations on the type of an "extends" or "implements" clause}
          * @param supertypeIndex the index into the interfaces array or 65535 to indicate it is the superclass
+         * @throws IllegalArgumentException if {@code supertypeIndex} is not
+         *         {@link org.glavo.classfile##u2 u2}
          */
         static SupertypeTarget ofClassExtends(int supertypeIndex) {
             return new TargetInfoImpl.SupertypeTargetImpl(supertypeIndex);
@@ -267,6 +398,8 @@ public sealed interface TypeAnnotation
          * @param targetType {@link TargetType#CLASS_TYPE_PARAMETER_BOUND} or {@link TargetType#METHOD_TYPE_PARAMETER_BOUND}
          * @param typeParameterIndex specifies which type parameter declaration is annotated
          * @param boundIndex specifies which bound of the type parameter declaration is annotated
+         * @throws IllegalArgumentException if {@code typeParameterIndex} or
+         *         {@code boundIndex} is not {@link org.glavo.classfile##u1 u1}
          */
         static TypeParameterBoundTarget ofTypeParameterBound(TargetType targetType, int typeParameterIndex, int boundIndex) {
             return new TargetInfoImpl.TypeParameterBoundTargetImpl(targetType, typeParameterIndex, boundIndex);
@@ -277,6 +410,8 @@ public sealed interface TypeAnnotation
          * a generic class, or interface}
          * @param typeParameterIndex specifies which type parameter declaration is annotated
          * @param boundIndex specifies which bound of the type parameter declaration is annotated
+         * @throws IllegalArgumentException if {@code typeParameterIndex} or
+         *         {@code boundIndex} is not {@link org.glavo.classfile##u1 u1}
          */
         static TypeParameterBoundTarget ofClassTypeParameterBound(int typeParameterIndex, int boundIndex) {
             return ofTypeParameterBound(TargetType.CLASS_TYPE_PARAMETER_BOUND, typeParameterIndex, boundIndex);
@@ -287,6 +422,8 @@ public sealed interface TypeAnnotation
          * a generic method, or constructor}
          * @param typeParameterIndex specifies which type parameter declaration is annotated
          * @param boundIndex specifies which bound of the type parameter declaration is annotated
+         * @throws IllegalArgumentException if {@code typeParameterIndex} or
+         *         {@code boundIndex} is not {@link org.glavo.classfile##u1 u1}
          */
         static TypeParameterBoundTarget ofMethodTypeParameterBound(int typeParameterIndex, int boundIndex) {
             return ofTypeParameterBound(TargetType.METHOD_TYPE_PARAMETER_BOUND, typeParameterIndex, boundIndex);
@@ -322,9 +459,14 @@ public sealed interface TypeAnnotation
         }
 
         /**
-         * {@return a target for annotations on the type in a formal parameter declaration of a method,
-         * constructor, or lambda expression}
+         * {@return a target for annotations on the type in a formal parameter
+         * declaration of a method, constructor, or lambda expression}  The
+         * index may differ from the index in the method descriptor because some
+         * synthetic or implicit parameters are omitted.
+         *
          * @param formalParameterIndex specifies which formal parameter declaration has an annotated type
+         * @throws IllegalArgumentException if {@code formalParameterIndex} is
+         *         not {@link org.glavo.classfile##u1 u1}
          */
         static FormalParameterTarget ofMethodFormalParameter(int formalParameterIndex) {
             return new TargetInfoImpl.FormalParameterTargetImpl(formalParameterIndex);
@@ -334,6 +476,8 @@ public sealed interface TypeAnnotation
          * {@return a target for annotations on the i'th type in the throws clause of a method or
          * constructor declaration}
          * @param throwsTargetIndex the index into the exception table of the Exceptions attribute of the method
+         * @throws IllegalArgumentException if {@code throwsTargetIndex} is
+         *         not {@link org.glavo.classfile##u2 u2}
          */
         static ThrowsTarget ofThrows(int throwsTargetIndex) {
             return new TargetInfoImpl.ThrowsTargetImpl(throwsTargetIndex);
@@ -344,6 +488,8 @@ public sealed interface TypeAnnotation
          * including a variable declared as a resource in a try-with-resources statement}
          * @param targetType {@link TargetType#LOCAL_VARIABLE} or {@link TargetType#RESOURCE_VARIABLE}
          * @param table the list of local variable targets
+         * @throws IllegalArgumentException if the size of the list of targets
+         *         exceeds the limit of {@link org.glavo.classfile##u2 u2}
          */
         static LocalVarTarget ofVariable(TargetType targetType, List<LocalVarTargetInfo> table) {
             return new TargetInfoImpl.LocalVarTargetImpl(targetType, table);
@@ -352,6 +498,8 @@ public sealed interface TypeAnnotation
         /**
          * {@return a target for annotations on the type in a local variable declaration}
          * @param table the list of local variable targets
+         * @throws IllegalArgumentException if the size of the list of targets
+         *         exceeds the limit of {@link org.glavo.classfile##u2 u2}
          */
         static LocalVarTarget ofLocalVariable(List<LocalVarTargetInfo> table) {
             return ofVariable(TargetType.LOCAL_VARIABLE, table);
@@ -361,6 +509,8 @@ public sealed interface TypeAnnotation
          * {@return a target for annotations on the type in a local variable declared
          * as a resource in a try-with-resources statement}
          * @param table the list of local variable targets
+         * @throws IllegalArgumentException if the size of the list of targets
+         *         exceeds the limit of {@link org.glavo.classfile##u2 u2}
          */
         static LocalVarTarget ofResourceVariable(List<LocalVarTargetInfo> table) {
             return ofVariable(TargetType.RESOURCE_VARIABLE, table);
@@ -369,6 +519,8 @@ public sealed interface TypeAnnotation
         /**
          * {@return a target for annotations on the i'th type in an exception parameter declaration}
          * @param exceptionTableIndex the index into the exception table of the Code attribute
+         * @throws IllegalArgumentException if {@code exceptionTableIndex} is
+         *         not {@link org.glavo.classfile##u2 u2}
          */
         static CatchTarget ofExceptionParameter(int exceptionTableIndex) {
             return new TargetInfoImpl.CatchTargetImpl(exceptionTableIndex);
@@ -380,7 +532,7 @@ public sealed interface TypeAnnotation
          * @param targetType {@link TargetType#INSTANCEOF}, {@link TargetType#NEW},
          *                   {@link TargetType#CONSTRUCTOR_REFERENCE},
          *                   or {@link TargetType#METHOD_REFERENCE}
-         * @param target the code label corresponding to the instruction
+         * @param target the label right before the instruction
          */
         static OffsetTarget ofOffset(TargetType targetType, Label target) {
             return new TargetInfoImpl.OffsetTargetImpl(targetType, target);
@@ -388,7 +540,7 @@ public sealed interface TypeAnnotation
 
         /**
          * {@return a target for annotations on the type in an instanceof expression}
-         * @param target the code label corresponding to the instruction
+         * @param target the label right before the instruction
          */
         static OffsetTarget ofInstanceofExpr(Label target) {
             return ofOffset(TargetType.INSTANCEOF, target);
@@ -396,7 +548,7 @@ public sealed interface TypeAnnotation
 
         /**
          * {@return a target for annotations on the type in a new expression}
-         * @param target the code label corresponding to the instruction
+         * @param target the label right before the instruction
          */
         static OffsetTarget ofNewExpr(Label target) {
             return ofOffset(TargetType.NEW, target);
@@ -404,7 +556,7 @@ public sealed interface TypeAnnotation
 
         /**
          * {@return a target for annotations on the type before the :: in a constructor reference expression}
-         * @param target the code label corresponding to the instruction
+         * @param target the label right before the instruction
          */
         static OffsetTarget ofConstructorReference(Label target) {
             return ofOffset(TargetType.CONSTRUCTOR_REFERENCE, target);
@@ -412,7 +564,7 @@ public sealed interface TypeAnnotation
 
         /**
          * {@return a target for annotations on the type before the :: in a method reference expression}
-         * @param target the code label corresponding to the instruction
+         * @param target the label right before the instruction
          */
         static OffsetTarget ofMethodReference(Label target) {
             return ofOffset(TargetType.METHOD_REFERENCE, target);
@@ -427,8 +579,10 @@ public sealed interface TypeAnnotation
          *                   {@link TargetType#METHOD_INVOCATION_TYPE_ARGUMENT},
          *                   {@link TargetType#CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT},
          *                   or {@link TargetType#METHOD_REFERENCE_TYPE_ARGUMENT}
-         * @param target the code label corresponding to the instruction
+         * @param target the label right before the instruction
          * @param typeArgumentIndex specifies which type in the cast operator or argument is annotated
+         * @throws IllegalArgumentException if {@code typeArgumentIndex} is not
+         *         {@link org.glavo.classfile##u1 u1}
          */
         static TypeArgumentTarget ofTypeArgument(TargetType targetType, Label target, int typeArgumentIndex) {
             return new TargetInfoImpl.TypeArgumentTargetImpl(targetType, target, typeArgumentIndex);
@@ -436,8 +590,10 @@ public sealed interface TypeAnnotation
 
         /**
          * {@return a target for annotations on the i'th type in a cast expression}
-         * @param target the code label corresponding to the instruction
+         * @param target the label right before the instruction
          * @param typeArgumentIndex specifies which type in the cast operator is annotated
+         * @throws IllegalArgumentException if {@code typeArgumentIndex} is not
+         *         {@link org.glavo.classfile##u1 u1}
          */
         static TypeArgumentTarget ofCastExpr(Label target, int typeArgumentIndex) {
             return ofTypeArgument(TargetType.CAST, target, typeArgumentIndex);
@@ -446,8 +602,10 @@ public sealed interface TypeAnnotation
         /**
          * {@return a target for annotations on the i'th type argument in the explicit type argument list for
          * an explicit constructor invocation statement}
-         * @param target the code label corresponding to the instruction
+         * @param target the label right before the instruction
          * @param typeArgumentIndex specifies which type in the argument is annotated
+         * @throws IllegalArgumentException if {@code typeArgumentIndex} is not
+         *         {@link org.glavo.classfile##u1 u1}
          */
         static TypeArgumentTarget ofConstructorInvocationTypeArgument(Label target, int typeArgumentIndex) {
             return ofTypeArgument(TargetType.CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT, target, typeArgumentIndex);
@@ -456,8 +614,10 @@ public sealed interface TypeAnnotation
         /**
          * {@return a target for annotations on the i'th type argument in the explicit type argument list for
          * a method invocation expression}
-         * @param target the code label corresponding to the instruction
+         * @param target the label right before the instruction
          * @param typeArgumentIndex specifies which type in the argument is annotated
+         * @throws IllegalArgumentException if {@code typeArgumentIndex} is not
+         *         {@link org.glavo.classfile##u1 u1}
          */
         static TypeArgumentTarget ofMethodInvocationTypeArgument(Label target, int typeArgumentIndex) {
             return ofTypeArgument(TargetType.METHOD_INVOCATION_TYPE_ARGUMENT, target, typeArgumentIndex);
@@ -466,8 +626,10 @@ public sealed interface TypeAnnotation
         /**
          * {@return a target for annotations on the i'th type argument in the explicit type argument list for
          * a new expression}
-         * @param target the code label corresponding to the instruction
+         * @param target the label right before the instruction
          * @param typeArgumentIndex specifies which type in the argument is annotated
+         * @throws IllegalArgumentException if {@code typeArgumentIndex} is not
+         *         {@link org.glavo.classfile##u1 u1}
          */
         static TypeArgumentTarget ofConstructorReferenceTypeArgument(Label target, int typeArgumentIndex) {
             return ofTypeArgument(TargetType.CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT, target, typeArgumentIndex);
@@ -476,8 +638,10 @@ public sealed interface TypeAnnotation
         /**
          * {@return a target for annotations on the i'th type argument in the explicit type argument list for
          * a method reference expression}
-         * @param target the code label corresponding to the instruction
+         * @param target the label right before the instruction
          * @param typeArgumentIndex specifies which type in the argument is annotated
+         * @throws IllegalArgumentException if {@code typeArgumentIndex} is not
+         *         {@link org.glavo.classfile##u1 u1}
          */
         static TypeArgumentTarget ofMethodReferenceTypeArgument(Label target, int typeArgumentIndex) {
             return ofTypeArgument(TargetType.METHOD_REFERENCE_TYPE_ARGUMENT, target, typeArgumentIndex);
@@ -489,9 +653,12 @@ public sealed interface TypeAnnotation
      * parameter of a generic class, generic interface, generic method, or
      * generic constructor.
      *
-     * @since 22
+     * @see #ofTypeParameter(TargetType, int)
+     * @see #ofClassTypeParameter(int)
+     * @see #ofMethodTypeParameter(int)
+     * @since 24
      */
-        sealed interface TypeParameterTarget extends TargetInfo
+    sealed interface TypeParameterTarget extends TargetInfo
             permits TargetInfoImpl.TypeParameterTargetImpl {
 
         /**
@@ -507,9 +674,10 @@ public sealed interface TypeAnnotation
      * Indicates that an annotation appears on a type in the extends or implements
      * clause of a class or interface declaration.
      *
-     * @since 22
+     * @see #ofClassExtends(int)
+     * @since 24
      */
-        sealed interface SupertypeTarget extends TargetInfo
+    sealed interface SupertypeTarget extends TargetInfo
             permits TargetInfoImpl.SupertypeTargetImpl {
 
         /**
@@ -530,9 +698,12 @@ public sealed interface TypeAnnotation
      * type parameter declaration of a generic class, interface, method, or
      * constructor.
      *
-     * @since 22
+     * @see #ofTypeParameterBound(TargetType, int, int)
+     * @see #ofClassTypeParameterBound(int, int)
+     * @see #ofMethodTypeParameterBound(int, int)
+     * @since 24
      */
-        sealed interface TypeParameterBoundTarget extends TargetInfo
+    sealed interface TypeParameterBoundTarget extends TargetInfo
             permits TargetInfoImpl.TypeParameterBoundTargetImpl {
 
         /**
@@ -555,9 +726,13 @@ public sealed interface TypeAnnotation
      * declaration, the return type of a method, the type of a newly constructed
      * object, or the receiver type of a method or constructor.
      *
-     * @since 22
+     * @see #of(TargetType)
+     * @see #ofField()
+     * @see #ofMethodReturn()
+     * @see #ofMethodReceiver()
+     * @since 24
      */
-        sealed interface EmptyTarget extends TargetInfo
+    sealed interface EmptyTarget extends TargetInfo
             permits TargetInfoImpl.EmptyTargetImpl {
     }
 
@@ -565,16 +740,17 @@ public sealed interface TypeAnnotation
      * Indicates that an annotation appears on the type in a formal parameter
      * declaration of a method, constructor, or lambda expression.
      *
-     * @since 22
+     * @see #ofMethodFormalParameter(int)
+     * @since 24
      */
-        sealed interface FormalParameterTarget extends TargetInfo
+    sealed interface FormalParameterTarget extends TargetInfo
             permits TargetInfoImpl.FormalParameterTargetImpl {
 
         /**
-         * Which formal parameter declaration has an annotated type.
-         *
-         * @return the index into the formal parameter declarations, in the order
-         * declared in the source code
+         * {@return the index into the formal parameter declarations, in the
+         * order declared in the source code}  The index may differ from the
+         * index in the method descriptor because some synthetic or implicit
+         * parameters are omitted.
          */
         int formalParameterIndex();
     }
@@ -583,9 +759,10 @@ public sealed interface TypeAnnotation
      * Indicates that an annotation appears on the i'th type in the throws
      * clause of a method or constructor declaration.
      *
-     * @since 22
+     * @see #ofThrows(int)
+     * @since 24
      */
-        sealed interface ThrowsTarget extends TargetInfo
+    sealed interface ThrowsTarget extends TargetInfo
             permits TargetInfoImpl.ThrowsTargetImpl {
 
         /**
@@ -593,7 +770,7 @@ public sealed interface TypeAnnotation
          * Exceptions attribute of the method_info structure enclosing the
          * RuntimeVisibleTypeAnnotations attribute.
          *
-         * @return the index into the list java.lang.classfile.attribute.ExceptionsAttribute.exceptions()
+         * @return the index into the list org.glavo.classfile.attribute.ExceptionsAttribute.exceptions()
          */
         int throwsTargetIndex();
     }
@@ -602,13 +779,14 @@ public sealed interface TypeAnnotation
      * Indicates that an annotation appears on the type in a local variable declaration,
      * including a variable declared as a resource in a try-with-resources statement.
      *
-     * @since 22
+     * @see #ofLocalVariable(List)
+     * @since 24
      */
-        sealed interface LocalVarTarget extends TargetInfo
+    sealed interface LocalVarTarget extends TargetInfo
             permits TargetInfoImpl.LocalVarTargetImpl {
 
         /**
-         * {@return the table of local variable location/indices.}
+         * {@return the table of local variable location/indices}
          */
         List<LocalVarTargetInfo> table();
     }
@@ -618,9 +796,10 @@ public sealed interface TypeAnnotation
      * has a value, and the index into the local variable array of the current
      * frame at which that local variable can be found.
      *
-     * @since 22
+     * @see LocalVarTarget
+     * @since 24
      */
-        sealed interface LocalVarTargetInfo
+    sealed interface LocalVarTargetInfo
             permits TargetInfoImpl.LocalVarTargetInfoImpl {
 
         /**
@@ -630,7 +809,6 @@ public sealed interface TypeAnnotation
          * @return the start of the bytecode section
          */
         Label startLabel();
-
 
         /**
          * The given local variable has a value at indices into the code array in the interval
@@ -654,6 +832,8 @@ public sealed interface TypeAnnotation
          * @param startLabel the code label indicating start of an interval where variable has value
          * @param endLabel the code label indicating start of an interval where variable has value
          * @param index index into the local variables
+         * @throws IllegalArgumentException if {@code index} is not {@link
+         *         org.glavo.classfile##u2 u2}
          */
         static LocalVarTargetInfo of(Label startLabel, Label endLabel, int index) {
             return new TargetInfoImpl.LocalVarTargetInfoImpl(startLabel, endLabel, index);
@@ -664,9 +844,10 @@ public sealed interface TypeAnnotation
      * Indicates that an annotation appears on the i'th type in an exception parameter
      * declaration.
      *
-     * @since 22
+     * @see #ofExceptionParameter(int)
+     * @since 24
      */
-        sealed interface CatchTarget extends TargetInfo
+    sealed interface CatchTarget extends TargetInfo
             permits TargetInfoImpl.CatchTargetImpl {
 
         /**
@@ -682,17 +863,22 @@ public sealed interface TypeAnnotation
      * Indicates that an annotation appears on either the type in an instanceof expression
      * or a new expression, or the type before the :: in a method reference expression.
      *
-     * @since 22
+     * @see #ofOffset(TargetType, Label)
+     * @see #ofNewExpr(Label)
+     * @see #ofInstanceofExpr(Label)
+     * @see #ofConstructorReference(Label)
+     * @see #ofMethodReference(Label)
+     * @since 24
      */
-        sealed interface OffsetTarget extends TargetInfo
+    sealed interface OffsetTarget extends TargetInfo
             permits TargetInfoImpl.OffsetTargetImpl {
 
         /**
-         * The code array offset of either the bytecode instruction
-         * corresponding to the instanceof expression, the new bytecode instruction corresponding to the new
-         * expression, or the bytecode instruction corresponding to the method reference expression.
+         * The label right before the {@link Instruction} corresponding to the
+         * instanceof expression, the new expression, or the method reference
+         * expression.
          *
-         * @return the code label corresponding to the instruction
+         * @return the label right before the instruction
          */
         Label target();
     }
@@ -703,19 +889,24 @@ public sealed interface TypeAnnotation
      * expression, an explicit constructor invocation statement, a method invocation expression, or a method reference
      * expression.
      *
-     * @since 22
+     * @see #ofTypeArgument(TargetType, Label, int)
+     * @see #ofCastExpr(Label, int)
+     * @see #ofConstructorInvocationTypeArgument(Label, int)
+     * @see #ofConstructorReferenceTypeArgument(Label, int)
+     * @see #ofMethodInvocationTypeArgument(Label, int)
+     * @see #ofMethodReferenceTypeArgument(Label, int)
+     * @since 24
      */
-        sealed interface TypeArgumentTarget extends TargetInfo
+    sealed interface TypeArgumentTarget extends TargetInfo
             permits TargetInfoImpl.TypeArgumentTargetImpl {
 
         /**
-         * The code array offset of either the bytecode instruction
-         * corresponding to the cast expression, the new bytecode instruction corresponding to the new expression, the
-         * bytecode instruction corresponding to the explicit constructor invocation statement, the bytecode
-         * instruction corresponding to the method invocation expression, or the bytecode instruction corresponding to
-         * the method reference expression.
+         * The label right before the {@link Instruction} corresponding to the
+         * cast expression, the new expression, the explicit constructor
+         * invocation statement, the method invocation expression, or the method
+         * reference expression.
          *
-         * @return the code label corresponding to the instruction
+         * @return the label right before the instruction
          */
         Label target();
 
@@ -736,19 +927,20 @@ public sealed interface TypeAnnotation
 
     /**
      * JVMS: Type_path structure identifies which part of the type is annotated,
-     * as defined in {@jvms 4.7.20.2}
+     * as defined in JVMS {@jvms 4.7.20.2}
      *
-     * @since 22
+     * @see #targetPath()
+     * @since 24
      */
-        sealed interface TypePathComponent
+    sealed interface TypePathComponent
             permits UnboundAttribute.TypePathComponentImpl {
 
         /**
-         * Type path kind, as defined in {@jvms 4.7.20.2}
+         * Type path kind, as defined in JVMS {@jvms 4.7.20.2}
          *
-         * @since 22
+         * @since 24
          */
-                public enum Kind {
+        public enum Kind {
 
             /** Annotation is deeper in an array type */
             ARRAY(0),
@@ -809,9 +1001,11 @@ public sealed interface TypeAnnotation
          * {@return type path component of an annotation}
          * @param typePathKind the kind of path element
          * @param typeArgumentIndex the type argument index
+         * @throws IllegalArgumentException if {@code typeArgumentIndex} is not
+         *         {@link org.glavo.classfile##u1 u1}
          */
         static TypePathComponent of(Kind typePathKind, int typeArgumentIndex) {
-
+            Util.checkU1(typeArgumentIndex, "type argument index");
             return switch (typePathKind) {
                 case ARRAY -> ARRAY;
                 case INNER_TYPE -> INNER_TYPE;

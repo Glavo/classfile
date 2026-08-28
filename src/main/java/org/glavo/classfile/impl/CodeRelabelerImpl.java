@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,22 +28,12 @@ import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.Label;
 import org.glavo.classfile.components.CodeRelabeler;
-import org.glavo.classfile.instruction.BranchInstruction;
-import org.glavo.classfile.instruction.CharacterRange;
-import org.glavo.classfile.instruction.ExceptionCatch;
-import org.glavo.classfile.instruction.LabelTarget;
-import org.glavo.classfile.instruction.LocalVariable;
-import org.glavo.classfile.instruction.LocalVariableType;
-import org.glavo.classfile.instruction.LookupSwitchInstruction;
-import org.glavo.classfile.instruction.SwitchCase;
-import org.glavo.classfile.instruction.TableSwitchInstruction;
-
+import org.glavo.classfile.instruction.*;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
 public record CodeRelabelerImpl(BiFunction<Label, CodeBuilder, Label> mapFunction) implements CodeRelabeler {
 
-    @Override
     public Label relabel(Label label, CodeBuilder cob) {
         return mapFunction.apply(label, cob);
     }
@@ -52,28 +42,21 @@ public record CodeRelabelerImpl(BiFunction<Label, CodeBuilder, Label> mapFunctio
     public void accept(CodeBuilder cob, CodeElement coe) {
         Objects.requireNonNull(coe);
         if (coe instanceof BranchInstruction bi) {
-            cob.branchInstruction(
-                    bi.opcode(),
-                    relabel(bi.target(), cob));
+            cob.branch(bi.opcode(), relabel(bi.target(), cob));
         } else if (coe instanceof LookupSwitchInstruction lsi) {
-            cob.lookupSwitchInstruction(
+            cob.lookupswitch(
                     relabel(lsi.defaultTarget(), cob),
                     lsi.cases().stream().map(c ->
-                            SwitchCase.of(
-                                    c.caseValue(),
-                                    relabel(c.target(), cob))).toList());
+                            SwitchCase.of(c.caseValue(), relabel(c.target(), cob))).toList());
         } else if (coe instanceof TableSwitchInstruction tsi) {
-            cob.tableSwitchInstruction(
+            cob.tableswitch(
                     tsi.lowValue(),
                     tsi.highValue(),
                     relabel(tsi.defaultTarget(), cob),
                     tsi.cases().stream().map(c ->
-                            SwitchCase.of(
-                                    c.caseValue(),
-                                    relabel(c.target(), cob))).toList());
+                            SwitchCase.of(c.caseValue(), relabel(c.target(), cob))).toList());
         } else if (coe instanceof LabelTarget lt) {
-            cob.labelBinding(
-                    relabel(lt.label(), cob));
+            cob.labelBinding(relabel(lt.label(), cob));
         } else if (coe instanceof ExceptionCatch ec) {
             cob.exceptionCatch(
                     relabel(ec.tryStart(), cob),

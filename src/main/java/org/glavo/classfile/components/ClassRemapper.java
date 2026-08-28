@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,16 +24,19 @@
  */
 package org.glavo.classfile.components;
 
-import java.lang.constant.ClassDesc;
-import java.util.Map;
-import java.util.function.Function;
+import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.ClassModel;
 import org.glavo.classfile.ClassTransform;
-import org.glavo.classfile.ClassFile;
 import org.glavo.classfile.CodeTransform;
 import org.glavo.classfile.FieldTransform;
 import org.glavo.classfile.MethodTransform;
+import java.lang.constant.ClassDesc;
+import java.util.Map;
+import java.util.function.Function;
+
 import org.glavo.classfile.impl.ClassRemapperImpl;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * {@code ClassRemapper} is a {@link ClassTransform}, {@link FieldTransform},
@@ -50,8 +53,6 @@ import org.glavo.classfile.impl.ClassRemapperImpl;
  * <p>
  * Arrays of reference types are always decomposed, mapped as the base reference
  * types and composed back to arrays.
- *
- * @since 22
  */
 public sealed interface ClassRemapper extends ClassTransform permits ClassRemapperImpl {
 
@@ -62,6 +63,7 @@ public sealed interface ClassRemapper extends ClassTransform permits ClassRemapp
      * @return new instance of {@code ClassRemapper}
      */
     static ClassRemapper of(Map<ClassDesc, ClassDesc> classMap) {
+        requireNonNull(classMap);
         return of(desc -> classMap.getOrDefault(desc, desc));
     }
 
@@ -73,7 +75,7 @@ public sealed interface ClassRemapper extends ClassTransform permits ClassRemapp
      * @return new instance of {@code ClassRemapper}
      */
     static ClassRemapper of(Function<ClassDesc, ClassDesc> mapFunction) {
-        return new ClassRemapperImpl(mapFunction);
+        return new ClassRemapperImpl(requireNonNull(mapFunction));
     }
 
     /**
@@ -105,6 +107,6 @@ public sealed interface ClassRemapper extends ClassTransform permits ClassRemapp
      * @return re-mapped class file bytes
      */
     default byte[] remapClass(ClassFile context, ClassModel clm) {
-        return context.transform(clm, map(clm.thisClass().asSymbol()), this);
+        return context.transformClass(clm, map(clm.thisClass().asSymbol()), this);
     }
 }

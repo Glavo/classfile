@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,11 +24,7 @@
  */
 package org.glavo.classfile.impl;
 
-import java.util.Objects;
-import java.util.Optional;
-
 import org.glavo.classfile.CodeBuilder;
-import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.Label;
 import org.glavo.classfile.constantpool.ConstantPoolBuilder;
 
@@ -39,13 +35,12 @@ public abstract sealed class NonterminalCodeBuilder implements CodeBuilder
 
     public NonterminalCodeBuilder(CodeBuilder parent) {
         this.parent = parent;
-        if (Objects.requireNonNull(parent) instanceof NonterminalCodeBuilder cb) {
-            this.terminal = cb.terminal;
-        } else if (parent instanceof TerminalCodeBuilder cb) {
-            this.terminal = cb;
-        } else {
-            throw new IllegalArgumentException();
-        }
+        this.terminal = findTerminal(parent);
+    }
+
+    static TerminalCodeBuilder findTerminal(CodeBuilder cob) {
+        return cob instanceof NonterminalCodeBuilder ncb ?
+                ncb.terminal : (TerminalCodeBuilder) cob;
     }
 
     @Override
@@ -61,11 +56,6 @@ public abstract sealed class NonterminalCodeBuilder implements CodeBuilder
     @Override
     public ConstantPoolBuilder constantPool() {
         return terminal.constantPool();
-    }
-
-    @Override
-    public Optional<CodeModel> original() {
-        return terminal.original();
     }
 
     @Override

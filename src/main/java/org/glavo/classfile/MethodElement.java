@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,33 +24,30 @@
  */
 package org.glavo.classfile;
 
-import org.glavo.classfile.attribute.AnnotationDefaultAttribute;
-import org.glavo.classfile.attribute.DeprecatedAttribute;
-import org.glavo.classfile.attribute.ExceptionsAttribute;
-import org.glavo.classfile.attribute.MethodParametersAttribute;
-import org.glavo.classfile.attribute.RuntimeInvisibleAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeInvisibleParameterAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeInvisibleTypeAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeVisibleAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeVisibleParameterAnnotationsAttribute;
-import org.glavo.classfile.attribute.RuntimeVisibleTypeAnnotationsAttribute;
-import org.glavo.classfile.attribute.SignatureAttribute;
-import org.glavo.classfile.attribute.SyntheticAttribute;
-import org.glavo.classfile.attribute.UnknownAttribute;
+import org.glavo.classfile.attribute.*;
 
 /**
- * A marker interface for elements that can appear when traversing
- * a {@link MethodModel} or be presented to a {@link MethodBuilder}.
+ * Marker interface for a member element of a {@link MethodModel}.  Such an
+ * element can appear when traversing a {@link MethodModel} unless otherwise
+ * specified, be supplied to a {@link MethodBuilder}, and be processed by a
+ * {@link MethodTransform}.
+ * <p>
+ * {@link AccessFlags} is the only member element of a method that appear
+ * exactly once during the traversal of a {@link MethodModel}.
  *
+ * @see ClassFileElement##membership Membership Elements
+ * @see ClassElement
+ * @see FieldElement
+ * @see CodeElement
  * @sealedGraph
- * @since 22
+ * @since 24
  */
 public sealed interface MethodElement
         extends ClassFileElement
         permits AccessFlags, CodeModel, CustomAttribute,
-        AnnotationDefaultAttribute, DeprecatedAttribute,
-        ExceptionsAttribute, MethodParametersAttribute,
-        RuntimeInvisibleAnnotationsAttribute, RuntimeInvisibleParameterAnnotationsAttribute,
+                AnnotationDefaultAttribute, DeprecatedAttribute,
+                ExceptionsAttribute, MethodParametersAttribute,
+                RuntimeInvisibleAnnotationsAttribute, RuntimeInvisibleParameterAnnotationsAttribute,
                 RuntimeInvisibleTypeAnnotationsAttribute, RuntimeVisibleAnnotationsAttribute,
                 RuntimeVisibleParameterAnnotationsAttribute, RuntimeVisibleTypeAnnotationsAttribute,
                 SignatureAttribute, SyntheticAttribute, UnknownAttribute {

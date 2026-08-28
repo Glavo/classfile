@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,12 +24,17 @@
  */
 package org.glavo.classfile.attribute;
 
+import org.glavo.classfile.CodeBuilder;
+import org.glavo.classfile.instruction.LineNumber;
+
 import org.glavo.classfile.impl.UnboundAttribute;
 
 /**
- * Models a single line number in the {@link LineNumberTableAttribute}.
+ * Models a single line number entry in the {@link LineNumberTableAttribute}.
  *
- * @since 22
+ * @see LineNumberTableAttribute#lineNumbers()
+ * @see LineNumber
+ * @since 24
  */
 public sealed interface LineNumberInfo
         permits UnboundAttribute.UnboundLineNumberInfo {
@@ -47,8 +52,16 @@ public sealed interface LineNumberInfo
 
     /**
      * {@return a line number description}
+     *
+     * @apiNote
+     * The created entry cannot be written to a {@link CodeBuilder}.  Call
+     * {@link CodeBuilder#lineNumber CodeBuilder::lineNumber} in the correct
+     * order instead.
+     *
      * @param startPc the starting index of the code array for this line
      * @param lineNumber the line number within the original source file
+     * @throws IllegalArgumentException if {@code startPc} or {@code lineNumber}
+     *         is not {@link org.glavo.classfile##u2 u2}
      */
     public static LineNumberInfo of(int startPc, int lineNumber) {
         return new UnboundAttribute.UnboundLineNumberInfo(startPc, lineNumber);

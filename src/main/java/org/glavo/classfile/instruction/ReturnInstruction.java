@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,33 +24,48 @@
  */
 package org.glavo.classfile.instruction;
 
+import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.Instruction;
 import org.glavo.classfile.Opcode;
 import org.glavo.classfile.TypeKind;
+
 import org.glavo.classfile.impl.AbstractInstruction;
 import org.glavo.classfile.impl.BytecodeHelpers;
 import org.glavo.classfile.impl.Util;
 
 /**
  * Models a return-from-method instruction in the {@code code} array of a
- * {@code Code} attribute.  Corresponding opcodes will have a {@code kind} of
+ * {@code Code} attribute.  Corresponding opcodes have a {@linkplain Opcode#kind() kind} of
  * {@link Opcode.Kind#RETURN}.  Delivered as a {@link CodeElement} when
  * traversing the elements of a {@link CodeModel}.
+ * <p>
+ * A return-from-method instruction is composite:
+ * {@snippet lang=text :
+ * // @link substring="ReturnInstruction" target="#of(TypeKind)" :
+ * ReturnInstruction(TypeKind typeKind) // @link substring="typeKind" target="#typeKind()"
+ * }
+ * where {@code typeKind} is {@linkplain TypeKind##computational-type
+ * computational} or {@link TypeKind#VOID void}.
  *
- * @since 22
+ * @see Opcode.Kind#RETURN
+ * @see CodeBuilder#return_(TypeKind) CodeBuilder::return_
+ * @since 24
  */
 public sealed interface ReturnInstruction extends Instruction
         permits AbstractInstruction.UnboundReturnInstruction {
 
     /**
-     * {@return the type of the return instruction}
+     * {@return the {@linkplain TypeKind##computational-type computational type}, including
+     * {@link TypeKind#VOID void}, of the return instruction}
      */
     TypeKind typeKind();
 
     /**
      * {@return a return instruction}
+     * {@code typeKind} is {@linkplain TypeKind#asLoadable() converted} to its
+     * computational type.
      *
      * @param typeKind the type of the return instruction
      */
@@ -63,6 +78,8 @@ public sealed interface ReturnInstruction extends Instruction
      *
      * @param op the opcode for the specific type of return instruction,
      *           which must be of kind {@link Opcode.Kind#RETURN}
+     * @throws IllegalArgumentException if the opcode kind is not
+     *         {@link Opcode.Kind#RETURN}.
      */
     static ReturnInstruction of(Opcode op) {
         Util.checkKind(op, Opcode.Kind.RETURN);

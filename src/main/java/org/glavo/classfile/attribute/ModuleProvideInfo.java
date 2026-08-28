@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,11 +24,12 @@
  */
 package org.glavo.classfile.attribute;
 
+import org.glavo.classfile.constantpool.ClassEntry;
 import java.lang.constant.ClassDesc;
+import java.lang.module.ModuleDescriptor;
 import java.util.Arrays;
 import java.util.List;
 
-import org.glavo.classfile.constantpool.ClassEntry;
 import org.glavo.classfile.impl.TemporaryConstantPool;
 import org.glavo.classfile.impl.UnboundAttribute;
 import org.glavo.classfile.impl.Util;
@@ -36,25 +37,35 @@ import org.glavo.classfile.impl.Util;
 /**
  * Models a single "provides" declaration in the {@link ModuleAttribute}.
  *
- * @since 22
+ * @see ModuleAttribute#provides()
+ * @see ModuleDescriptor.Provides
+ * @jvms 4.7.25 The {@code Module} Attribute
+ * @since 24
  */
 public sealed interface ModuleProvideInfo
         permits UnboundAttribute.UnboundModuleProvideInfo {
 
     /**
      * {@return the service interface representing the provided service}
+     *
+     * @see ModuleDescriptor.Provides#service()
      */
     ClassEntry provides();
 
     /**
-     * {@return the classes providing the service implementation}
+     * {@return the classes providing the service implementation}  The list
+     * should not be empty.
+     *
+     * @see ModuleDescriptor.Provides#providers()
      */
     List<ClassEntry> providesWith();
 
     /**
      * {@return a service provision description}
      * @param provides the service class interface
-     * @param providesWith the service class implementations
+     * @param providesWith the service class implementations, must not be empty
+     * @throws IllegalArgumentException if the number of implementations exceeds
+     *         the limit of {@link org.glavo.classfile##u2 u2}
      */
     static ModuleProvideInfo of(ClassEntry provides,
                                 List<ClassEntry> providesWith) {
@@ -64,7 +75,9 @@ public sealed interface ModuleProvideInfo
     /**
      * {@return a service provision description}
      * @param provides the service class interface
-     * @param providesWith the service class implementations
+     * @param providesWith the service class implementations, must not be empty
+     * @throws IllegalArgumentException if the number of implementations exceeds
+     *         the limit of {@link org.glavo.classfile##u2 u2}
      */
     static ModuleProvideInfo of(ClassEntry provides,
                                 ClassEntry... providesWith) {
@@ -74,22 +87,26 @@ public sealed interface ModuleProvideInfo
     /**
      * {@return a service provision description}
      * @param provides the service class interface
-     * @param providesWith the service class implementations
-     * @throws IllegalArgumentException if {@code provides} represents a primitive type
+     * @param providesWith the service class implementations, must not be empty
+     * @throws IllegalArgumentException if {@code provides} or any of {@code
+     *         providesWith} represents a primitive type, or the number of
+     *         implementations exceeds the limit of {@link org.glavo.classfile##u2 u2}
      */
     static ModuleProvideInfo of(ClassDesc provides,
-                                       List<ClassDesc> providesWith) {
+                                List<ClassDesc> providesWith) {
         return of(TemporaryConstantPool.INSTANCE.classEntry(provides), Util.entryList(providesWith));
     }
 
     /**
      * {@return a service provision description}
      * @param provides the service class interface
-     * @param providesWith the service class implementations
-     * @throws IllegalArgumentException if {@code provides} or any of {@code providesWith} represents a primitive type
+     * @param providesWith the service class implementations, must not be empty
+     * @throws IllegalArgumentException if {@code provides} or any of {@code
+     *         providesWith} represents a primitive type, or the number of
+     *         implementations exceeds the limit of {@link org.glavo.classfile##u2 u2}
      */
     static ModuleProvideInfo of(ClassDesc provides,
-                                       ClassDesc... providesWith) {
+                                ClassDesc... providesWith) {
         // List view, since ref to providesWith is temporary
         return of(provides, Arrays.asList(providesWith));
     }

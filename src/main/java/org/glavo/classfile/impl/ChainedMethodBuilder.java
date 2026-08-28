@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,65 +24,52 @@
  */
 package org.glavo.classfile.impl;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Consumer;
-
 import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.CodeTransform;
 import org.glavo.classfile.MethodBuilder;
 import org.glavo.classfile.MethodElement;
-import org.glavo.classfile.MethodModel;
 import org.glavo.classfile.constantpool.ConstantPoolBuilder;
+import java.util.function.Consumer;
+
+import static java.util.Objects.requireNonNull;
 
 public final class ChainedMethodBuilder implements MethodBuilder {
-    final MethodBuilder downstream;
     final TerminalMethodBuilder terminal;
     final Consumer<MethodElement> consumer;
 
     public ChainedMethodBuilder(MethodBuilder downstream,
                                 Consumer<MethodElement> consumer) {
-        Objects.requireNonNull(downstream);
-        this.downstream = downstream;
         this.consumer = consumer;
-        if (downstream instanceof ChainedMethodBuilder cb) {
-            this.terminal = cb.terminal;
-        } else if (downstream instanceof TerminalMethodBuilder tb) {
-            this.terminal = tb;
-        } else {
-            throw new IllegalArgumentException();
-        }
+        this.terminal = downstream instanceof ChainedMethodBuilder cmb ?
+                cmb.terminal : (TerminalMethodBuilder) downstream;
     }
 
     @Override
     public MethodBuilder with(MethodElement element) {
-        consumer.accept(element);
+        consumer.accept(requireNonNull(element));
         return this;
     }
 
     @Override
     public MethodBuilder withCode(Consumer<? super CodeBuilder> handler) {
-        return downstream.with(terminal.bufferedCodeBuilder(null)
+        consumer.accept(terminal.bufferedCodeBuilder(null)
                                        .run(handler)
                                        .toModel());
+        return this;
     }
 
     @Override
     public MethodBuilder transformCode(CodeModel code, CodeTransform transform) {
         BufferedCodeBuilder builder = terminal.bufferedCodeBuilder(code);
         builder.transform(code, transform);
-        return downstream.with(builder.toModel());
+        consumer.accept(builder.toModel());
+        return this;
     }
 
     @Override
     public ConstantPoolBuilder constantPool() {
         return terminal.constantPool();
-    }
-
-    @Override
-    public Optional<MethodModel> original() {
-        return terminal.original();
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * LowJCovAttributeTest
  */
-@Disabled("Not compiled with -Xjcov")
+@Disabled("Requires compilation with -Xjcov")
 class LowJCovAttributeTest {
 
     private static final boolean VERBOSE = false;
@@ -78,7 +78,7 @@ class LowJCovAttributeTest {
     private void testRead0() {
         int[] mask = new int[1];
         for (Attribute<?> attr : classLow.attributes()) {
-            switch (attr.attributeName()) {
+            switch (attr.attributeName().stringValue()) {
                 case Attributes.NAME_COMPILATION_ID: {
                     CompilationIDAttribute cid = (CompilationIDAttribute) attr;
                     Utf8Entry v = cid.compilationId();
@@ -96,8 +96,8 @@ class LowJCovAttributeTest {
             }
         }
         for (MethodModel m : classLow.methods()) {
-            m.findAttribute(Attributes.CODE).ifPresent(code ->
-                ((CodeModel) code).findAttribute(Attributes.CHARACTER_RANGE_TABLE).ifPresent(attr -> {
+            m.findAttribute(Attributes.code()).ifPresent(code ->
+                ((CodeModel) code).findAttribute(Attributes.characterRangeTable()).ifPresent(attr -> {
                                 for (CharacterRangeInfo cr : attr.characterRangeTable()) {
                                     printf("  %d-%d -> %d/%d-%d/%d (%x)%n", cr.startPc(), cr.endPc(),
                                             cr.characterRangeStart() >> 10, cr.characterRangeStart() & 0x3FF,
@@ -158,7 +158,7 @@ class LowJCovAttributeTest {
 //        }
 //        writeAndCompareAttributes(classLow, cp);
 //        for (MethodLow m : classLow.methodsLow()) {
-//            m.findAttribute(Attributes.CODE).ifPresent(code ->
+//            m.findAttribute(Attributes.code()).ifPresent(code ->
 //                    writeAndCompareAttributes(code, cp));
 //        }
 //    }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,26 +25,31 @@
 package org.glavo.classfile.attribute;
 
 import org.glavo.classfile.constantpool.Utf8Entry;
+import org.glavo.classfile.instruction.LocalVariableType;
+
 import org.glavo.classfile.impl.BoundLocalVariableType;
 import org.glavo.classfile.impl.UnboundAttribute;
 
 /**
  * Models a single local variable in the {@link LocalVariableTypeTableAttribute}.
  *
- * @since 22
+ * @see LocalVariableTypeTableAttribute#localVariableTypes()
+ * @see LocalVariableType
+ * @jvms 4.7.14 The {@code LocalVariableTypeTable} Attribute
+ * @since 24
  */
 public sealed interface LocalVariableTypeInfo
         permits UnboundAttribute.UnboundLocalVariableTypeInfo, BoundLocalVariableType {
 
     /**
-     * {@return the index into the code array (inclusive) at which the scope of
+     * {@return the index into the code array, inclusive at which the scope of
      * this variable begins}
      */
     int startPc();
 
     /**
      * {@return the length of the region of the code array in which this
-     * variable is in scope.}
+     * variable is in scope}
      */
     int length();
 
@@ -55,7 +60,7 @@ public sealed interface LocalVariableTypeInfo
 
 
     /**
-     * {@return the field signature of the local variable}
+     * {@return the field signature string of the local variable}
      */
     Utf8Entry signature();
 

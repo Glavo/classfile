@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,17 +24,24 @@
  */
 package org.glavo.classfile.instruction;
 
+import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.Instruction;
+import org.glavo.classfile.Opcode;
+
 import org.glavo.classfile.impl.AbstractInstruction;
 
 /**
- * Models an {@code athrow} instruction in the {@code code} array of a
+ * Models an {@link Opcode#ATHROW athrow} instruction in the {@code code} array of a
  * {@code Code} attribute.  Delivered as a {@link CodeElement} when traversing
  * the elements of a {@link CodeModel}.
+ * <p>
+ * A throw instruction has no visible state.
  *
- * @since 22
+ * @see Opcode.Kind#THROW_EXCEPTION
+ * @see CodeBuilder#athrow CodeBuiler::athrow
+ * @since 24
  */
 public sealed interface ThrowInstruction extends Instruction
         permits AbstractInstruction.UnboundThrowInstruction {

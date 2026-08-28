@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,10 +25,10 @@
 
 package org.glavo.classfile.impl;
 
-import java.lang.constant.ClassDesc;
 import org.glavo.classfile.attribute.LocalVariableInfo;
 import org.glavo.classfile.constantpool.Utf8Entry;
 import org.glavo.classfile.instruction.LocalVariable;
+import java.lang.constant.ClassDesc;
 
 public final class BoundLocalVariable
         extends AbstractBoundLocalVariable
@@ -46,7 +46,7 @@ public final class BoundLocalVariable
 
     @Override
     public ClassDesc typeSymbol() {
-        return ClassDesc.ofDescriptor(type().stringValue());
+        return Util.fieldTypeSymbol(type());
     }
 
     @Override

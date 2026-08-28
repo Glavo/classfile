@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,7 +27,7 @@
  * <h2>Provides specific components, transformations, and tools built on top of the
  * {@link org.glavo.classfile} library.</h2>
  *
- * The {@code java.lang.classfile.components} package contains specific
+ * The {@code org.glavo.classfile.components} package contains specific
  * transformation components and utility classes helping to compose very complex
  * tasks with minimal effort.
  *
@@ -110,8 +110,5 @@
  * CodeLocalsShifter} and {@link CodeRelabeler} into fully functional class
  * instrumenting transformation:
  * {@snippet lang="java" class="ComponentsPackageSnippets" region="classInstrumentation"}
- *
- * @since 22
  */
 package org.glavo.classfile.components;
-

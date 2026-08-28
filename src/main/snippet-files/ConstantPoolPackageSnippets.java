@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2025, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,30 +22,22 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-package org.glavo.classfile;
+package org.glavo.classfile.constantpool.snippet;
 
-import org.glavo.classfile.constantpool.ConstantPoolBuilder;
-import org.glavo.classfile.constantpool.PoolEntry;
-import org.glavo.classfile.impl.DirectFieldBuilder;
-import org.glavo.classfile.impl.DirectMethodBuilder;
+import org.glavo.classfile.ClassFile;
+import org.glavo.classfile.MethodModel;
+import org.glavo.classfile.constantpool.Utf8Entry;
 
-/**
- * A classfile element that can encode itself as a stream of bytes in the
- * encoding expected by the classfile format.
- *
- * @param <T> the type of the entity
- *
- * @sealedGraph
- * @since 22
- */
-public sealed interface WritableElement<T> extends ClassFileElement
-        permits Annotation, AnnotationElement, AnnotationValue, Attribute,
-        PoolEntry, BootstrapMethodEntry, FieldModel, MethodModel,
-        ConstantPoolBuilder, DirectFieldBuilder, DirectMethodBuilder {
-    /**
-     * Writes the element to the specified writer
-     *
-     * @param buf the writer
-     */
-    void writeTo(BufWriter buf);
+class PackageSnippets {
+
+    // @start region=isStaticWorkMethod
+    boolean isStaticWorkMethod(MethodModel method) {
+        // check static flag first to avoid unnecessary evaluation of UTF-8 entry
+        return (method.flags().flagsMask() & ClassFile.ACC_STATIC) != 0
+                // use equalsString to avoid full conversion to String for comparison
+                // the Utf8Entry can also act as a basic CharSequence without full conversion
+                // @link substring="methodName" target="MethodModel#methodName" :
+                && method.methodName().equalsString("work"); // @link substring="equalsString" target="Utf8Entry#equalsString"
+    }
+    // @end
 }

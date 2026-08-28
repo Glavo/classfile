@@ -10,7 +10,7 @@ plugins {
 
 group = "org.glavo"
 version = "0.6.0" + "-SNAPSHOT"
-description = "Java 21 Classfile API"
+description = "OpenJDK Class-File API backport for Java 17"
 
 val sourceToolchainVersion = 17
 val javadocToolchainVersion = 21
@@ -92,6 +92,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.10.2")
 }
 
 tasks.test {
@@ -101,7 +102,9 @@ tasks.test {
 
     useJUnitPlatform()
 
-    jvmArgs("--add-opens=java.base/java.util=ALL-UNNAMED")
+    exclude("testdata/**")
+
+    jvmArgs("--enable-preview", "--add-opens=java.base/java.util=ALL-UNNAMED")
 }
 
 tasks.jacocoTestReport {

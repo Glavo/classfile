@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,26 +24,26 @@
  */
 package org.glavo.classfile.components;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.function.BiFunction;
 import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeTransform;
 import org.glavo.classfile.Label;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.function.BiFunction;
+
 import org.glavo.classfile.impl.CodeRelabelerImpl;
-import org.glavo.classfile.instruction.LabelTarget;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * A code relabeler is a {@link CodeTransform} replacing all occurrences
- * of {@link Label} in the transformed code with new instances.
- * All {@link LabelTarget} instructions are adjusted accordingly.
+ * of {@link org.glavo.classfile.Label} in the transformed code with new instances.
+ * All {@link org.glavo.classfile.instruction.LabelTarget} instructions are adjusted accordingly.
  * Relabeled code graph is identical to the original.
  * <p>
  * Primary purpose of CodeRelabeler is for repeated injections of the same code blocks.
  * Repeated injection of the same code block must be relabeled, so each instance of
- * {@link Label} is bound in the target bytecode exactly once.
- *
- * @since 22
+ * {@link org.glavo.classfile.Label} is bound in the target bytecode exactly once.
  */
 public sealed interface CodeRelabeler extends CodeTransform permits CodeRelabelerImpl {
 
@@ -61,6 +61,7 @@ public sealed interface CodeRelabeler extends CodeTransform permits CodeRelabele
      * @return a new instance of CodeRelabeler
      */
     static CodeRelabeler of(Map<Label, Label> map) {
+        requireNonNull(map);
         return of((l, cob) -> map.computeIfAbsent(l, ll -> cob.newLabel()));
     }
 
@@ -71,14 +72,6 @@ public sealed interface CodeRelabeler extends CodeTransform permits CodeRelabele
      * @return a new instance of CodeRelabeler
      */
     static CodeRelabeler of(BiFunction<Label, CodeBuilder, Label> mapFunction) {
-        return new CodeRelabelerImpl(mapFunction);
+        return new CodeRelabelerImpl(requireNonNull(mapFunction));
     }
-
-    /**
-     * Access method to internal re-labeling function.
-     * @param label source label
-     * @param codeBuilder builder to create new labels
-     * @return target label
-     */
-    Label relabel(Label label, CodeBuilder codeBuilder);
 }

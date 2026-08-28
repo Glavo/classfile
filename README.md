@@ -5,8 +5,8 @@
 [![Latest release](https://img.shields.io/maven-central/v/org.glavo/classfile)](https://github.com/Glavo/classfile/releases/latest)
 [![javadoc](https://javadoc.io/badge2/org.glavo/classfile/javadoc.svg)](https://javadoc.io/doc/org.glavo/classfile)
 
-This is a modern Java classfile manipulation and analysis library.
-This library is a modern replacement for [ASM](https://asm.ow2.io/), extracted from the latest implementation of JDK and backport to Java 17. 
+This is a modern Java class-file manipulation and analysis library.
+This library is a modern replacement for [ASM](https://asm.ow2.io/), synchronized with the latest OpenJDK implementation and backported to Java 17.
 
 ## Adding to your build
 
@@ -33,9 +33,9 @@ implementation("org.glavo:classfile:0.5.0")
 
 ## Note
 
-This library is extracted from OpenJDK 23 and renamed package `jdk.internal.classfile` to `org.glavo.classfile`.
+This library is synchronized with the OpenJDK 28 development tree and renames the `java.lang.classfile` and `jdk.internal.classfile` packages to `org.glavo.classfile`.
 
-Since the Class-File API is still in preview, this library may also undergo breaking changes until the Class-File API is generally available.
+The Java 28 preview features carried by this library may undergo incompatible changes before they become final.
 
 In order to be compatible with Java 17, this library also copies some new APIs in Java 20/21:
 
@@ -43,8 +43,6 @@ In order to be compatible with Java 17, this library also copies some new APIs i
 * `java.lang.reflect.ClassFileFormatVersion` -> `org.glavo.classfile.ClassFileFormatVersion`
 * `java.lang.constant.ModuleDesc` -> `org.glavo.classfile.constant.ModuleDesc`
 * `java.lang.constant.PackageDesc` -> `org.glavo.classfile.constant.PackageDesc`
-
-Since the Class-File API is still in preview, it is not yet stable
 
 [Here](CHANGELOG.md) is the change log.  
 

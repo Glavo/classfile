@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,8 +25,24 @@
 package org.glavo.classfile.impl;
 
 import org.glavo.classfile.CodeBuilder;
+import org.glavo.classfile.CodeModel;
+import org.glavo.classfile.attribute.CodeAttribute;
 
-public sealed interface TerminalCodeBuilder extends CodeBuilder
-        permits DirectCodeBuilder, BufferedCodeBuilder, TransformingCodeBuilder {
+public sealed interface TerminalCodeBuilder extends CodeBuilder, LabelContext
+        permits DirectCodeBuilder, BufferedCodeBuilder {
+    int curTopLocal();
 
+    static int setupTopLocal(MethodInfo methodInfo, CodeModel original) {
+        int paramSlots = Util.maxLocals(methodInfo.methodFlags(), methodInfo.methodTypeSymbol());
+        if (original == null) {
+            return paramSlots;
+        }
+        if (original instanceof CodeAttribute attr) {
+            return Math.max(paramSlots, attr.maxLocals());
+        }
+        if (original instanceof BufferedCodeBuilder.Model buffered) {
+            return Math.max(paramSlots, buffered.curTopLocal());
+        }
+        throw new InternalError("Unknown code model " + original);
+    }
 }

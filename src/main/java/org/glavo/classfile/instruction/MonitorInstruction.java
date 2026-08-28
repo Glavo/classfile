@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,19 +24,29 @@
  */
 package org.glavo.classfile.instruction;
 
+import org.glavo.classfile.CodeBuilder;
 import org.glavo.classfile.CodeElement;
 import org.glavo.classfile.CodeModel;
 import org.glavo.classfile.Instruction;
 import org.glavo.classfile.Opcode;
+
 import org.glavo.classfile.impl.AbstractInstruction;
 import org.glavo.classfile.impl.Util;
 
 /**
- * Models a {@code monitorenter} or {@code monitorexit} instruction in the
- * {@code code} array of a {@code Code} attribute.  Delivered as a {@link
- * CodeElement} when traversing the elements of a {@link CodeModel}.
+ * Models a {@link Opcode#MONITORENTER monitorenter} or {@link Opcode#MONITOREXIT
+ * monitorexit} instruction in the {@code code} array of a {@code Code} attribute.
+ * Corresponding opcodes have a {@linkplain Opcode#kind() kind} of {@link
+ * Opcode.Kind#MONITOR}.  Delivered as a {@link CodeElement} when traversing the
+ * elements of a {@link CodeModel}.
+ * <p>
+ * A monitor instruction is composite:
+ * {@snippet lang=text :
+ * // @link substring="MonitorInstruction" target="#of(Opcode)" :
+ * MonitorInstruction(Opcode opcode) // @link substring="opcode" target="#opcode"
+ * }
  *
- * @since 22
+ * @since 24
  */
 public sealed interface MonitorInstruction extends Instruction
         permits AbstractInstruction.UnboundMonitorInstruction {
@@ -46,6 +56,8 @@ public sealed interface MonitorInstruction extends Instruction
      *
      * @param op the opcode for the specific type of monitor instruction,
      *           which must be of kind {@link Opcode.Kind#MONITOR}
+     * @throws IllegalArgumentException if the opcode kind is not
+     *         {@link Opcode.Kind#MONITOR}.
      */
     static MonitorInstruction of(Opcode op) {
         Util.checkKind(op, Opcode.Kind.MONITOR);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2023, 2024, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -140,7 +140,7 @@ public final class CodeStackTrackerImpl implements CodeStackTracker {
 
     private void push(TypeKind type) {
         if (stack != null) {
-            if (type != TypeKind.VoidType) stack.push(type);
+            if (type != TypeKind.VOID) stack.push(type);
         } else {
             maxSize = null;
         }
@@ -216,15 +216,15 @@ public final class CodeStackTrackerImpl implements CodeStackTracker {
             pop(1);
         } else if (el instanceof NewMultiArrayInstruction i) {
             pop(i.dimensions());
-            push(TypeKind.ReferenceType);
+            push(TypeKind.REFERENCE);
         } else if (el instanceof NewObjectInstruction) {
-            push(TypeKind.ReferenceType);
+            push(TypeKind.REFERENCE);
         } else if (el instanceof NewPrimitiveArrayInstruction) {
             pop(1);
-            push(TypeKind.ReferenceType);
+            push(TypeKind.REFERENCE);
         } else if (el instanceof NewReferenceArrayInstruction) {
             pop(1);
-            push(TypeKind.ReferenceType);
+            push(TypeKind.REFERENCE);
         } else if (el instanceof NopInstruction) {
         } else if (el instanceof OperatorInstruction i) {
             switch (i.opcode()) {
@@ -347,15 +347,15 @@ public final class CodeStackTrackerImpl implements CodeStackTracker {
             switch (i.opcode()) {
                 case CHECKCAST -> {
                     pop(1);
-                    push(TypeKind.ReferenceType);
+                    push(TypeKind.REFERENCE);
                 }
                 case INSTANCEOF -> {
                     pop(1);
-                    push(TypeKind.IntType);
+                    push(TypeKind.INT);
                 }
             }
         } else if (el instanceof ExceptionCatch i) {
-            map.put(i.handler(), new Stack(new Item(TypeKind.ReferenceType, null), 1, 1));
+            map.put(i.handler(), new Stack(new Item(TypeKind.REFERENCE, null), 1, 1));
         } else if (el instanceof LabelTarget i) {
             stack = map.getOrDefault(i.label(), stack);
         }
