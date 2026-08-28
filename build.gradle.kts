@@ -3,8 +3,9 @@ plugins {
     id("jacoco")
     id("maven-publish")
     id("signing")
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
     id("org.glavo.load-maven-publish-properties") version "0.1.0"
+    id("org.glavo.gradle-wrapper-neo") version "0.2.0"
 }
 
 group = "org.glavo"
